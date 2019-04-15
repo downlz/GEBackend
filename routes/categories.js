@@ -1,7 +1,7 @@
 const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const {Category, validate} = require('../models/category');
-const {ItemName} = require('../models/itemname'); 
+const {ItemName} = require('../models/itemname');
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
@@ -13,11 +13,11 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', [auth, permit('admin')], async (req, res) => {
-  const { error } = validate(req.body); 
+  const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
   const itemName = await ItemName.findById(req.body.itemnameId);
-  if (!itemName) return res.status(400).send('Invalid state.');
+  if (!itemName) return res.status(400).send('Invalid Item name.');
 
    let categoryObj = _.pick(req.body, ['name']);
   categoryObj.itemname = itemName;
@@ -28,7 +28,7 @@ router.post('/', [auth, permit('admin')], async (req, res) => {
 });
 
 router.put('/:id', [auth, permit('admin')], async (req, res) => {
-  const { error } = validate(req.body); 
+  const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
   const category = await Category.findByIdAndUpdate(req.params.id, { name: req.body.name }, {
@@ -36,7 +36,7 @@ router.put('/:id', [auth, permit('admin')], async (req, res) => {
   });
 
   if (!category) return res.status(404).send('The genre with the given ID was not found.');
-  
+
   res.send(category);
 });
 

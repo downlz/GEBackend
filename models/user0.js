@@ -108,10 +108,6 @@ const userSchema = new mongoose.Schema({
   isBuyer: Boolean,
   isEmpL0: Boolean,
   isEmpL1: Boolean
-  //
-  // userType: {
-  //   type:String                                     // User Classification eg. small,large,corporate,institutional
-  // }
 });
 
 userSchema.methods.generateAuthToken = function() {

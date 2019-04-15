@@ -5,14 +5,14 @@ require('express-async-errors');
 module.exports = function() {
   winston.handleExceptions(
     new winston.transports.File({ filename: 'uncaughtExceptions.log' }));
-  
+
   process.on('unhandledRejection', (ex) => {
     throw ex;
   });
-  
+
   winston.add(winston.transports.File, { filename: 'logfile.log' });
-  winston.add(winston.transports.MongoDB, { 
-    db: 'mongodb://localhost/GrainEasyTestOne',
+  winston.add(winston.transports.MongoDB, {
+    db: 'mongodb://admin:GrainEasy2@ds125331.mlab.com:25331/graineasy-log',
     level: 'info'
-  });  
+  });
 }

@@ -5,6 +5,10 @@ const userModel = require("./user");
 const addressModel = require("./address");
 
 const orderSchema = new mongoose.Schema({
+  orderno:{
+    type: String,
+    required: false
+  },
   item: {
     type: itemModel.itemSchema,
     required: false
@@ -53,6 +57,11 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: ['new', 'confirmed', 'shipped', 'delivered'],
     required: false
+  },
+  ordertype: {
+    type: String,
+    enum: ['regular', 'groupbuying', 'auction', 'bidding'],
+    required: false
   }
 });
 
@@ -60,6 +69,7 @@ const Order = mongoose.model("Order", orderSchema);
 
 function validateOrder(order) {
   const schema = {
+    orderno: Joi.string().optional(),
     itemId: Joi.objectId().required(),
     quantity: Joi.number().optional(),
     cost: Joi.number().optional(),
@@ -71,7 +81,8 @@ function validateOrder(order) {
     shipmentTime: Joi.string().optional(),
     receivedTime: Joi.string().optional(),
     paymentMode: Joi.string().optional(),
-    status: Joi.string().optional()
+    status: Joi.string().optional(),
+    ordertype: Joi.string().optional()
   };
 
   return Joi.validate(order, schema);

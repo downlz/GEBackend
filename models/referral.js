@@ -4,7 +4,7 @@ const Joi = require('joi');
 const mongoose = require('mongoose');
 const address = require('./address');
 
-const userSchema = new mongoose.Schema({
+const referralSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -108,10 +108,6 @@ const userSchema = new mongoose.Schema({
   isBuyer: Boolean,
   isEmpL0: Boolean,
   isEmpL1: Boolean
-  //
-  // userType: {
-  //   type:String                                     // User Classification eg. small,large,corporate,institutional
-  // }
 });
 
 userSchema.methods.generateAuthToken = function() {

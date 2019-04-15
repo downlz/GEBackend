@@ -2,6 +2,6 @@ const winston = require('winston');
 const mongoose = require('mongoose');
 
 module.exports = function() {
-  mongoose.connect('mongodb://localhost/GrainEasyTestTwo')
+  mongoose.connect(process.env.DBCONN)
     .then(() => winston.info('Connected to MongoDB...'));
 }

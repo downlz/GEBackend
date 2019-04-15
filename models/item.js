@@ -3,9 +3,27 @@ Joi.objectId = require('joi-objectid')(Joi);
 const mongoose = require('mongoose');
 const address = require('./address');
 const category = require('./category');
+const manufacturer = require('./manufacturer');
+const unit = require('./unit');
 const user = require('./user');
 const itemname = require('./itemname');
 const city = require('./city');
+
+
+const itemspecSchema = new mongoose.Schema({
+  moisture: {
+    type: Number,
+    required: false
+  },
+  graincount: {
+    type: Number,
+    required: false
+  },
+  icumsa: {
+    type: Number,
+    required: false
+  }
+});
 
 const itemSchema = new mongoose.Schema({
   name: {
@@ -20,8 +38,16 @@ const itemSchema = new mongoose.Schema({
     type: category.categorySchema,
     required: false
   },
+  specs: {
+    type : itemspecSchema,
+    required: false
+  },
   qty: {
     type: Number,
+    required: false
+  },
+  unit: {
+    type : unit.unitSchema,
     required: false
   },
   price: {
@@ -63,7 +89,17 @@ const itemSchema = new mongoose.Schema({
   isLive: {
     type: Boolean,
     required: false
+  },
+  manufacturer:{
+    type: manufacturer.manufacturerSchema,
+    required: false
   }
+  // },
+  // saletype: {
+  //   type: String,
+  //   enum: ['auction', 'bid', 'normal', 'groupbuying'],
+  //   required: false
+  // }
 });
 
 const Item = mongoose.model('Item', itemSchema);
@@ -74,21 +110,24 @@ function validateItem(item) {
     image: Joi.string().required(),
     categoryId: Joi.objectId().required(),
     qty: Joi.number().required(),
+    unitId: Joi.objectId().required(),
     price: Joi.number().required(),
-    moisture: Joi.number().required(),
-    grainCount: Joi.number().required(),
-    grade: Joi.string().required(),
+    moisture: Joi.number().optional(),
+    grainCount: Joi.number().optional(),
+    grade: Joi.string().optional(),
     sampleNo: Joi.string().required(),
     cityId: Joi.objectId().required(),
     addressId: Joi.objectId().required(),
     sellerId: Joi.objectId().required(),
     origin: Joi.string().optional(),
-    isLive: Joi.string().optional()
+    isLive: Joi.boolean().optional(),
+    specs: Joi.object().optional(),
+    manufacturerId: Joi.objectId().optional()
   };
 
   return Joi.validate(item, schema);
 }
 
 exports.itemSchema = itemSchema;
-exports.Item = Item; 
+exports.Item = Item;
 exports.validate = validateItem;
