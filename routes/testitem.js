@@ -23,7 +23,7 @@ const app = express()
 
 router.post('/', async (req, res) => {
 
-  console.log(req.body)
+  // console.log(req.body)
   res.send({
     message: 'Hello'
   })

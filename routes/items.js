@@ -129,4 +129,11 @@ router.get('/:id', [auth], async (req, res) => {
   res.send(item);
 });
 
+router.get('/sampleno/:id', [auth], async (req, res) => {
+  const item = await Item.find({sampleNo : req.params.id});
+
+  if (!item) return res.status(404).send('The item with the given sample was not found.');
+
+  res.send(item);
+});
 module.exports = router;

@@ -12,7 +12,7 @@ module.exports = function() {
 
   winston.add(winston.transports.File, { filename: 'logfile.log' });
   winston.add(winston.transports.MongoDB, {
-    db: 'mongodb://admin:GrainEasy2@ds125331.mlab.com:25331/graineasy-log',
+    db: process.env.APPLOG,
     level: 'info'
   });
 }

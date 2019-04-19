@@ -68,6 +68,7 @@ const itemSchema = new mongoose.Schema({
   },
   sampleNo: {
     type: String,
+    unique : true,
     required: false
   },
   city: {
@@ -92,7 +93,7 @@ const itemSchema = new mongoose.Schema({
   },
   manufacturer:{
     type: manufacturer.manufacturerSchema,
-    required: false
+    required: true
   }
   // },
   // saletype: {
@@ -122,7 +123,7 @@ function validateItem(item) {
     origin: Joi.string().optional(),
     isLive: Joi.boolean().optional(),
     specs: Joi.object().optional(),
-    manufacturerId: Joi.objectId().optional()
+    manufacturerId: Joi.objectId().required()
   };
 
   return Joi.validate(item, schema);
