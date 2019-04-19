@@ -5,11 +5,18 @@ const permit = require('../middleware/permissions');
 const {GroupbuyingList, validate} = require('../models/gblist');
 const {Item} = require('../models/item');
 const {User} = require('../models/user');
+const {Unit} = require('../models/unit');
 const {Address, validateAddress} = require('../models/address');
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
+
+function dropIfDNE(Obj, arr) {
+  for (var i = 0, size = arr.length; i < size ; i++) {
+    if (!Obj[arr[i]]) delete Obj[arr[i]];
+  }
+}
 
 router.get('/', async (req, res) => {
   const order = await GroupbuyingList.find().sort('gbstarttime');
@@ -19,10 +26,15 @@ router.get('/', async (req, res) => {
 router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
 
   const { error } = validate(req.body);
+  console.log(error);
   if (error) return res.status(400).send(error.details[0].message);
 
   const item = await Item.findById(req.body.itemId);
   if (!item) return res.status(400).send('Invalid Item.');
+
+  const unit = await Unit.findById(req.body.unitId);
+  if (!unit) return res.status(400).send('Invalid unit.');
+
   //
   // const address = await Address.findById(req.body.addressId);
   // if (!address) return res.status(400).send('Invalid address.');
@@ -34,14 +46,13 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
   // if (!seller) return res.status(400).send('Invalid seller.');
 
 
-  let groupbuyingObj = _.pick(req.body, ['dealprice', 'moq', 'maxcap',      //Starttime and end time to be added after conversion
-  'sampleno', 'totalqty', 'taxrate','remarks']);
+  let groupbuyingObj = _.pick(req.body, ['dealprice', 'moq', 'maxqty',      //Starttime and end time to be added after conversion
+  'sampleno', 'totalqty', 'taxrate','remarks','gbstarttime','gbendtime']);
+  dropIfDNE (groupbuyingObj, ['dealprice', 'moq', 'maxqty', 'sampleno', 'totalqty', 'taxrate','remarks','gbstarttime','gbendtime']);
 
   groupbuyingObj.item =  item;
-  // groupbuyingObj.address =  address;
-  // groupbuyingObj.buyer =  buyer;
-  // groupbuyingObj.seller =  seller;
-  // console.log(groupbuyingObj)
+  groupbuyingObj.unit = unit;
+
   let groupbuying = new GroupbuyingList(groupbuyingObj);
   groupbuying = await groupbuying.save();
   res.send(groupbuying)
@@ -56,7 +67,7 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
 
 
   let groupbuyingObj = _.pick(req.body, ['gbStartTime',
-  'gbEndTime', 'dealPrice', 'moq', 'maxCap',
+  'gbEndTime', 'dealPrice', 'moq', 'maxqty',
   'sampleNo', 'totalQty', 'taxRate','remarks']);
 
   if (req.body.addressId) {

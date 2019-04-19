@@ -60,7 +60,7 @@ const orderSchema = new mongoose.Schema({
   },
   ordertype: {
     type: String,
-    enum: ['regular', 'groupbuying', 'auction', 'bidding'],
+    enum: ['regular', 'groupbuying','ready', 'auction', 'bidding'],
     required: false
   }
 });

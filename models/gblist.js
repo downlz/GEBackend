@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 // const category = require('./category');
 const item = require('./item');
 const user = require('./user');
+const unit = require('./unit');
 // const itemname = require('./itemname');
 // const city = require('./city');
 
@@ -29,7 +30,7 @@ const groupbuyingSchema = new mongoose.Schema({
    type: Number,
    required: false
  },
- maxcap :{
+ maxqty :{
    type: Number,
    required: false
  },
@@ -40,6 +41,10 @@ const groupbuyingSchema = new mongoose.Schema({
  totalqty :{
    type: Number,
    required: false
+ },
+ unit :{
+   type : unit.unitSchema,
+   required: true
  },
  taxrate :{
    type: Number,
@@ -61,12 +66,13 @@ function validateGBlist(gblist) {
   const schema = {
     itemId: Joi.objectId().required(),
     gbstarttime: Joi.string().optional(),
-    gbendtime: Joi.objectId().optional(),
+    gbendtime: Joi.string().optional(),
     dealprice: Joi.number().required(),
     moq: Joi.number().required(),
-    maxcap: Joi.number().optional(),
+    maxqty: Joi.number().optional(),
     sampleno: Joi.string().optional(),
-    totalqty: Joi.string().optional(),
+    totalqty: Joi.string().required(),
+    unitId: Joi.objectId().required(),
     taxrate: Joi.string().required(),
     isactive: Joi.string().optional(),
     remarks: Joi.string().optional(),
