@@ -25,6 +25,17 @@ router.get('/', async (req, res) => {
   res.send(item);
 });
 
+/**
+ * Api to get listings by category id
+ */
+router.get('/byCategory/:category', async (req, res) => {
+  const state = await Item.find({
+    'category._id': req.params.category
+  }).sort('name.name');
+  res.send(state);
+});
+
+
 router.post('/', [auth, permit('seller', 'admin')],  async (req, res) => {
 
   let itemObj = _.pick(req.body, ['image',
