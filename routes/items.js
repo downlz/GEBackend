@@ -43,11 +43,10 @@ router.post('/', [auth, permit('seller', 'admin')],  async (req, res) => {
   dropIfDNE (itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive','specs']);
 
   const { error } = validate(req.body);
-  console.log(error)
   if (error) return res.status(400).send(error.details[0].message);
 
   const category = await Category.findById(req.body.categoryId);
-  console.log(category);
+
   if (!category) return res.status(400).send('Invalid customer.');
 
   const name = await ItemName.findById(req.body.nameId);
@@ -77,7 +76,6 @@ router.post('/', [auth, permit('seller', 'admin')],  async (req, res) => {
   itemObj.manufacturer  = manufacturer;
 
   let item = new Item(itemObj);
-  console.log(item)
   item = await item.save();
 
   res.send(item);
