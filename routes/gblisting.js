@@ -20,6 +20,7 @@ function dropIfDNE(Obj, arr) {
 
 router.get('/', async (req, res) => {
   const order = await GroupbuyingList.find().sort('gbstarttime');
+  console.log(order);
   res.send(order);
 });
 
