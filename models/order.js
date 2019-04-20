@@ -55,12 +55,12 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['new', 'confirmed', 'shipped', 'delivered'],
+    enum: ['new', 'confirmed', 'ready','shipped', 'delivered'],
     required: false
   },
   ordertype: {
     type: String,
-    enum: ['regular', 'groupbuying','ready', 'auction', 'bidding'],
+    enum: ['regular', 'groupbuying', 'auction', 'bidding'],
     required: false
   }
 });

@@ -19,13 +19,18 @@ const referralSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: true,     
+    required: true, 
+    unique : true,    
     minlength: 6,             // Assuming user is sending landline no. also
     maxlength: 16
   },
   referredby: {
     type: User.userSchema,
     required: false,
+  },
+  referralcode:{
+    type: String,
+    required: false
   }
 });
 
@@ -33,10 +38,11 @@ const Referral = mongoose.model('Referral', referralSchema);
 
 function validateReferral(referral) {
   const schema = {
-    name: Joi.string().min(5).max(50).required(),
+    name: Joi.string().min(3).max(50).required(),
     email: Joi.string().min(5).max(255).optional().email(),
     phone: Joi.string().min(6).max(20).optional(),
-    referredby: Joi.objectId().required()
+    referredby: Joi.objectId().required(),
+    referralcode: Joi.string().optional()
   };
 
   return Joi.validate(referral, schema);
