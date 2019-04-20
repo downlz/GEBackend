@@ -23,6 +23,7 @@ const unit = require('../routes/unit');
 const distance = require('../routes/distance');
 const referral = require('../routes/referral');
 const transportrate = require('../routes/transport-rate');
+const auction = require('../routes/auction');
 // require('../middleware/cloudinary');
 
 var corsOptions = {
@@ -49,6 +50,10 @@ module.exports = function(app) {
   app.use('/api/unit', unit);
   app.use('/api/distance', distance);
   app.use('/api/transportrate', transportrate);
+<<<<<<< HEAD
   app.use('/api/referral', referral);
+=======
+  app.use('/api/auction', auction);
+>>>>>>> 563761d0683353a154fa431a9229598077430a52
   app.use(error);
 }
