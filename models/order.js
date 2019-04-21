@@ -59,12 +59,12 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['new', 'confirmed', 'shipped', 'delivered','cancelled'],
+    enum: ['new', 'confirmed', 'ready','shipped', 'delivered','cancelled'],
     required: false
   },
   ordertype: {
     type: String,
-    enum: ['regular', 'groupbuying','ready', 'auction', 'bidding','sampleorder'],
+    enum: ['regular', 'groupbuying', 'auction', 'bidding','sampleorder'],
     required: false
   }
   // referenceGB: {
