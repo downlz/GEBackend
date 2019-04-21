@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const itemModel = require("./item");
 const userModel = require("./user");
 const addressModel = require("./address");
+const auctionModel = require("./auction");
+const gblistModel = require("./gblist");
 
 const orderSchema = new mongoose.Schema({
   orderno:{
@@ -55,22 +57,22 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['new', 'confirmed', 'shipped', 'delivered','cancelled'],
+    enum: ['new', 'confirmed', 'ready','shipped', 'delivered'],
     required: false
   },
   ordertype: {
     type: String,
-    enum: ['regular', 'groupbuying','ready', 'auction', 'bidding','sampleorder'],
+    enum: ['regular', 'groupbuying', 'auction', 'bidding'],
     required: false
+  },
+  referenceGB: {
+    type : gblistModel.groupbuyingSchema,
+    required: false
+  },
+  referenceAuction :{
+    type : auctionModel.auctionSchema,
+    required:false
   }
-  // referenceGB: {
-  //   type : gblistModel.groupbuyingSchema,
-  //   required: false
-  // },
-  // referenceAuction :{
-  //   type : auctionModel.auctionSchema,
-  //   required:false
-  // }
 });
 
 const Order = mongoose.model("Order", orderSchema);
@@ -91,8 +93,8 @@ function validateOrder(order) {
     paymentMode: Joi.string().optional(),
     status: Joi.string().optional(),
     ordertype: Joi.string().optional(),
-    // referenceGBId: Joi.objectId().optional(),
-    // referenceAuctionId: Joi.objectId().optional(),
+    referenceGB: Joi.objectId().optional(),
+    referenceAuction: Joi.objectId().optional()
   };
 
   return Joi.validate(order, schema);

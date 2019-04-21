@@ -22,7 +22,7 @@ const referralSchema = new mongoose.Schema({
     required: true, 
     unique : true,    
     minlength: 6,             // Assuming user is sending landline no. also
-    maxlength: 16
+    maxlength: 20
   },
   referredby: {
     type: User.userSchema,
@@ -31,6 +31,11 @@ const referralSchema = new mongoose.Schema({
   referralcode:{
     type: String,
     required: false
+  },
+  isactive :{
+    type: Boolean,
+    required: false,
+    default: false
   }
 });
 
@@ -42,7 +47,8 @@ function validateReferral(referral) {
     email: Joi.string().min(5).max(255).optional().email(),
     phone: Joi.string().min(6).max(20).optional(),
     referredby: Joi.objectId().required(),
-    referralcode: Joi.string().optional()
+    referralcode: Joi.string().optional(),
+    isactive: Joi.string().optional(),
   };
 
   return Joi.validate(referral, schema);

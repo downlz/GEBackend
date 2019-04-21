@@ -31,9 +31,9 @@ router.post('/', [auth, permit('admin','buyer','seller')], async (req, res) => {
   const referredby = await User.findById(req.body.referredby);
   if (!referredby) return res.status(400).send('Invalid Referree');
 
-   let referralObj = _.pick(req.body, ['name','email','phone','referralcode']);
+   let referralObj = _.pick(req.body, ['name','email','phone','referralcode','isactive']);
   
-   dropIfDNE (referralObj, ['name','email','phone','referralcode']);
+   dropIfDNE (referralObj, ['name','email','phone','referralcode','isactive']);
 
    referralObj.referredby = referredby;
 
