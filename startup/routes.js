@@ -21,7 +21,9 @@ const price = require('../routes/price');
 const error = require('../middleware/error');
 const unit = require('../routes/unit');
 const distance = require('../routes/distance');
+const referral = require('../routes/referral');
 const transportrate = require('../routes/transport-rate');
+const auction = require('../routes/auction');
 // require('../middleware/cloudinary');
 
 var corsOptions = {
@@ -48,5 +50,7 @@ module.exports = function(app) {
   app.use('/api/unit', unit);
   app.use('/api/distance', distance);
   app.use('/api/transportrate', transportrate);
+  app.use('/api/referral', referral);
+  app.use('/api/auction', auction);
   app.use(error);
 }
