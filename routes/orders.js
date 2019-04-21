@@ -33,7 +33,7 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
 
   let orderObj = _.pick(req.body, ['orderno','quantity',
   'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-  'receivedTime', 'paymentMode', 'status','ordertype']);
+  'receivedTime', 'paymentMode', 'status','ordertype','price']);
 
   orderObj.item =  item;
   orderObj.address =  address;

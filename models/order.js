@@ -21,6 +21,10 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: false
   },
+  price: {
+    type: Number,
+    required: false
+  },
   address: {
     type: addressModel.addressSchema,
     required: false
@@ -81,6 +85,7 @@ function validateOrder(order) {
     itemId: Joi.objectId().required(),
     quantity: Joi.number().optional(),
     cost: Joi.number().optional(),
+    price: Joi.number().optional(),
     addressId: Joi.objectId().optional(),
     buyerId: Joi.objectId().required(),
     sellerId: Joi.objectId().required(),
