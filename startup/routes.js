@@ -5,7 +5,7 @@ require('dotenv').config();
 // const bodyParser = require('body-parser')
 
 const users = require('../routes/users');
-const testcall = require('../routes/testcall');
+const addimage = require('../routes/addimage');
 const testitem = require('../routes/testitem');
 const items = require('../routes/items');
 const orders = require('../routes/orders');
@@ -45,7 +45,7 @@ module.exports = function(app) {
   app.use('/api/manufacturer', manufacturer);
   app.use('/api/auth', auth);
   app.use('/api/price', price);
-  app.use('/api/testcall',testcall);
+  app.use('/api/addimage',addimage);
   app.use('/api/testitem',testitem);
   app.use('/api/unit', unit);
   app.use('/api/distance', distance);
