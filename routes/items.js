@@ -15,136 +15,147 @@ const _ = require('lodash');
 
 
 function dropIfDNE(Obj, arr) {
-  for (var i = 0, size = arr.length; i < size ; i++) {
-    if (!Obj[arr[i]]) delete Obj[arr[i]];
-  }
+    for (var i = 0, size = arr.length; i < size; i++) {
+        if (!Obj[arr[i]]) delete Obj[arr[i]];
+    }
 }
 
 router.get('/', async (req, res) => {
-  const item = await Item.find().sort('price');
-  res.send(item);
+    const item = await Item.find().sort('price');
+    res.send(item);
 });
 
 /**
  * Api to get listings by category id
  */
 router.get('/byCategory/:category', async (req, res) => {
-  const state = await Item.find({
-    'category._id': req.params.category
-  }).sort('name.name');
-  res.send(state);
+    const state = await Item.find({
+        'category._id': req.params.category
+    }).sort('name.name');
+    res.send(state);
 });
 
 
-router.post('/', [auth, permit('seller', 'admin')],  async (req, res) => {
+/**
+ * Api to get current  user listings
+ */
+router.get('/current/', [auth], async (req, res) => {
+    const state = await Item.find({
+        'seller._id': req.user._id
+    }).sort('name.name');
+    res.send(state);
+});
 
-  let itemObj = _.pick(req.body, ['image',
-  'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive','specs']);
-  dropIfDNE (itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive','specs']);
 
-  const { error } = validate(req.body);
-  console.log(error)
-  if (error) return res.status(400).send(error.details[0].message);
+router.post('/', [auth, permit('seller', 'admin')], async (req, res) => {
 
-  const category = await Category.findById(req.body.categoryId);
-  console.log(category);
-  if (!category) return res.status(400).send('Invalid customer.');
+    let itemObj = _.pick(req.body, ['image',
+        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'specs']);
+    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'specs']);
 
-  const name = await ItemName.findById(req.body.nameId);
-  if (!name) return res.status(400).send('Invalid category.');
+    const {error} = validate(req.body);
+    console.log(error)
+    if (error) return res.status(400).send(error.details[0].message);
 
-  const city = await City.findById(req.body.cityId);
-  if (!city) return res.status(400).send('Invalid city.');
+    const category = await Category.findById(req.body.categoryId);
+    console.log(category);
+    if (!category) return res.status(400).send('Invalid customer.');
 
-  const address = await Address.findById(req.body.addressId);
-  if (!address) return res.status(400).send('Invalid address');
+    const name = await ItemName.findById(req.body.nameId);
+    if (!name) return res.status(400).send('Invalid category.');
 
-  const seller = await User.findById(req.body.sellerId);
-  if (!seller) return res.status(400).send('Invalid seller');
+    const city = await City.findById(req.body.cityId);
+    if (!city) return res.status(400).send('Invalid city.');
 
-  const unit = await Unit.findById(req.body.unitId);
-  if (!unit) return res.status(400).send('Invalid unit.');
+    const address = await Address.findById(req.body.addressId);
+    if (!address) return res.status(400).send('Invalid address');
 
-  const manufacturer = await Manufacturer.findById(req.body.manufacturerId);
-  if (!manufacturer) return res.status(400).send('Invalid Manufacturer');
+    const seller = await User.findById(req.body.sellerId);
+    if (!seller) return res.status(400).send('Invalid seller');
 
-  itemObj.category =  category;
-  itemObj.name =  name;
-  itemObj.city =  city;
-  itemObj.address =  address;
-  itemObj.seller =  seller;
-  itemObj.unit  = unit;
-  itemObj.manufacturer  = manufacturer;
+    const unit = await Unit.findById(req.body.unitId);
+    if (!unit) return res.status(400).send('Invalid unit.');
 
-  let item = new Item(itemObj);
-  console.log(item)
-  item = await item.save();
+    const manufacturer = await Manufacturer.findById(req.body.manufacturerId);
+    if (!manufacturer) return res.status(400).send('Invalid Manufacturer');
 
-  res.send(item);
+    itemObj.category = category;
+    itemObj.name = name;
+    itemObj.city = city;
+    itemObj.address = address;
+    itemObj.seller = seller;
+    itemObj.unit = unit;
+    itemObj.manufacturer = manufacturer;
+
+    let item = new Item(itemObj);
+    console.log(item)
+    item = await item.save();
+
+    res.send(item);
 });
 
 router.put('/:id', [auth, permit('seller', 'admin')], async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+    const {error} = validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
 
-  const category = await Category.findOne({ name: req.body.categoryId });
-  if (!category) return res.status(400).send('Invalid customer.');
+    const category = await Category.findOne({name: req.body.categoryId});
+    if (!category) return res.status(400).send('Invalid customer.');
 
-  const name = await ItemName.findById(req.body.nameId);
-  if (!name) return res.status(400).send('Invalid category.');
+    const name = await ItemName.findById(req.body.nameId);
+    if (!name) return res.status(400).send('Invalid category.');
 
-  const city = await City.findById(req.body.cityId);
-  if (!city) return res.status(400).send('Invalid city.');
+    const city = await City.findById(req.body.cityId);
+    if (!city) return res.status(400).send('Invalid city.');
 
-  const address = await Address.findById(req.body.addressId);
-  if (!address) return res.status(400).send('Invalid address');
+    const address = await Address.findById(req.body.addressId);
+    if (!address) return res.status(400).send('Invalid address');
 
-  const seller = await User.findById(req.body.sellerId);
-  if (!seller) return res.status(400).send('Invalid seller');
+    const seller = await User.findById(req.body.sellerId);
+    if (!seller) return res.status(400).send('Invalid seller');
 
-  const unit = await Unit.findById(req.body.unitId);
-  if (!unit) return res.status(400).send('Invalid unit.');
+    const unit = await Unit.findById(req.body.unitId);
+    if (!unit) return res.status(400).send('Invalid unit.');
 
-  itemObj = _.pick(req.body, ['name', 'image',
-  'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive']);
+    itemObj = _.pick(req.body, ['name', 'image',
+        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive']);
 
-  itemObj.category =  category;
-  itemObj.name =  name;
-  itemObj.city =  city;
-  itemObj.address =  address;
-  itemObj.seller =  seller;
-  itemObj.unit  = unit;
+    itemObj.category = category;
+    itemObj.name = name;
+    itemObj.city = city;
+    itemObj.address = address;
+    itemObj.seller = seller;
+    itemObj.unit = unit;
 
-  const item = await Item.findByIdAndUpdate(req.params.id, itemObj, {
-    new: true
-  });
+    const item = await Item.findByIdAndUpdate(req.params.id, itemObj, {
+        new: true
+    });
 
-  if (!item) return res.status(404).send('The item with the given ID was not found.');
+    if (!item) return res.status(404).send('The item with the given ID was not found.');
 
-  res.send(item);
+    res.send(item);
 });
 
 router.delete('/:id', [auth, permit('admin')], async (req, res) => {
-  const item = await Item.findByIdAndRemove(req.params.id);
+    const item = await Item.findByIdAndRemove(req.params.id);
 
-  if (!item) return res.status(404).send('The item with the given ID was not found.');
+    if (!item) return res.status(404).send('The item with the given ID was not found.');
 
-  res.send(item);
+    res.send(item);
 });
 
 router.get('/:id', [auth], async (req, res) => {
-  const item = await Item.findById(req.params.id);
+    const item = await Item.findById(req.params.id);
 
-  if (!item) return res.status(404).send('The item with the given ID was not found.');
+    if (!item) return res.status(404).send('The item with the given ID was not found.');
 
-  res.send(item);
+    res.send(item);
 });
 
 router.get('/sampleno/:id', [auth], async (req, res) => {
-  const item = await Item.find({sampleNo : req.params.id});
+    const item = await Item.find({sampleNo: req.params.id});
 
-  if (!item) return res.status(404).send('The item with the given sample was not found.');
+    if (!item) return res.status(404).send('The item with the given sample was not found.');
 
-  res.send(item);
+    res.send(item);
 });
 module.exports = router;
