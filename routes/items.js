@@ -21,7 +21,7 @@ function dropIfDNE(Obj, arr) {
 }
 
 router.get('/', async (req, res) => {
-  console.log (req.query);
+  // console.log (req.query);
   const itemnameId = req.query.name;
   const catId = req.query.cat;
   const cityId = req.query.origin;
