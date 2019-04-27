@@ -21,8 +21,39 @@ function dropIfDNE(Obj, arr) {
 }
 
 router.get('/', async (req, res) => {
+<<<<<<< HEAD
     const item = await Item.find().sort('price');
     res.send(item);
+=======
+  console.log (req.query);
+  const itemnameId = req.query.name;
+  const catId = req.query.cat;
+  const cityId = req.query.origin;
+  const grade = req.query.grade;
+  const price = req.query.price;
+
+  filter = {};
+  if (itemnameId) {
+    filter['name._id'] = itemnameId;
+  }
+  if (catId) {
+    filter['category._id'] = catId;
+  }
+  if (cityId) {
+    filter['city._id'] = cityId;
+  }
+  if (grade) {
+    filter['grade'] = grade;
+  }
+  if (!price || price == 'asc') {
+    const item = await Item.find(filter).sort('price');
+    res.send(item);
+  }
+  else {
+    const item = await Item.find(filter).sort({'price':-1});
+    res.send(item);
+  }
+>>>>>>> b8c1938fafb6184ed242e12e20cd29bf7365bfc9
 });
 
 /**
@@ -53,6 +84,7 @@ router.post('/', [auth, permit('seller', 'admin')], async (req, res) => {
         'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'specs']);
     dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'specs']);
 
+<<<<<<< HEAD
     const {error} = validate(req.body);
     console.log(error)
     if (error) return res.status(400).send(error.details[0].message);
@@ -60,6 +92,14 @@ router.post('/', [auth, permit('seller', 'admin')], async (req, res) => {
     const category = await Category.findById(req.body.categoryId);
     console.log(category);
     if (!category) return res.status(400).send('Invalid customer.');
+=======
+  const { error } = validate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  const category = await Category.findById(req.body.categoryId);
+
+  if (!category) return res.status(400).send('Invalid customer.');
+>>>>>>> b8c1938fafb6184ed242e12e20cd29bf7365bfc9
 
     const name = await ItemName.findById(req.body.nameId);
     if (!name) return res.status(400).send('Invalid category.');
@@ -87,9 +127,14 @@ router.post('/', [auth, permit('seller', 'admin')], async (req, res) => {
     itemObj.unit = unit;
     itemObj.manufacturer = manufacturer;
 
+<<<<<<< HEAD
     let item = new Item(itemObj);
     console.log(item)
     item = await item.save();
+=======
+  let item = new Item(itemObj);
+  item = await item.save();
+>>>>>>> b8c1938fafb6184ed242e12e20cd29bf7365bfc9
 
     res.send(item);
 });

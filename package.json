@@ -4,8 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+<<<<<<< HEAD
     "dev" : "export DBCONN=mongodb://admin:GrainEasy1@ds057548.mlab.com:57548/graineasy-dev && node index",
     "local" : "export DBCONN=mongodb://localhost:27017/graineasy-dev && node index",
+=======
+    "dev": "export DBCONN=mongodb://admin:GrainEasy1@ds057548.mlab.com:57548/graineasy-dev && node index",
+>>>>>>> b8c1938fafb6184ed242e12e20cd29bf7365bfc9
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
