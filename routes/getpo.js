@@ -1,26 +1,58 @@
 const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
-const {Order, validate} = require('../models/order');
+const {Order} = require('../models/order');
 const {Item} = require('../models/item');
-const {GroupbuyingList} = require('../models/gblist');
-const {Auction} = require('../models/auction');
 const {User} = require('../models/user');
-const {Address, validateAddress} = require('../models/address');
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
+const PDFDocument = require('pdfkit');
 
-router.get('/', async (req, res) => {
-  const order = await Order.find().sort('placedTime');
-  res.send(order);
+router.get('/id/:id', async (req, res) => {
+  id  = req.params.id;
+  const doc = new PDFDocument();
+  var lorem = 'kfdshjkxbkbhdkjhbcn  gkdhfgkjhdfgkh'
+  const result = await Order.findById(id);
+      
+      title        = result.orderno,
+      quantity      = result.quantity;
+      cost = result.cost;
+      placedTime  = result.placedTime;
+      confirmedTime         = result.status;
+      ordertype         = result.ordertype;
+      filename     = encodeURIComponent(title) + '.pdf';
+      res.setHeader('Content-disposition', 'attachment; filename="' + filename + '"');
+      res.setHeader('Content-type', 'application/pdf');
+      doc.fontSize(10).text('Order Placed On ' + placedTime, 100, 80);
+      doc
+        .moveDown()
+        .fontSize(15).text('Order No - ' + title, 100, 50);
+      doc.circle(280, 200, 50).fill('#6600FF');
+      doc
+        .text('Order Value ' + cost, 100, 300)
+        .font('Times-Roman', 13)
+        .moveDown()
+        .text(lorem, {
+          width: 412,
+          align: 'justify',
+          indent: 30,
+          columns: 2,
+          height: 300,
+          ellipsis: true
+        });
+      doc.image('./assets/but_graineasy.png', 5, 20, {width: 100})
+        .text('Invoiced to Bajaj Pulse Mill', 5, 2);
+  
+     doc.pipe(res);
+     doc.end();
 });
 
 router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
-  
+
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-  
+
   const item = await Item.findById(req.body.itemId);
   if (!item) return res.status(400).send('Invalid Item.');
 
@@ -33,7 +65,7 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
   const seller = await User.findById(req.body.sellerId);
   if (!seller) return res.status(400).send('Invalid seller.');
 
-  let orderObj = _.pick(req.body, ['orderno','quantity','unit',
+  let orderObj = _.pick(req.body, ['orderno','quantity',
   'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
   'receivedTime', 'paymentMode', 'status','ordertype','price']);
 
@@ -41,20 +73,6 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
   orderObj.address =  address;
   orderObj.buyer =  buyer;
   orderObj.seller =  seller;
-  
-  if (req.body.referenceGBId) {
-    console.log("Hello" + req.body.referenceGBId)
-  const gblist = await GroupbuyingList.findById(req.body.referenceGBId);
-    if (!gblist) return res.status(400).send('Invalid Reference Group buying id');
-    orderObj.referenceGB =  gblist;
-  }
-
-  if (req.body.referenceAuctionId) {
-    const auction = await Auction.findById(req.body.referenceAuctionId);
-      if (!auction) return res.status(400).send('Invalid Reference Auction id');
-      orderObj.referenceAuction =  auction;
-    }
-
   let order = new Order(orderObj);
   order = await order.save();
 

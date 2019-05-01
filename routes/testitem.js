@@ -4,12 +4,17 @@ const aadhar = require('../models/test');
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
-const cloudinary = require('cloudinary')
+const cloudinary = require('cloudinary');
+const crypt = require('../middleware/crypt.js');
+// const nodemailer = require('nodemailer');
+const sendEmail = require('../middleware/sendemail');
 const bodyParser = require('body-parser');
 const path = require('path');
 const _ = require('lodash');
 // const cloudinary = require('../middleware/cloudinary');
 require('../middleware/cloudinary');
+// require('../middleware/nodemailer');
+
 // const upload = require('../middleware/multer');
 // const {Blog} = require('../models/blog');
 //
@@ -23,7 +28,16 @@ const app = express()
 
 router.post('/', async (req, res) => {
 
-  // console.log(req.body)
+  // const encPassword = crypt.encrypt('yourgmail pass');
+  // console.log(encPassword);
+  // console.log(crypt.decrypt(encPassword));
+  // console.log(crypt.decrypt('3e73bfc93fd9d23698a6'));
+  // send mail with defined transport object
+
+  sendEmail('shahnawaz_haq@outlook.com', 'Order Placed', 'Test message');  // can be a await call
+  // console.log(info);
+  // console.log("Message sent: %s", info.messageId);  
+  
   res.send({
     message: 'Hello'
   })

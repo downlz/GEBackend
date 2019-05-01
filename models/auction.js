@@ -10,15 +10,11 @@ const itemname = require('./itemname');
 
 const auctionSchema = new mongoose.Schema({
     itemName: {type: mongoose.Schema.Types.ObjectId, ref: 'ItemName', required: true},
-    category: {type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true},
-    item: {type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true},
+    itemCategory: {type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true},
+    sampleNo: {type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true},
     auctionType: {
         type: String
         , required: true
-    },
-    category: {
-        type: category.categorySchema,
-        required: true
     },
     availableQty: {
         type: Number,
@@ -49,13 +45,17 @@ const auctionSchema = new mongoose.Schema({
         type: Boolean,
         required: true
     },
-    startDate: {
+    startTime: {
         type: Date,
         required: true
     },
-    endDate: {
+    endTime: {
         type: Date,
         required: true
+    },
+    approved: {
+        type: Boolean,
+        defaultValue: false
     },
     user: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
@@ -73,22 +73,22 @@ const Auction = mongoose.model('Auction', auctionSchema);
 
 function validateItem(item) {
     const schema = {
-        itemName: Joi.objectId().required(),
-        category: Joi.objectId().required(),
-        item: Joi.objectId().required(),
+        itemName: Joi.objectId(),
+        itemCategory: Joi.objectId(),
+        sampleNo: Joi.objectId(),
         auctionType: Joi.string().required(),
         availableQty: Joi.number().required(),
-        minQty: Joi.number().required(),
-        maxQty: Joi.number().required(),
+        minQty: Joi.number()/*.required()*/,
+        maxQty: Joi.number()/*.required()*/,
         unit: Joi.objectId().required(),
         floorPrice: Joi.number().required(),
         ceilingPrice: Joi.number().required(),
         nameVisible: Joi.boolean().required(),
         transportCost: Joi.boolean().required(),
-        startDate: Joi.date().required(),
-        endDate: Joi.date().required(),
+        startTime: Joi.date().required(),
+        endTime: Joi.date().required(),
+        //Buyer or seller Id
         user: Joi.objectId().required(),
-
     };
 
     return Joi.validate(item, schema);

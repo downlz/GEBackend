@@ -107,7 +107,12 @@ const userSchema = new mongoose.Schema({
   isSeller: Boolean,
   isBuyer: Boolean,
   isEmpL0: Boolean,
-  isEmpL1: Boolean
+  isEmpL1: Boolean,
+  vendorCode: {
+    type: String,
+    required: false,
+    unique : true,
+  }
   //
   // userType: {
   //   type:String                                     // User Classification eg. small,large,corporate,institutional
@@ -149,7 +154,8 @@ function validateUser(user) {
     buyerDiscount1Percent: Joi.number().optional(),
     buyerDiscount2PerKg: Joi.number().optional(),
     buyerDiscount3Lumpsump: Joi.number().optional(),
-    buyerFinePerKg: Joi.number().optional()
+    buyerFinePerKg: Joi.number().optional(),
+    vendorCode: Joi.string().length(6).optional()
   };
 
   return Joi.validate(user, schema);
