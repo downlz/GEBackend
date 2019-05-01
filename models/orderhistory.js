@@ -1,3 +1,5 @@
+// This schema is to track all changes made to an order (It can be an auction order or some other type which is yet 
+// to be defined)
 const Joi = require("joi");
 const mongoose = require("mongoose");
 const itemModel = require("./item");
@@ -5,73 +7,36 @@ const userModel = require("./user");
 const addressModel = require("./address");
 const auctionModel = require("./auction");
 const gblistModel = require("./gblist");
+const orderModel = require("./order")
 
 const orderSchema = new mongoose.Schema({
-  orderno:{
-    type: String,
-    required: false
-  },
-  item: {
-    type: itemModel.itemSchema,
-    required: false
+  order: {                        // To trace the order on which changes are being made
+    type: orderModel.orderSchema,
+    required: true
   },
   quantity: {
     type: Number,
     required: false
   },
-  cost: {
+  unit: {                     // Provisional in case requried
+    type: String,
+    required: false
+  },
+  price: {
     type: Number,
     required: false
   },
-  address: {
-    type: addressModel.addressSchema,
+  cost: {                     // System calculated value
+    type: Number,
     required: false
   },
-  buyer: {
+  modifiedTime: {
+    type: Date,
+    required: false
+  },
+  modifiedBy: {
     type: userModel.userSchema,
     required: false
-  },
-  seller: {
-    type: userModel.userSchema,
-    required: false
-  },
-  placedTime: {
-    type: Date,
-    required: false
-  },
-  confirmedTime: {
-    type: Date,
-    required: false
-  },
-  shipmentTime: {
-    type: Date,
-    required: false
-  },
-  receivedTime: {
-    type: Date,
-    required: false
-  },
-  paymentMode: {
-    type: String,
-    required: false
-  },
-  status: {
-    type: String,
-    enum: ['new', 'confirmed', 'ready','shipped', 'delivered'],
-    required: false
-  },
-  ordertype: {
-    type: String,
-    enum: ['regular', 'groupbuying', 'auction', 'bidding'],
-    required: false
-  },
-  referenceGB: {
-    type : gblistModel.groupbuyingSchema,
-    required: false
-  },
-  referenceAuction :{
-    type : auctionModel.auctionSchema,
-    required:false
   }
 });
 

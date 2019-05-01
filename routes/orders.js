@@ -2,6 +2,8 @@ const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const {Order, validate} = require('../models/order');
 const {Item} = require('../models/item');
+const {GroupbuyingList} = require('../models/gblist');
+const {Auction} = require('../models/auction');
 const {User} = require('../models/user');
 const {Address, validateAddress} = require('../models/address');
 const mongoose = require('mongoose');
@@ -15,10 +17,10 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
-
+  
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-
+  
   const item = await Item.findById(req.body.itemId);
   if (!item) return res.status(400).send('Invalid Item.');
 
@@ -31,7 +33,7 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
   const seller = await User.findById(req.body.sellerId);
   if (!seller) return res.status(400).send('Invalid seller.');
 
-  let orderObj = _.pick(req.body, ['orderno','quantity',
+  let orderObj = _.pick(req.body, ['orderno','quantity','unit',
   'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
   'receivedTime', 'paymentMode', 'status','ordertype','price']);
 
@@ -39,6 +41,20 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
   orderObj.address =  address;
   orderObj.buyer =  buyer;
   orderObj.seller =  seller;
+  
+  if (req.body.referenceGBId) {
+    console.log("Hello" + req.body.referenceGBId)
+  const gblist = await GroupbuyingList.findById(req.body.referenceGBId);
+    if (!gblist) return res.status(400).send('Invalid Reference Group buying id');
+    orderObj.referenceGB =  gblist;
+  }
+
+  if (req.body.referenceAuctionId) {
+    const auction = await Auction.findById(req.body.referenceAuctionId);
+      if (!auction) return res.status(400).send('Invalid Reference Auction id');
+      orderObj.referenceAuction =  auction;
+    }
+
   let order = new Order(orderObj);
   order = await order.save();
 

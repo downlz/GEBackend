@@ -7,7 +7,6 @@ const router = express.Router();
 const _ = require('lodash');
 
 router.post('/', [auth],  async (req, res) => {
-  console.log("abc");
   const item = await Item.findById(req.body.itemId);
   if (!item) return res.status(400).send('Invalid Item.');
 
@@ -50,8 +49,8 @@ router.post('/', [auth],  async (req, res) => {
   let P_gross = (((P_invoice_rate) + (buyerDiscount2PerKg * quantity_dash) + buyerDiscount3Lumpsump) / 
         ((quantity_dash) - ((buyerBackMarginPercent + buyerDiscount1Percent)* quantity_dash))) * quantity;
   let p_final = P_gross * (1 + ((tax + insurance)/100));
-  console.log(quantity_dash, P1, P2, Num, Den, P_invoice_rate, P_gross, p_final);
-  console.log()
+  // console.log(quantity_dash, P1, P2, Num, Den, P_invoice_rate, P_gross, p_final);
+  // console.log()
   price  = {'price' : p_final};
   res.send(price);
 });
