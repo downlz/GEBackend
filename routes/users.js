@@ -36,6 +36,8 @@ router.post('/', async (req, res) => {
 
   const { error } = validate(userObj);
 
+  console.log(error)
+  
   let user = await User.findOne({ phone: req.body.phone });
   if (user) return res.status(400).send('User already registered.');
 

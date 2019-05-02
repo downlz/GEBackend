@@ -29,7 +29,7 @@ const getpo = require('../routes/getpo');
 
 
 var corsOptions = {
-  origin: 'http://localhost:4200'
+  origin: '*'
 }
 
 module.exports = function(app) {

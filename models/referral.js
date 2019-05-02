@@ -14,6 +14,7 @@ const referralSchema = new mongoose.Schema({
   email: {
     type: String,
     required: false,
+    unique : true,
     minlength: 5,
     maxlength: 255
   },
@@ -36,6 +37,11 @@ const referralSchema = new mongoose.Schema({
     type: Boolean,
     required: false,
     default: false
+  },
+  isjunk : {                      // If referred user is not related with business
+    type: Boolean,
+    required: false,
+    default: false
   }
 });
 
@@ -49,6 +55,7 @@ function validateReferral(referral) {
     referredby: Joi.objectId().required(),
     referralcode: Joi.string().optional(),
     isactive: Joi.string().optional(),
+    isjunk: Joi.string().optional(),
   };
 
   return Joi.validate(referral, schema);

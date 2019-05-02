@@ -43,7 +43,7 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
   orderObj.seller =  seller;
   
   if (req.body.referenceGBId) {
-    console.log("Hello" + req.body.referenceGBId)
+    // console.log("Hello" + req.body.referenceGBId)
   const gblist = await GroupbuyingList.findById(req.body.referenceGBId);
     if (!gblist) return res.status(400).send('Invalid Reference Group buying id');
     orderObj.referenceGB =  gblist;
@@ -102,12 +102,19 @@ router.get('/id/:id', [auth], async (req, res) => {
   res.send(order);
 });
 
+router.get('/orderno', [auth], async (req, res) => {
+  const order = await Order.find().sort({orderno:-1}).limit(1)
+  if (!order) return res.status(404).send('The item with the given ID was not found.');
+  res.send(order);
+  // res.send(order[0].orderno);
+});
+
 router.get('/user/:id', [auth], async (req, res) => {
   // const order = await Order.findById(req.params.id);
 
   const customer = await User.findById(req.params.id);
-  console.log(req.params.id);
-  console.log(customer);
+  // console.log(req.params.id);
+  // console.log(customer);
   if (!customer) return res.status(400).send('Invalid buyer.');
   let order = null;
   if (customer.isSeller) {
