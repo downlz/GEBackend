@@ -6,6 +6,7 @@ const {GroupbuyingList, validate} = require('../models/gblist');
 const {Item} = require('../models/item');
 const {User} = require('../models/user');
 const {Unit} = require('../models/unit');
+const {Order} = require('../models/order');
 const {Address, validateAddress} = require('../models/address');
 const mongoose = require('mongoose');
 const express = require('express');
@@ -92,6 +93,22 @@ router.delete('/:id', [auth, permit('admin')], async (req, res) => {
 });
 
 router.get('/:id', [auth], async (req, res) => {
+  const groupbuying = await GroupbuyingList.findById(req.params.id);
+
+  if (!groupbuying) return res.status(404).send('The item with the given ID was not found.');
+
+  res.send(groupbuying);
+});
+
+router.get('/getqty/avl/:id', [auth], async (req, res) => {
+  const groupbuying = await GroupbuyingList.findById(req.params.id);
+
+  if (!groupbuying) return res.status(404).send('The item with the given ID was not found.');
+
+  res.send(groupbuying);
+});
+
+router.get('/getqty/booked/:id', [auth], async (req, res) => {
   const groupbuying = await GroupbuyingList.findById(req.params.id);
 
   if (!groupbuying) return res.status(404).send('The item with the given ID was not found.');
