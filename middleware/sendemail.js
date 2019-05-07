@@ -6,7 +6,7 @@ const transport = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
         user: process.env.EMAILUSER,
-        pass: crypt.decrypt(encryptedPassword),
+        pass: ""//crypt.decrypt(encryptedPassword),
     },
 });
 module.exports = function sendEmail(to, subject, message) {
