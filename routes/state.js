@@ -15,7 +15,7 @@ router.post('/', [auth, permit('admin')], async (req, res) => {
   const { error } = validate(req.body); 
   if (error) return res.status(400).send(error.details[0].message);
 
-  let stateObj = _.pick(req.body, ['name']);
+  let stateObj = _.pick(req.body, ['name','code']);
 
   let state = new State(stateObj);
   state = await state.save();
@@ -27,7 +27,7 @@ router.put('/:id', [auth, permit('admin')], async (req, res) => {
   const { error } = validate(req.body); 
   if (error) return res.status(400).send(error.details[0].message);
 
-  const state = await State.findByIdAndUpdate(req.params.id, { name: req.body.name }, {
+  const state = await State.findByIdAndUpdate(req.params.id, { name: req.body.name , code: req.body.code}, {
     new: true
   });
 
