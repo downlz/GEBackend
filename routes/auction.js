@@ -11,7 +11,7 @@ const router = express.Router();
 const _ = require('lodash');
 
 router.get('/', [auth], async (req, res) => {
-    const state = await Auction.find().populate(["sampleNo", "user", "unit"]);
+    const state = await Auction.find().populate(["sampleNo", "user", "unit", "state"]);
     res.send(state);
 });
 
@@ -19,7 +19,7 @@ router.get('/', [auth], async (req, res) => {
 router.get('/current', [auth], async (req, res) => {
     const state = await Auction.find({
         "user": req.user._id
-    }).populate(["sampleNo", "user", "unit"]);
+    }).populate(["sampleNo", "user", "unit", "state"]);
     res.send(state);
 });
 
@@ -56,7 +56,10 @@ router.post('/', [auth, permit('admin', 'seller')], async (req, res) => {
 });
 
 router.put('/:id', [auth, permit('admin')], async (req, res) => {
-
+    //Set every update to be approved
+    if(!req.body.approved){
+        req.body.approved = false;
+    }
     const auction = await Auction.findByIdAndUpdate(req.params.id, {...req.body}, {
         new: true
     }).populate(["sampleNo", "user", "unit",]);

@@ -16,6 +16,17 @@ const auctionSchema = new mongoose.Schema({
         type: String
         , required: true
     },
+    address: {
+        type: String
+        , required: true
+    },
+    pincode: {
+        type: String
+        , required: true
+    },
+    state: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'State', required: true
+    },
     availableQty: {
         type: Number,
         required: true
@@ -77,6 +88,9 @@ function validateItem(item) {
         itemCategory: Joi.objectId(),
         sampleNo: Joi.objectId(),
         auctionType: Joi.string().required(),
+        address: Joi.string().required(),
+        pincode: Joi.string().required(),
+        state: Joi.objectId(),
         availableQty: Joi.number().required(),
         minQty: Joi.number()/*.required()*/,
         maxQty: Joi.number()/*.required()*/,
