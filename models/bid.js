@@ -27,8 +27,7 @@ const Bid = mongoose.model("Bid", bidSchema);
 function validateBid(order) {
     const schema = {
         quantity: Joi.number().optional(),
-        price: Joi.number().optional(),
-        auction : Joi.objectId()
+        price: Joi.number().optional()
     };
 
     return Joi.validate(order, schema);
