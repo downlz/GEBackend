@@ -7,6 +7,10 @@ const stateSchema = new mongoose.Schema({
     required: true,
     minlength: 3,
     maxlength: 50
+  },
+  code : {
+    type: Number,
+    required: false
   }
 });
 
@@ -14,7 +18,8 @@ const State = mongoose.model('State', stateSchema);
 
 function validateState(state) {
   const schema = {
-    name: Joi.string().min(3).max(50).required()
+    name: Joi.string().min(3).max(50).required(),
+    code: Joi.number().optional()
   };
 
   return Joi.validate(state, schema);

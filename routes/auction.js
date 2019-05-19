@@ -4,13 +4,14 @@ const {Auction, validate} = require('../models/auction');
 const {ItemName} = require('../models/itemname');
 const {Item} = require('../models/item');
 const {Category} = require('../models/category');
+const {Bid} = require('../models/bid');
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
 
 router.get('/', [auth], async (req, res) => {
-    const state = await Auction.find().populate(["sampleNo", "user", "unit",]);
+    const state = await Auction.find().populate(["sampleNo", "user", "unit", "state"]);
     res.send(state);
 });
 
@@ -18,7 +19,7 @@ router.get('/', [auth], async (req, res) => {
 router.get('/current', [auth], async (req, res) => {
     const state = await Auction.find({
         "user": req.user._id
-    }).populate(["sampleNo", "user", "unit",]);
+    }).populate(["sampleNo", "user", "unit", "state"]);
     res.send(state);
 });
 
@@ -55,7 +56,10 @@ router.post('/', [auth, permit('admin', 'seller')], async (req, res) => {
 });
 
 router.put('/:id', [auth, permit('admin')], async (req, res) => {
-
+    //Set every update to be approved
+    if(!req.body.approved){
+        req.body.approved = false;
+    }
     const auction = await Auction.findByIdAndUpdate(req.params.id, {...req.body}, {
         new: true
     }).populate(["sampleNo", "user", "unit",]);
@@ -74,10 +78,21 @@ router.delete('/:id', [auth, permit('admin')], async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-    const auction = await Auction.findById(req.params.id);
-
+    let auction = await Auction.findById(req.params.id).populate(["sampleNo", "user", "unit",]);
     if (!auction) return res.status(404).send('The genre with the given ID was not found.');
-
+    const bids = await Bid.find({
+        auction: req.params.id
+    }).populate("createdBy");
+    auction = auction.toJSON();
+    let modifiedAuction = {
+        ...auction
+    }
+    auction.bids = bids.map((bid) => {
+        bid = bid.toJSON();
+        bid.auction = modifiedAuction;
+        console.log(bid);
+        return bid
+    });
     res.send(auction);
 });
 

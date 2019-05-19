@@ -24,8 +24,10 @@ const distance = require('../routes/distance');
 const referral = require('../routes/referral');
 const transportrate = require('../routes/transport-rate');
 const auction = require('../routes/auction');
+const bid = require('../routes/bid');
 const getinvoice = require('../routes/getinvoice');
 const getpo = require('../routes/getpo');
+const uploadbill = require('../routes/uploadbill');
 
 
 var corsOptions = {
@@ -54,7 +56,9 @@ module.exports = function(app) {
   app.use('/api/transportrate', transportrate);
   app.use('/api/referral', referral);
   app.use('/api/auction', auction);
+  app.use('/api/bid', bid);
   app.use('/api/getinvoice', getinvoice);
   app.use('/api/getpo', getpo);
+  app.use('/api/uploadbill', uploadbill);
   app.use(error);
 }
