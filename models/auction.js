@@ -33,11 +33,11 @@ const auctionSchema = new mongoose.Schema({
     },
     maxQty: {
         type: Number,
-        required: true
+        //required: true
     },
     minQty: {
         type: Number,
-        required: true
+        //required: true
     },
     unit: {type: mongoose.Schema.Types.ObjectId, ref: 'Unit', required: true},
     floorPrice: {
@@ -46,7 +46,7 @@ const auctionSchema = new mongoose.Schema({
     },
     ceilingPrice: {
         type: Number,
-        required: true
+        //required: true
     },
     nameVisible: {
         type: Boolean,
@@ -70,6 +70,9 @@ const auctionSchema = new mongoose.Schema({
     },
     user: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
+    },
+    remarks: {
+        type: String,
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
@@ -96,13 +99,14 @@ function validateItem(item) {
         maxQty: Joi.number()/*.required()*/,
         unit: Joi.objectId().required(),
         floorPrice: Joi.number().required(),
-        ceilingPrice: Joi.number().required(),
+        ceilingPrice: Joi.number()/*.required()*/,
         nameVisible: Joi.boolean().required(),
         transportCost: Joi.boolean().required(),
         startTime: Joi.date().required(),
         endTime: Joi.date().required(),
         //Buyer or seller Id
         user: Joi.objectId().required(),
+        remarks: Joi.string()
     };
 
     return Joi.validate(item, schema);
