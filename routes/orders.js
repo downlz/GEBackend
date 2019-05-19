@@ -20,7 +20,7 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
   
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-  
+
   const item = await Item.findById(req.body.itemId);
   if (!item) return res.status(400).send('Invalid Item.');
 

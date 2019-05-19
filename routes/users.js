@@ -81,6 +81,27 @@ router.post('/', async (req, res) => {
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'role']));
 });
 
+router.post('/resetpassword', async (req, res) => {
+  passObj = _.pick(req.body, ['password', 'phone', 'pan', 'gstin']);
+
+  user = new User(passObj);
+  userpass = await User.find({$and :[{phone:req.body.phone},{pan:req.body.pan},{GST:req.body.gstin}]});
+  
+  if (userpass[0]){
+      const salt = await bcrypt.genSalt(10);
+      newpassword = await bcrypt.hash(req.body.password, salt); 
+      user = await User.updateOne({_id : userpass[0]._id}, {$set: {password: newpassword}});
+      
+      if (!user) return res.status(404).send('The item with the given ID was not found.');
+        res.send(user);
+      } else {
+        // console.log("No result")
+        res.status(404).send({
+          message :"No valid data found"
+        });
+    }
+});
+
 router.put('/:id', [auth, permit('admin')], async (req, res) => {
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
