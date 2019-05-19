@@ -7,7 +7,6 @@ const unit = require('./unit');
 const user = require('./user');
 const itemname = require('./itemname');
 
-
 const auctionSchema = new mongoose.Schema({
     itemName: {type: mongoose.Schema.Types.ObjectId, ref: 'ItemName', required: true},
     itemCategory: {type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true},
@@ -73,6 +72,7 @@ const auctionSchema = new mongoose.Schema({
     },
     remarks: {
         type: String,
+        required: false
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
@@ -106,7 +106,7 @@ function validateItem(item) {
         endTime: Joi.date().required(),
         //Buyer or seller Id
         user: Joi.objectId().required(),
-        remarks: Joi.string()
+        remarks: Joi.string().optional().allow('')
     };
 
     return Joi.validate(item, schema);
