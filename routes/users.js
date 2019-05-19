@@ -30,7 +30,7 @@ router.get('/me', [auth], auth, async (req, res) => {
 router.post('/', async (req, res) => {
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
-  'pan'.toUpperCase(), 'GST'.toUpperCase(), 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
+  'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
   'isEmpL0', 'isEmpL1']);
   dropIfDNE (userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1']);
 
