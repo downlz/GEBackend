@@ -21,7 +21,7 @@ const bidSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
     },
     manufacturer: {
-        type: String,
+        type: mongoose.Schema.Types.Mixed,
         required: false
     },
     marketingExpense: {
@@ -37,8 +37,8 @@ function validateBid(order) {
         quantity: Joi.number().optional(),
         price: Joi.number().optional(),
         auction: Joi.objectId(),
-        manufacturer : Joi.string().optional(),
-        marketingExpense : Joi.number().optional()
+        manufacturer: Joi.alternatives().try(Joi.string(), Joi.object()).optional(),
+        marketingExpense: Joi.number().optional()
     };
 
     return Joi.validate(order, schema);
