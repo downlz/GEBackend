@@ -8,7 +8,8 @@ const {User} = require('../models/user');
 const {Unit} = require('../models/unit');
 const {Order} = require('../models/order');
 const {Address, validateAddress} = require('../models/address');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
+// const mongo = require('mongodb');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
@@ -101,11 +102,38 @@ router.get('/:id', [auth], async (req, res) => {
 });
 
 router.get('/getqty/avl/:id', [auth], async (req, res) => {
-  const groupbuying = await GroupbuyingList.findById(req.params.id);
 
-  if (!groupbuying) return res.status(404).send('The item with the given ID was not found.');
-
-  res.send(groupbuying);
+  const ObjectID = require("mongodb").ObjectID;
+  const refGBId = new ObjectID(req.params.id);
+  const gbOrder = await Order.aggregate([
+      { 
+        "$match": {
+          "referenceGB._id": refGBId,
+          "status" : { $nin: [ 'cancelled' ] }          // In future modify as required.
+        }
+      }
+      , {
+        $group: {
+          _id: null,
+          total: {
+            $sum: "$quantity"
+          }
+        }
+      }
+  ]);
+  const groupbuying = await GroupbuyingList.find({_id : refGBId});    // Will always return one entry
+  if (!gbOrder[0] || !groupbuying[0]) {
+    //  return res.status(404).send('The item with the given ID was not found.');
+    return res.status(200).send({
+      "availableQty" : groupbuying[0].totalqty
+    });
+  } else {  
+  availableQty = groupbuying[0].totalqty - gbOrder[0].total
+  }
+  // console.log(availableQty);
+  res.send({
+    "availableQty" : availableQty
+  });
 });
 
 router.get('/getqty/booked/:id', [auth], async (req, res) => {

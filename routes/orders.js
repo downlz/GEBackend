@@ -2,6 +2,7 @@ const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const {Order, validate} = require('../models/order');
 const {Item} = require('../models/item');
+const {Unit} = require('../models/unit');
 const {GroupbuyingList} = require('../models/gblist');
 const {Auction} = require('../models/auction');
 const {User} = require('../models/user');
@@ -33,6 +34,9 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
   const seller = await User.findById(req.body.sellerId);
   if (!seller) return res.status(400).send('Invalid seller.');
 
+  // const unit = await Unit.findById(req.body.unitId);
+  // if (!unit) return res.status(400).send('Invalid unit.');
+
   let orderObj = _.pick(req.body, ['orderno','quantity','unit',
   'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
   'receivedTime', 'paymentMode', 'status','ordertype','price']);
@@ -41,6 +45,7 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
   orderObj.address =  address;
   orderObj.buyer =  buyer;
   orderObj.seller =  seller;
+  // orderObj.unit = unit;
   
   if (req.body.referenceGBId) {
     // console.log("Hello" + req.body.referenceGBId)
