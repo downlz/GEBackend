@@ -13,125 +13,128 @@ const router = express.Router();
 const _ = require('lodash');
 
 router.get('/', async (req, res) => {
-  const order = await Order.find().sort('placedTime');
-  res.send(order);
+    const order = await Order.find().sort('placedTime');
+    res.send(order);
 });
 
-router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
-  
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+router.post('/', [auth, permit('buyer', 'admin')], async (req, res) => {
+    await placeOrder(req.body, req, res)
+});
 
-  const item = await Item.findById(req.body.itemId);
-  if (!item) return res.status(400).send('Invalid Item.');
+async function placeOrder(obj, req, res) {
+    const {error} = validate(obj);
+    if (error) return res.status(400).send(error.details[0].message);
 
-  const address = await Address.findById(req.body.addressId);
-  if (!address) return res.status(400).send('Invalid address.');
+    const item = await Item.findById(obj.itemId);
+    if (!item) return res.status(400).send('Invalid Item.');
 
-  const buyer = await User.findById(req.body.buyerId);
-  if (!buyer) return res.status(400).send('Invalid buyer.');
-
-  const seller = await User.findById(req.body.sellerId);
-  if (!seller) return res.status(400).send('Invalid seller.');
-
-  // const unit = await Unit.findById(req.body.unitId);
-  // if (!unit) return res.status(400).send('Invalid unit.');
-
-  let orderObj = _.pick(req.body, ['orderno','quantity','unit',
-  'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-  'receivedTime', 'paymentMode', 'status','ordertype','price']);
-
-  orderObj.item =  item;
-  orderObj.address =  address;
-  orderObj.buyer =  buyer;
-  orderObj.seller =  seller;
-  // orderObj.unit = unit;
-  
-  if (req.body.referenceGBId) {
-    // console.log("Hello" + req.body.referenceGBId)
-  const gblist = await GroupbuyingList.findById(req.body.referenceGBId);
-    if (!gblist) return res.status(400).send('Invalid Reference Group buying id');
-    orderObj.referenceGB =  gblist;
-  }
-
-  if (req.body.referenceAuctionId) {
-    const auction = await Auction.findById(req.body.referenceAuctionId);
-      if (!auction) return res.status(400).send('Invalid Reference Auction id');
-      orderObj.referenceAuction =  auction;
+    // const address = await Address.findById(obj.addressId);
+    // if (!address) return res.status(400).send('Invalid address.');
+    let buyer, seller;
+    if (obj.buyerId) {
+        buyer = await User.findById(obj.buyerId);
+        if (!buyer) return res.status(400).send('Invalid buyer.');
+    } else {
+        seller = await User.findById(obj.sellerId);
+        if (!seller) return res.status(400).send('Invalid seller.');
     }
 
-  let order = new Order(orderObj);
-  order = await order.save();
 
-  res.send(order);
-});
+    let orderObj = _.pick(obj, ['orderno', 'quantity', 'unit',
+        'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
+        'receivedTime', 'paymentMode', 'status', 'ordertype', 'price']);
+
+    orderObj.item = item;
+    //orderObj.address = address;
+    orderObj.buyer = buyer;
+    orderObj.seller = seller;
+
+    if (obj.referenceGBId) {
+        const gblist = await GroupbuyingList.findById(obj.referenceGBId);
+        if (!gblist) return res.status(400).send('Invalid Reference Group buying id');
+        orderObj.referenceGB = gblist;
+    }
+
+    if (obj.referenceAuctionId) {
+        const auction = await Auction.findById(obj.referenceAuctionId);
+        if (!auction) return res.status(400).send('Invalid Reference Auction id');
+        orderObj.referenceAuction = auction;
+    }
+
+    let order = new Order(orderObj);
+    order = await order.save();
+    res.send(order);
+    return order;
+}
 
 router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
 
-  if (req.body.addressId) {
-    const address = await Address.findById(req.body.addressId);
-    if (!address) return res.status(400).send('Invalid category.');
-  }
+    if (req.body.addressId) {
+        const address = await Address.findById(req.body.addressId);
+        if (!address) return res.status(400).send('Invalid category.');
+    }
 
 
-  let orderObj = _.pick(req.body, ['quantity',
-  'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-  'receivedTime', 'paymentMode', 'status']);
+    let orderObj = _.pick(req.body, ['quantity',
+        'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
+        'receivedTime', 'paymentMode', 'status']);
 
-  if (req.body.addressId) {
-    orderObj.address =  address;
-  }
+    if (req.body.addressId) {
+        orderObj.address = address;
+    }
 
-  const order = await Order.findByIdAndUpdate(req.params.id, orderObj, {
-    new: true
-  });
+    const order = await Order.findByIdAndUpdate(req.params.id, orderObj, {
+        new: true
+    });
 
-  if (!order) return res.status(404).send('The item with the given ID was not found.');
+    if (!order) return res.status(404).send('The item with the given ID was not found.');
 
-  res.send(order);
+    res.send(order);
 });
 
 router.delete('/:id', [auth, permit('admin')], async (req, res) => {
-  const order = await Order.findByIdAndRemove(req.params.id);
+    const order = await Order.findByIdAndRemove(req.params.id);
 
-  if (!order) return res.status(404).send('The item with the given ID was not found.');
+    if (!order) return res.status(404).send('The item with the given ID was not found.');
 
-  res.send(order);
+    res.send(order);
 });
 
 router.get('/id/:id', [auth], async (req, res) => {
-  const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id);
 
-  if (!order) return res.status(404).send('The item with the given ID was not found.');
+    if (!order) return res.status(404).send('The item with the given ID was not found.');
 
-  res.send(order);
+    res.send(order);
 });
 
 router.get('/orderno', [auth], async (req, res) => {
-  const order = await Order.find().sort({orderno:-1}).limit(1)
-  if (!order) return res.status(404).send('The item with the given ID was not found.');
-  res.send(order);
-  // res.send(order[0].orderno);
+    const order = await Order.find().sort({orderno: -1}).limit(1)
+    if (!order) return res.status(404).send('The item with the given ID was not found.');
+    res.send(order);
+    // res.send(order[0].orderno);
 });
 
 router.get('/user/:id', [auth], async (req, res) => {
-  // const order = await Order.findById(req.params.id);
+    // const order = await Order.findById(req.params.id);
 
-  const customer = await User.findById(req.params.id);
-  // console.log(req.params.id);
-  // console.log(customer);
-  if (!customer) return res.status(400).send('Invalid buyer.');
-  let order = null;
-  if (customer.isSeller) {
-    order = await Order.find({seller: customer}).sort({'placedTime':-1});
-  }
-  else {
-    order = await Order.find({buyer: customer}).sort({'placedTime':-1});
-  }
+    const customer = await User.findById(req.params.id);
+    // console.log(req.params.id);
+    // console.log(customer);
+    if (!customer) return res.status(400).send('Invalid buyer.');
+    let order = null;
+    if (customer.isSeller) {
+        order = await Order.find({seller: customer}).sort({'placedTime': -1});
+    } else {
+        order = await Order.find({buyer: customer}).sort({'placedTime': -1});
+    }
 
-  if (!order) return res.status(404).send('The item with the given ID was not found.');
+    if (!order) return res.status(404).send('The item with the given ID was not found.');
 
-  res.send(order);
+    res.send(order);
 });
 
-module.exports = router;
+module.exports = {
+    router,
+    placeOrder
+};

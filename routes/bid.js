@@ -8,7 +8,7 @@ const uuid = require('uuid')
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
-
+const {placeOrder} = require('./orders');
 router.get('/', [auth, permit('seller', 'admin')], async (req, res) => {
     const state = await Bid.find().populate(["auction", "user"]);
     return res.status(200).send(state);
@@ -125,20 +125,27 @@ router.post('/confirmOrder/:id', [auth], async (req, res) => {
             },
             'createdBy'
         ]);
-        let order = new Order();
-        order.orderNo = uuid.v4();
-        order.item = bid.auction.sampleNo;
+        let order = {};
+        order.orderno = uuid.v4();
+        order.itemId = bid.auction.sampleNo._id.toString();
         order.quantity = bid.quantity;
-        order.unit = bid.auction.unit;
+        order.unit = bid.auction.unit.mass;
         order.cost = bid.price;
         order.price = bid.price;
         //Order Address schema is different from what we capture in auction
         //order.address =
         order.status = 'confirmed';
         order.ordertype = 'auction';
-        order.referenceAuction = bid.auction;
-        await order.save();
-        return res.status(200).send(order);
+        order.referenceAuctionId = bid.auction._id.toString();
+        console.log(bid.createdBy._id);
+        if (bid.auction.auctionType == 'seller') {
+            order.buyerId = bid.createdBy._id.toString();
+        } else {
+            order.sellerId = bid.createdBy._id.toString();
+        }
+        order.placedTime = new Date().toISOString();
+        await placeOrder(order, req, res)
+
     } catch (e) {
         return res.status(500).send(e.message);
     }
