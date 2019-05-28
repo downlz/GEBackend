@@ -126,22 +126,32 @@ router.post('/confirmOrder/:id', [auth], async (req, res) => {
             'createdBy'
         ]);
         let order = {};
-        order.orderno = uuid.v4();
+        console.log(bid);
+        const orderno = await Order.find().sort({orderno: -1}).limit(1)
+
+        if (!orderno) return res.status(404).send('The item with the given ID was not found.');
+
+        // order.orderno = uuid.v4();                          // to be updated with orderno logic.
+        order.orderno = String(parseInt(orderno[0].orderno) + 1);
         order.itemId = bid.auction.sampleNo._id.toString();
-        order.quantity = bid.quantity;
+        
         order.unit = bid.auction.unit.mass;
-        order.cost = bid.price;
+        order.cost = bid.price * bid.quantity;
         order.price = bid.price;
         //Order Address schema is different from what we capture in auction
         //order.address =
-        order.status = 'confirmed';
+        order.status = 'new';
         order.ordertype = 'auction';
         order.referenceAuctionId = bid.auction._id.toString();
-        console.log(bid.createdBy._id);
+        // console.log(bid.createdBy._id);
         if (bid.auction.auctionType == 'seller') {
             order.buyerId = bid.createdBy._id.toString();
+            order.sellerId = bid.auction.user._id.toString();
+            order.quantity = bid.quantity;
         } else {
+            order.quantity = bid.auction.availableQty;
             order.sellerId = bid.createdBy._id.toString();
+            order.buyerId = bid.auction.user._id.toString();
         }
         order.placedTime = new Date().toISOString();
         await placeOrder(order, req, res)

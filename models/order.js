@@ -7,20 +7,16 @@ const addressModel = require("./address");
 const gblistModel = require("./gblist");
 const auctionModel = require("./auction");
 
-const shipto = new mongoose.Schema({
-  partyname: {
-    type: Number,
-    required: false
-  },
-  gstin: {
-    type: Number,
-    required: false
-  },
-  address: {
-    type: addressModel.addressSchema,
-    required: false
-  }
-});
+// const shipto = new mongoose.Schema({
+//   partyname: {
+//     type: Number,
+//     required: false
+//   },
+//   gstin: {
+//     type: Number,
+//     required: false
+//   }
+// });
 
 const orderSchema = new mongoose.Schema({
     orderno: {
@@ -59,6 +55,19 @@ const orderSchema = new mongoose.Schema({
         type: userModel.userSchema,
         required: false
     },
+    isshippingbillingdiff: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
+    // shippingdtl: {
+    //     type: shipto,
+    //     required: false
+    // },
+    shippingaddress:{
+        type: addressModel.addressSchema,
+        required: false
+    },
     placedTime: {
         type: Date,
         required: false
@@ -76,6 +85,10 @@ const orderSchema = new mongoose.Schema({
         required: false
     },
     receivedTime: {
+        type: Date,
+        required: false
+    },
+    lastUpdated: {
         type: Date,
         required: false
     },
@@ -116,11 +129,14 @@ function validateOrder(order) {
         addressId: Joi.objectId().optional(),
         buyerId: Joi.objectId().optional(),
         sellerId: Joi.objectId().optional(),
+        isshippingbillingdiff: Joi.boolean().optional(),
+        shippingaddress: Joi.objectId().optional(),
         placedTime: Joi.string().required(),
         confirmedTime: Joi.string().optional(),
         readyTime: Joi.string().optional(),
         shipmentTime: Joi.string().optional(),
         receivedTime: Joi.string().optional(),
+        lastUpdated: Joi.string().optional(),
         paymentMode: Joi.string().optional(),
         status: Joi.string().optional(),
         ordertype: Joi.string().optional(),
