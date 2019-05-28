@@ -43,7 +43,7 @@ function validateBid(order) {
         auction: Joi.objectId(),
         manufacturer: Joi.alternatives().try(Joi.string(), Joi.object()).optional(),
         marketingExpense: Joi.number().optional(),
-        orderConfirmed : Joi.boolean.optional()
+        orderConfirmed : Joi.boolean().optional()
     };
     return Joi.validate(order, schema);
 }
