@@ -154,7 +154,9 @@ router.post('/confirmOrder/:id', [auth], async (req, res) => {
             order.buyerId = bid.auction.user._id.toString();
         }
         order.placedTime = new Date().toISOString();
-        await placeOrder(order, req, res)
+        await placeOrder(order, req, res);
+        bid.orderConfirmed = true;
+        await bid.save();
 
     } catch (e) {
         return res.status(500).send(e.message);

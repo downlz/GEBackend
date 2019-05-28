@@ -27,6 +27,10 @@ const bidSchema = new mongoose.Schema({
     marketingExpense: {
         type: Number,
         required: false
+    },
+    orderConfirmed: {
+        type: Boolean,
+        required: false
     }
 });
 
@@ -38,7 +42,8 @@ function validateBid(order) {
         price: Joi.number().optional(),
         auction: Joi.objectId(),
         manufacturer: Joi.alternatives().try(Joi.string(), Joi.object()).optional(),
-        marketingExpense: Joi.number().optional()
+        marketingExpense: Joi.number().optional(),
+        orderConfirmed : Joi.boolean().optional()
     };
 
     return Joi.validate(order, schema);
