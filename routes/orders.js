@@ -9,6 +9,7 @@ const {User} = require('../models/user');
 const {State} = require('../models/state');
 const {Address, validateAddress} = require('../models/address');
 const mongoose = require('mongoose');
+const {ObjectId} = require('mongodb');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
@@ -20,10 +21,11 @@ function dropIfDNE(Obj, arr) {
   }
 
 router.get('/', async (req, res) => {
-    const order = await Order.find().sort('placedTime');
+    const order = await Order.find().sort({'placedTime':-1});
     res.send(order);
 });
 
+// Check below permit as in future seller may also place order
 router.post('/', [auth, permit('buyer', 'admin')], async (req, res) => {
     // console.log("Hello")
     await placeOrder(req.body, req, res)
@@ -52,11 +54,11 @@ async function placeOrder(obj, req, res) {
         if (!seller) return res.status(400).send('Invalid seller.');
     // }
 
-    let orderObj = _.pick(obj, ['orderno', 'quantity', 'unit',
+    let orderObj = _.pick(obj, ['orderno', 'quantity', 'unit','address',
         'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
         'receivedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff']);
     
-    dropIfDNE(orderObj,['orderno', 'quantity', 'unit',
+    dropIfDNE(orderObj,['orderno', 'quantity', 'unit','address',
     'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
     'receivedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff'])
 
@@ -78,10 +80,14 @@ async function placeOrder(obj, req, res) {
         addedby: obj.buyerId,
         addresstype: 'delivery',
         }; 
-    
         address = new Address(addressObj);
         savedaddr = await address.save();    
         orderObj.shippingaddress = savedaddr;
+    } else if (req.body.isshippingbillingdiff == false){
+        // console.log(typeof(obj.addressreference));
+        // orderObj.shippingaddress = obj.addressreference //don't update anything app will pickup default registered address
+    } else {
+        // Think at some point of time.Critical for other order types
     }
        
     orderObj.item = item;
@@ -104,7 +110,7 @@ async function placeOrder(obj, req, res) {
     }
 
     let order = new Order(orderObj);
-    // console.log(order)
+    console.log(order)
     order = await order.save();
     res.send(order);
 
@@ -118,10 +124,13 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
         if (!address) return res.status(400).send('Invalid category.');
     }
 
-
     let orderObj = _.pick(req.body, ['quantity',
         'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-        'receivedTime', 'paymentMode', 'status']);
+        'receivedTime', 'paymentMode', 'status','remarks']);
+    
+    dropIfDNE = (orderObj,['quantity',
+    'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
+    'receivedTime', 'paymentMode', 'status','remarks']); 
 
     if (req.body.addressId) {
         orderObj.address = address;

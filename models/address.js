@@ -15,7 +15,7 @@ const addridentifier = new mongoose.Schema({
     type: String,
     required: false
   }
-});
+}); 
 
 const addressSchema = new mongoose.Schema({
   text: {

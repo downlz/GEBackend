@@ -7,16 +7,20 @@ const addressModel = require("./address");
 const gblistModel = require("./gblist");
 const auctionModel = require("./auction");
 
-// const shipto = new mongoose.Schema({
-//   partyname: {
-//     type: Number,
-//     required: false
-//   },
-//   gstin: {
-//     type: Number,
-//     required: false
-//   }
-// });
+const userGeneratedBillSchema = new mongoose.Schema({
+    filename: {
+      type: String,
+      required: false
+    },
+    addedBy: {
+      type: userModel.userSchema,
+      required: false
+    },
+    addedOn: {
+      type: Date,
+      required: false
+    }
+  });
 
 const orderSchema = new mongoose.Schema({
     orderno: {
@@ -43,8 +47,8 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
-    address: {
-        type: addressModel.addressSchema,
+    address: {                                      // Use for combined address
+        type: Object,
         required: false
     },
     buyer: {
@@ -57,8 +61,7 @@ const orderSchema = new mongoose.Schema({
     },
     isshippingbillingdiff: {
         type: Boolean,
-        required: false,
-        default: false
+        required: false
     },
     // shippingdtl: {
     //     type: shipto,
@@ -101,6 +104,14 @@ const orderSchema = new mongoose.Schema({
         enum: ['new', 'confirmed', 'ready', 'shipped', 'delivered', 'cancelled'],
         required: false
     },
+    remarks: {
+        type: String,
+        required: false
+    },
+    manualbill: {
+        type: userGeneratedBillSchema,
+        required: false
+    },
     ordertype: {
         type: String,
         enum: ['regular', 'groupbuying', 'auction', 'bidding', 'sampleorder'],
@@ -126,7 +137,7 @@ function validateOrder(order) {
         unit: Joi.string().required(),
         cost: Joi.number().optional(),
         price: Joi.number().optional(),
-        addressId: Joi.objectId().optional(),
+        address: Joi.object().optional(),               // To hold partial address
         buyerId: Joi.objectId().optional(),
         sellerId: Joi.objectId().optional(),
         isshippingbillingdiff: Joi.boolean().optional(),
@@ -139,6 +150,8 @@ function validateOrder(order) {
         lastUpdated: Joi.string().optional(),
         paymentMode: Joi.string().optional(),
         status: Joi.string().optional(),
+        remarks: Joi.string().optional(),
+        manualbill: Joi.object().optional(),
         ordertype: Joi.string().optional(),
         referenceGBId: Joi.objectId().optional(),
         referenceAuctionId: Joi.objectId().optional(),

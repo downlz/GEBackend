@@ -8,7 +8,7 @@ const {User, validate} = require('../models/user');
 const {Address, validateAddress} = require('../models/address');
 const {City} = require('../models/city');
 const {State} = require('../models/state');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 
