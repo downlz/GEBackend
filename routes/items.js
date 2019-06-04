@@ -26,6 +26,7 @@ router.get('/', async (req, res) => {
   const cityId = req.query.origin;
   const grade = req.query.grade;
   const price = req.query.price;
+  const mnfId = req.query.mnf;
 
   filter = {};
   if (itemnameId) {
@@ -40,12 +41,15 @@ router.get('/', async (req, res) => {
   if (grade) {
     filter['grade'] = grade;
   }
+  if (mnfId) {
+    filter['manufacturer._id'] = mnfId;
+  }
   if (!price || price == 'asc') {
-    const item = await Item.find(filter).sort('price');
+    const item = await Item.find({$or : [{filter},{'isLive':true}]}).sort('price');
     res.send(item);
   }
   else {
-    const item = await Item.find(filter).sort({'price':-1});
+    const item = await Item.find({$or : [{filter},{'isLive':true}]}).sort({'price':-1});    // Check how to disable active item, valid whether or is correct way to push
     res.send(item);
   }
 });

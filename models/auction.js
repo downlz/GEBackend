@@ -7,7 +7,6 @@ const unit = require('./unit');
 const user = require('./user');
 const itemname = require('./itemname');
 
-
 const auctionSchema = new mongoose.Schema({
     itemName: {type: mongoose.Schema.Types.ObjectId, ref: 'ItemName', required: true},
     itemCategory: {type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true},
@@ -33,11 +32,11 @@ const auctionSchema = new mongoose.Schema({
     },
     maxQty: {
         type: Number,
-        required: true
+        //required: true
     },
     minQty: {
         type: Number,
-        required: true
+        //required: true
     },
     unit: {type: mongoose.Schema.Types.ObjectId, ref: 'Unit', required: true},
     floorPrice: {
@@ -46,7 +45,7 @@ const auctionSchema = new mongoose.Schema({
     },
     ceilingPrice: {
         type: Number,
-        required: true
+        //required: true
     },
     nameVisible: {
         type: Boolean,
@@ -66,10 +65,14 @@ const auctionSchema = new mongoose.Schema({
     },
     approved: {
         type: Boolean,
-        defaultValue: false
+        default: false
     },
     user: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
+    },
+    remarks: {
+        type: String,
+        required: false
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
@@ -96,13 +99,14 @@ function validateItem(item) {
         maxQty: Joi.number()/*.required()*/,
         unit: Joi.objectId().required(),
         floorPrice: Joi.number().required(),
-        ceilingPrice: Joi.number().required(),
+        ceilingPrice: Joi.number()/*.required()*/,
         nameVisible: Joi.boolean().required(),
         transportCost: Joi.boolean().required(),
         startTime: Joi.date().required(),
         endTime: Joi.date().required(),
         //Buyer or seller Id
         user: Joi.objectId().required(),
+        remarks: Joi.string().optional().allow('')
     };
 
     return Joi.validate(item, schema);

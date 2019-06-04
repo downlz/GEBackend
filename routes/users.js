@@ -7,7 +7,8 @@ const _ = require('lodash');
 const {User, validate} = require('../models/user');
 const {Address, validateAddress} = require('../models/address');
 const {City} = require('../models/city');
-const mongoose = require('mongoose');
+const {State} = require('../models/state');
+// const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 
@@ -18,7 +19,7 @@ function dropIfDNE(Obj, arr) {
 }
 
 router.get('/', [auth, permit('admin')], async (req, res) => {
-  const user = await User.find().sort('name');
+  const user = await User.find().sort('name').select('-password');
   res.send(user);
 });
 
@@ -33,30 +34,40 @@ router.post('/', async (req, res) => {
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
   'isEmpL0', 'isEmpL1']);
   dropIfDNE (userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1']);
-
+  // console.log(req.body);
   const { error } = validate(userObj);
-
-  console.log(error)
-  
+  console.log(error);
   let user = await User.findOne({ phone: req.body.phone });
   if (user) return res.status(400).send('User already registered.');
-
+  
   const city = await City.findById(req.body.cityId);
   if (!city) return res.status(400).send('Invalid city.');
-
+  
+  state = await State.findById(req.body.stateId);
+  if (!state) return res.status(400).send('Invalid State');
+  
+  partyObj = {
+    partyname: req.body.name,
+    gstin: req.body.GST 
+  }
   addressObj = {
     text: req.body.address,
     city: city,
-    pin: req.body.pin
+    pin: req.body.pin,
+    state: state,
+    phone: req.body.phone,
+    addresstype: 'registered',
+    addressbasicdtl: partyObj,
   };
 
   const { errorAddr } = validateAddress(addressObj);
+  console.log(errorAddr);
   if (errorAddr) return res.status(400).send(error.details[0].message);
   address = new Address(addressObj);
   await address.save();
 
   if (error) return res.status(400).send(error.details[0].message);
-
+  console.log(error)
   user = new User(userObj);
   user.Addresses.push(address);
   const salt = await bcrypt.genSalt(10);
@@ -75,6 +86,19 @@ router.post('/', async (req, res) => {
   user.isSeller = false;
 
   await user.save();
+  // Update user address 
+  // console.log(addressid);
+  // console.log(typeof(userid));
+  // updatingAddr = await Address.updateOne({_id : addressid}, {$set: {addedby: userid,addresstype:'registered'}});
+  // console.log(updatingAddr)
+  // if (!updatingAddr) return res.status(404).send('The item with the given ID was not found.');
+  //       res.send(user);
+  //     } else {
+  //       // console.log("No result")
+  //       res.status(404).send({
+  //         message :"No valid data found"
+  //       });
+  //     }
 
   const token = user.generateAuthToken();
   res.header('x-auth-token', token).send(_.pick(user, ['_id', 'name', 'email', 'phone',
@@ -166,13 +190,13 @@ router.put('/me', [auth], async (req, res) => {
 });
 
 router.get('/seller', [auth, permit('admin')], async (req, res) => {                       //Check Security violation as auth is taken off
-  const user = await User.find({"isSeller":true}).sort('name');
+  const user = await User.find({"isSeller":true}).sort('name').select('-password');
   res.send(user);
 });
 
 
 router.get('/buyer', [auth, permit('admin')], async (req, res) => {
-  const user = await User.find({"isBuyer":true}).sort('name');
+  const user = await User.find({"isBuyer":true}).sort('name').select('-password');
   res.send(user);
 });
 

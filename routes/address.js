@@ -58,4 +58,21 @@ router.get('/:id', async (req, res) => {
   res.send(address);
 });
 
+// This is to pull list of all active address associated with user
+router.get('/byuser/:id/phone/:phone', async (req, res) => {
+  const address = await Address.find({ $or : [{addedby : req.params.id},{phone: req.params.phone}]});
+
+  if (!address) return res.status(404).send('The genre with the given ID was not found.');
+
+  res.send(address);
+});
+
+// Get user registered address
+router.get('/phone/:phone', async (req, res) => {
+  const address = await Address.find({ $and : [{addresstype : 'registered'},{phone: req.params.phone}]});
+
+  if (!address) return res.status(404).send('The genre with the given ID was not found.');
+
+  res.send(address);
+});
 module.exports = router;
