@@ -74,7 +74,7 @@ function validateGBlist(gblist) {
     totalqty: Joi.string().required(),
     unitId: Joi.objectId().required(),
     taxrate: Joi.string().required(),
-    isactive: Joi.string().optional(),
+    isactive: Joi.boolean().optional(),
     remarks: Joi.string().optional(),
   };
 

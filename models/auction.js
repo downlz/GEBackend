@@ -65,7 +65,7 @@ const auctionSchema = new mongoose.Schema({
     },
     approved: {
         type: Boolean,
-        defaultValue: false
+        default: false
     },
     user: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true

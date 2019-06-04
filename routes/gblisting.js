@@ -49,8 +49,8 @@ router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
 
 
   let groupbuyingObj = _.pick(req.body, ['dealprice', 'moq', 'maxqty',      //Starttime and end time to be added after conversion
-  'sampleno', 'totalqty', 'taxrate','remarks','gbstarttime','gbendtime']);
-  dropIfDNE (groupbuyingObj, ['dealprice', 'moq', 'maxqty', 'sampleno', 'totalqty', 'taxrate','remarks','gbstarttime','gbendtime']);
+  'sampleno', 'totalqty', 'taxrate','remarks','gbstarttime','gbendtime','isactive']);
+  dropIfDNE (groupbuyingObj, ['dealprice', 'moq', 'maxqty', 'sampleno', 'totalqty', 'taxrate','remarks','gbstarttime','gbendtime','isactive']);
 
   groupbuyingObj.item =  item;
   groupbuyingObj.unit = unit;

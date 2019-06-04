@@ -45,11 +45,11 @@ router.get('/', async (req, res) => {
     filter['manufacturer._id'] = mnfId;
   }
   if (!price || price == 'asc') {
-    const item = await Item.find(filter).sort('price');
+    const item = await Item.find({$or : [{filter},{'isLive':true}]}).sort('price');
     res.send(item);
   }
   else {
-    const item = await Item.find(filter).sort({'price':-1});    // Check how to disable active item
+    const item = await Item.find({$or : [{filter},{'isLive':true}]}).sort({'price':-1});    // Check how to disable active item, valid whether or is correct way to push
     res.send(item);
   }
 });

@@ -4,6 +4,7 @@ const {Bid, validate} = require('../models/bid');
 const {Order} = require('../models/order');
 const {BidHistory} = require('../models/bidhistory');
 const {Address} = require('../models/address');
+const {State} = require('../models/state');
 const {Auction} = require('../models/auction');
 const uuid = require('uuid')
 const express = require('express');
@@ -121,14 +122,16 @@ router.post('/confirmOrder/:id', [auth], async (req, res) => {
                         path: 'sampleNo',
                         model: 'Item'
                     }
-
                 ]
             },
             'createdBy'
         ]);
         let order = {};
-        console.log(bid);
-        console.log('******')
+        // console.log(bid);
+        // console.log('******')
+
+        const statename = await State.findById(bid.auction.state);
+        // console.log(statename);
         const orderno = await Order.find().sort({orderno: -1}).limit(1)
 
         if (!orderno) return res.status(404).send('The item with the given ID was not found.');
@@ -142,6 +145,7 @@ router.post('/confirmOrder/:id', [auth], async (req, res) => {
         //Order Address schema is different from what we capture in auction
         //order.address =
         order.status = 'new';
+        // order.statedtl = statename;
         order.ordertype = 'auction';
         order.referenceAuctionId = bid.auction._id.toString();
         console.log(bid.createdBy.phone);
@@ -158,16 +162,15 @@ router.post('/confirmOrder/:id', [auth], async (req, res) => {
             order.address = {
                 text: bid.auction.address,
                 pin: bid.auction.pincode,
-                state: bid.auction.state,
+                state: statename,
             }
         }
         order.placedTime = new Date().toISOString();
         order.cost = order.price * order.quantity;
-        console.log(order);
+        // console.log(order);
         await placeOrder(order, req, res);
         bid.orderConfirmed = true;
         await bid.save();
-
     } catch (e) {
         console.log(e);
         return res.status(500).send(e.message);
