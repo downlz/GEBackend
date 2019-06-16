@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
 
   const token = user.generateAuthToken();
   userInfo = { name: user.name, _id: user._id, isAdmin: user.isAdmin,
- 	isBuyer: user.isBuyer, isSeller: user.isSeller, token: token  }
+ 	isBuyer: user.isBuyer, isSeller: user.isSeller, isActive: user.isactive,token: token  }
   res.send(userInfo);
 });
 

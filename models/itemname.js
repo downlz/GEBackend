@@ -9,6 +9,10 @@ const itemnameSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 50
   },
+  hsn: {
+    type: String,
+    required: false,
+  },
   tax: {
     type: Number,
     required: false
@@ -30,6 +34,7 @@ function validateItemName(itemname) {
     name: Joi.string().min(3).max(50).required(),
     tax: Joi.number().optional(),
     insurance: Joi.number().optional(),
+    hsn: Joi.string().optional(),
     season: Joi.string().optional()
   };
 

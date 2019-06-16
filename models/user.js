@@ -113,11 +113,20 @@ const userSchema = new mongoose.Schema({
     required: false,
     unique : true,
     default: ''
+  },
+  cin : {
+    type: String,
+    required: false
+  },
+  isactive :{
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  userType: {
+    type: String,                                     // User Classification eg. small,large,corporate,institutional
+    required: false
   }
-  //
-  // userType: {
-  //   type:String                                     // User Classification eg. small,large,corporate,institutional
-  // }
 });
 
 userSchema.methods.generateAuthToken = function() {
@@ -156,7 +165,10 @@ function validateUser(user) {
     buyerDiscount2PerKg: Joi.number().optional(),
     buyerDiscount3Lumpsump: Joi.number().optional(),
     buyerFinePerKg: Joi.number().optional(),
-    vendorCode: Joi.string().length(6).optional()
+    vendorCode: Joi.string().length(6).optional(),
+    cin: Joi.string().optional(),
+    isactive: Joi.boolean().optional(),
+    userType: Joi.string().optional()
   };
 
   return Joi.validate(user, schema);

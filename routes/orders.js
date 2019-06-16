@@ -1,5 +1,6 @@
 const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
+const sendEmail = require('../middleware/sendemail');
 const {Order, validate} = require('../models/order');
 const {Item} = require('../models/item');
 const {Unit} = require('../models/unit');
@@ -110,8 +111,9 @@ async function placeOrder(obj, req, res) {
     }
 
     let order = new Order(orderObj);
-    console.log(order)
+    // console.log(order)
     order = await order.save();
+    // sendEmail('nawazee11@gmail.com', 'Order Placed', 'You order was placed successfully.Order no ' + order.orderno);
     res.send(order);
 
     return order;
@@ -126,11 +128,11 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
 
     let orderObj = _.pick(req.body, ['quantity',
         'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-        'receivedTime', 'paymentMode', 'status','remarks']);
+        'receivedTime','readyTime','lastUpdated', 'paymentMode', 'status','remarks']);
     
     dropIfDNE = (orderObj,['quantity',
     'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-    'receivedTime', 'paymentMode', 'status','remarks']); 
+    'receivedTime','readyTime','lastUpdated', 'paymentMode', 'status','remarks']); 
 
     if (req.body.addressId) {
         orderObj.address = address;

@@ -2,9 +2,12 @@ const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const {Order} = require('../models/order');
 const {Item} = require('../models/item');
+const {Taxrate} = require('../models/taxrates');
 const {User} = require('../models/user');
-const mongoose = require('mongoose');
+const {State} = require('../models/state');
+// const mongoose = require('mongoose');
 const express = require('express');
+const moment = require('moment');
 const router = express.Router();
 const _ = require('lodash');
 const PDFDocument = require('pdfkit');
@@ -16,20 +19,65 @@ router.get('/id/:id', async (req, res) => {
 
   // Positions for x and y coordinates 
 
-  // var linestart = 20
   var textlabel_x = 20
-  // var textlabel_xx = 20
+  // var textlabel_x = 25
+  var firstline_y = 40
   var textlabel_xx = 300
-  var textdata_x = 80
-  var textdata_xx = 360
+  var textdata_x = 90
+  var textdata_xx = 375
   var secondlinetext = 360
   var firsthorznline = 580
-  var firstline_y = 80
-  var horznlinefirst_y = 350
-  var horznlinesecond_y = 370
-  var horznlinethird_y = 530
-
+  var horznlinefirst_y = 220
+  var horznlinetext_y = horznlinefirst_y + 5
+  var horznlinesecond_y = horznlinefirst_y + 20
+  var horznlinethird_y = horznlinefirst_y + 180
+  var certifyline = horznlinethird_y + 40
+  var termsline = certifyline + 20
+  var companyline = termsline + 160
+  var footerpos = 180
+  
+  const cgstresponse = await Taxrate.find({type:'cgst'});        // append date based on order
+  const igstresponse = await Taxrate.find({type:'igst'});
+  const sgstresponse = await Taxrate.find({type:'sgst'});
+  // console.log(cgstres);
   const result = await Order.findById(id);
+  console.log(result);
+  
+  // Logic to get shipping address
+  if (result.isshippingbillingdiff == true) {
+    shipper = {
+                partyname :  result.shippingaddress.addressbasicdtl.partyname,
+                gstin:  result.shippingaddress.addressbasicdtl.gstin,
+                addressline:  result.shippingaddress.text,
+                state:  result.shippingaddress.state.name,
+                pin:  result.shippingaddress.pin,
+                phone:  result.shippingaddress.phone
+    }
+  } else if (result.isshippingbillingdiff == undefined){
+    shipper = {
+      partyname :  result.buyer.name,
+      gstin: result.buyer.GST,
+    addressline: result.buyer.Addresses[0].text,
+    city: result.buyer.Addresses[0].city.name,
+    state: result.buyer.Addresses[0].city.state.name,
+    pin: result.buyer.Addresses[0].pin,
+    phone: result.buyer.phone
+    }
+  } else {
+    shipper = {
+      partyname : result.buyer.name,
+                     gstin: result.buyer.GST,
+                     text: result.address.text,
+                     state: result.address.state.name,
+                     pin: result.address.pin,
+                     phone: result.buyer.phone
+    }
+  }
+                  
+               
+                    
+                  
+  // const statedtl = await State.findById(result.Addresses.state); 
       
       title        = result.orderno,
       quantity      = result.quantity;
@@ -37,19 +85,47 @@ router.get('/id/:id', async (req, res) => {
       placedTime  = result.placedTime;
       confirmedTime         = result.status;
       ordertype         = result.ordertype;
-      filename     = encodeURIComponent(title) + '.pdf';
+
+      // console.log(result.seller.Addresses[0].state);
+      console.log('**********');
+      // console.log(result.buyer.Addresses[0]);
+
+      // Calculating tax, apply logic to calculate igst and sgst
+
+      cgst = (cgstresponse.ratepct/100) * parseInt(result.cost);
+      if (result.seller.Addresses[0].state.code == result.seller.Addresses[0].state.code) {
+        sgst = (sgstresponse.ratepct/100) * parseInt(result.cost);
+        igst = 0
+      } else {
+        igst = (igstresponse.ratepct/100) * parseInt(result.cost);
+        sgst = 0
+      }
+  
+      filename     = encodeURIComponent('PO-' + title) + '.pdf';
       res.setHeader('Content-disposition', 'attachment; filename="' + filename + '"');
       res.setHeader('Content-type', 'application/pdf');
-
-      doc.image('./assets/images/graineasy.png', 10, 10, {width: 100})
+      
+      console.log(result);
+      
+      doc.image('./assets/images/gelogo.jpeg', 5, 5, {width: 50})
         .text('Purchase Order', 500, 10); 
-      // Settings Address fields
+      
+        // Column 1 fields
       doc
+      .fontSize(8)
+      .text('Graineasy PAN',textlabel_x,firstline_y);  
+      doc
+      .text('Graineasy GSTIN',textlabel_x);  
+      doc
+      .text('Graineasy CIN',textlabel_x);  
+        
+        doc
         .fontSize(10)
-        .text('Grain Easy PAN',textlabel_x,firstline_y);
+        .moveDown(1)
+        .text('Order No.',textlabel_x);
+        
       doc
-      .text('Order No.',textlabel_x);
-      doc
+        .moveDown(3)
         .text('Seller',textlabel_x);
       doc
         // .moveUp()
@@ -58,19 +134,32 @@ router.get('/id/:id', async (req, res) => {
         .moveDown(1)
         .text('Origin',textlabel_x);  
       doc
-      .moveDown(1)
-      .text('PAN',textlabel_x);      
+        .moveDown(1)
+        .text('PAN',textlabel_x);
       doc
-        // .moveDown() 
         .text('GSTIN',textlabel_x);
-      doc
-        // .moveUp()
-        .text('CIN',textlabel_x);   
+      // doc                                        // Disabled not needed as of now
+      //   .text('CIN',textlabel_x);   
       
       // Column 2 labels
-
+      // For company pan details
+      // doc
+      // .fontSize(8)
+      // .text(' ',textlabel_xx,firstline_y);
+      // doc
+      // .text(' ',textlabel_xx,firstline_y);
+      // doc
+      // .text(' ',textlabel_xx,firstline_y);
       doc
-        .text('Bill To',textlabel_xx,firstline_y);
+      .fontSize(10)                              
+      .text('Order date(PO)',textlabel_xx,firstline_y);
+      doc
+      .text('Delivery date',textlabel_xx);
+      doc
+      .text('Expiry date',textlabel_xx);
+      doc
+        .moveDown(1)
+        .text('Bill To',textlabel_xx);
       doc
         // .moveUp()
         .text('Address',textlabel_xx);     
@@ -87,81 +176,113 @@ router.get('/id/:id', async (req, res) => {
         .moveDown(1)
         .text('GSTIN',textlabel_xx);   
       doc
-        .moveDown(2)
+        .moveDown(1)
         .text('Place of Supply',textlabel_xx);
+        doc
+        .text('State code',textlabel_xx);  
         
 
-      // Specify field details here  
-      doc  
-        .text(': Funfact Emarketplace Private Limited',80,40)
-      doc  
-        .text(': ELITE TRADERS',360,40)  
+      // // Specify field details here  
       doc
-        .text(': FUNFACT002',80); 
+      .fontSize(8)
+      .text(': ABC1234567',textdata_x,firstline_y);       // Default to grain easy details as of now
       doc
-        .moveUp()
-        .text(': ELITRAD102',360)  
-      doc  
-        .text(': NO 39/2, ITPL MAIN ROAD, MUNNEKOLAL, Bangalore 37',80,64,{
-          width: 200,
-          align: 'left'})    
-      doc  
-        .text(': NO.73/9,, 2ND MAIN ROAD,, N.T. PET,, Bengaluru , Karnataka, 560002',360,64,{
-          width: 200,
-          align: 'left'}) 
+      .text(': QWERTY789012345',textdata_x);  
+      doc
+      .text(': AGHGBNBJHKKJK',textdata_x);  
+
+       doc
+       .fontSize(10)
+       .moveDown(1)
+      .text(': OR-'+ result.orderno,textdata_x);
       doc 
-        .text(': CIN No Here',80)      
-      doc 
-        .moveUp()
-        .text(': 29AALFS8665E1ZK',360) 
+        .moveDown(3) 
+        .text(': ' + result.seller.name,textdata_x)
       doc
-        .text(': AGVPH1923R',100)    
+        .text(': Address line goes here',textdata_x)
+
+        //result.seller.Addresses[0].text + ', ' + result.seller.Addresses[0].city.name + ', ' + result.seller.Addresses[0].city.state.name+ ', ' + result.seller.Addresses[0].pin
+        doc
+        .moveDown(1)
+        .text(': Origin address goes here',textdata_x)  
+        // result.item.address.text + ', ' + result.item.address.city.name + ', ' + result.item.address.pin
+      // // doc  
+      // //   .text(': NO 39/2, ITPL MAIN ROAD, MUNNEKOLAL, Bangalore 37',80,64,{
+      // //     width: 200,
+      // //     align: 'left'})    
+      // // doc  
+      // //   .text(': NO.73/9,, 2ND MAIN ROAD,, N.T. PET,, Bengaluru , Karnataka, 560002',360,64,{
+      // //     width: 200,
+      // //     align: 'left'}) 
+        
+      
       doc
-        // .moveUp()
-        .text(': WAREHOUSE 1',360)   
-       doc
-       .moveUp()
-       .text(': 29AALFS8665E1ZK',80);
-       doc
-      // .moveUp()
-      .text(': OR-123412',80);
-       doc
-       .text(': NO.73/9,, 2ND MAIN ROAD,, N.T. PET,, Bengaluru , Karnataka, 560002',360,123,{
-        width: 200,
-        align: 'left'}) 
+        .moveDown(1)
+        .text(': ' + result.seller.pan,textdata_x)   
+        
+        doc 
+        .text(': ' + result.seller.GST,textdata_x)
+         doc
+      //  .moveUp()
+       .text(': ' + result.seller.cin,textdata_x);    
+      // doc 
+      //   // .moveUp()
+      //   .text(': WAREHOUSE 1',360)   
+      
+      // ******************** 2nd Column Data *******************
+      // //  doc
+      // //  .text(': NO.73/9,, 2ND MAIN ROAD,, N.T. PET,, Bengaluru , Karnataka, 560002',360,123,{
+      // //   width: 200,
+      // //   align: 'left'}) 
       doc
-      .moveUp()
-      .text(': 03-05-2019',80);
-      doc
-      // .moveUp()
-      .text(': 112212',80);
-      doc
-      // .moveUp()
-      .text(': 04-05-2019',80);
-      doc
-      .moveUp()
-      .text(': 29AALFS8665E1ZK',360);
+      // .moveDown()
+      .text(': ' + moment(result.placedTime).format('DD-MM-YYYY'),textdata_xx,firstline_y);
       // doc
       // // .moveUp()
-      // .text(': Bangalore,KN',360);
+      // .text(': 112212',80);
       doc
-      // .moveUp()
-      .text(': No',170);
-      // doc
-      // .moveUp()
-      // .text(': Hyderabad,TN',360);
-      doc.moveTo(20, 200)                               // set the current point
-        .lineTo(580, 200)  
+      .text(': ' + moment(result.placedTime).add(6, 'days').format('DD-MM-YYYY'),textdata_xx);
+      doc
+      .text(': ' + moment(result.placedTime).add(8, 'days').format('DD-MM-YYYY'),textdata_xx);
+      
+      doc  
+        .moveDown(1)
+        .text(': ' + result.buyer.name,textdata_xx)
+        // Removing address field and pasting at last
+        // doc  
+        // .text(': ' + result.buyer.Addresses[0].text + ', ' + result.buyer.Addresses[0].city.name + ', ' + result.buyer.Addresses[0].city.state.name+ ', ' + result.buyer.Addresses[0].pin,textdata_xx,80,{
+        //     width: 200,
+        //     align: 'left'})    
+        doc
+         .moveDown(2)
+         .text(': ' + result.buyer.GST,textdata_xx);   
+         doc  
+         .text(': ' + shipper.partyname,textdata_xx);    
+         doc  
+        .text(': Address line here',textdata_xx)      
+  //        shipper.addressline + ', ' + shipper.state + ', ' + shipper.pin
+        doc                              // cin data section
+        .moveDown(1)
+        .text(': ' + shipper.gstin,textdata_xx)   
+        doc 
+        .moveDown(1)
+        .text(': '+ result.seller.Addresses[0].state.name,textdata_xx)  
+        doc 
+        .text(': '+ result.seller.Addresses[0].state.code,textdata_xx)  
+      
+
+      doc.moveTo(20, horznlinefirst_y)                               // set the current point
+        .lineTo(firsthorznline, horznlinefirst_y)  
         .stroke();                                   // stroke the path
-        doc.moveTo(20, 220)                               // set the current point
-        .lineTo(580, 220)  
+        doc.moveTo(20, horznlinesecond_y)                               // set the current point
+        .lineTo(firsthorznline, horznlinesecond_y)  
         .stroke();                                   // stroke the path
-        doc.moveTo(20, 380)                               // set the current point
-        .lineTo(580, 380)  
+        doc.moveTo(20, horznlinethird_y)                               // set the current point
+        .lineTo(firsthorznline, horznlinethird_y)  
         .stroke();
         doc
         .fontSize(8)
-        .text('Item No',30,205)
+        .text('Item No',30,horznlinetext_y)
         doc
         .moveUp()
         .text('Description',70)
@@ -199,32 +320,32 @@ router.get('/id/:id', async (req, res) => {
         // .moveUp()
         .text('IGST@2.5%',470)
 
-        // Item Details
+        // Item Details Values
 
         doc
         .moveUp(2)
-        .text('Item No',30)
+        .text(result.item.sampleNo,30)
         doc
         .moveUp()
-        .text('Description',70)
+        .text(result.item.name.name + ',' + result.item.category.name,70)
         doc
         .moveUp() 
-        .text('HSN',130)
+        .text(result.item.name.hsn,130)       
         doc
         .moveUp()
-        .text('Qty',170)
+        .text(result.quantity + ' ' + result.unit,170)
         doc
         .moveUp()
-        .text('Rate',210)
+        .text(result.price,210)
         doc
         .moveUp()
-        .text('Gross Amount',250) 
+        .text(result.cost,250) 
         doc
         .moveUp()
-        .text('Discount',310)
+        .text('NA',310)
         doc
         .moveUp()
-        .text('Net Amount',360)
+        .text(result.cost,360)
         // doc
         // .moveUp()
         // .text('Tax',470)
@@ -233,13 +354,13 @@ router.get('/id/:id', async (req, res) => {
         // .text('Amount',530)
         doc
         .moveUp(2)
-        .text('5000',530)
+        .text(cgst,530)
         doc
         // .moveUp()
-        .text('5000',530)
+        .text(sgst,530)
         doc
         // .moveUp()
-        .text('NA',530)
+        .text(igst,530)
 
         // Additional Taxation details
         doc
@@ -266,37 +387,23 @@ router.get('/id/:id', async (req, res) => {
         .text('NA',530);
         doc
         .moveDown(2)
-        .text('Rs. 825776',530);
+        .text((parseInt(result.cost)+cgst+igst+sgst).toFixed(2),530);
 
-        doc
-        // .moveDown()
-        // .fontSize(6)
-        // .text("Sale Sale,Mega sale this month",500,50)   
-      // doc.circle(280, 200, 50).fill('#6600FF');
-      
-      // doc.lineTo(20,400).fillAndStroke('#6600FF');
-      // doc
-      //   .text('Order Value ' + cost, 100, 300)
-      //   .font('Times-Roman', 13)
-      //   .moveDown()
-      //   .text(lorem, {
-      //     width: 412,
-      //     align: 'justify',
-      //     indent: 30,
-      //     columns: 2,
-      //     height: 300,
-      //     ellipsis: true
-      //   });
       doc
         .fontSize(6)
-        .text('Certified that the particulars given above are true and correct and the amount indicated',180,400)
+        .text('Certified that the particulars given above are true and correct and the amount indicated',footerpos,certifyline)
       doc
         .fontSize(6)
-        .text('This is an electronically generated invoice. This does not require physical signature',180,420)
+        .text('Payment Terms-x days from date of order/ delivery',footerpos,termsline)
       doc 
         .fontSize(8)
-        .text('For Funfact eMarkatplace Pvt Ltd',180,520)
+        .text('For Funfact eMarkatplace Pvt Ltd',footerpos,companyline)
         doc.pipe(res);
+        doc  
+        .fontSize(10)
+        .text(': ' + result.buyer.Addresses[0].text + ', ' + result.buyer.Addresses[0].city.name + ', ' + result.buyer.Addresses[0].city.state.name+ ', ' + result.buyer.Addresses[0].pin,textdata_xx,98,{
+            width: 200,
+            align: 'left'})  
      doc.end();
 });
 

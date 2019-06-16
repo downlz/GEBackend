@@ -30,7 +30,8 @@ const bidSchema = new mongoose.Schema({
     },
     orderConfirmed: {
         type: Boolean,
-        required: false
+        required: false,
+        default: false
     }
 });
 

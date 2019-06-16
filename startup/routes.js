@@ -28,6 +28,8 @@ const bid = require('../routes/bid');
 const getinvoice = require('../routes/getinvoice');
 const getpo = require('../routes/getpo');
 const uploadbill = require('../routes/uploadbill');
+const billingorg = require('../routes/billingorg');
+const taxrates = require('../routes/taxrates');
 
 
 var corsOptions = {
@@ -60,5 +62,7 @@ module.exports = function(app) {
   app.use('/api/getinvoice', getinvoice);
   app.use('/api/getpo', getpo);
   app.use('/api/uploadbill', uploadbill);
+  app.use('/api/billingorg', billingorg);
+  app.use('/api/taxrates', taxrates);
   app.use(error);
 }
