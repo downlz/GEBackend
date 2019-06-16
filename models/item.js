@@ -46,6 +46,10 @@ const itemSchema = new mongoose.Schema({
     type: Number,
     required: false
   },
+  bargaintrgqty: {
+    type: Number,
+    required: false
+  },
   unit: {
     type : unit.unitSchema,
     required: false
@@ -111,6 +115,7 @@ function validateItem(item) {
     image: Joi.string().required(),
     categoryId: Joi.objectId().required(),
     qty: Joi.number().required(),
+    bargaintrgqty: Joi.number().required(),
     unitId: Joi.objectId().required(),
     price: Joi.number().required(),
     moisture: Joi.number().optional(),

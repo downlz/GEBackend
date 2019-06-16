@@ -117,6 +117,11 @@ const orderSchema = new mongoose.Schema({
         enum: ['regular', 'groupbuying', 'auction', 'bidding', 'sampleorder'],
         required: false
     },
+    reversechargemech:{
+        type: Boolean,
+        required: false,
+        default: false
+    },
     referenceGB: {
         type: gblistModel.groupbuyingSchema,
         required: false
@@ -153,6 +158,7 @@ function validateOrder(order) {
         remarks: Joi.string().optional(),
         manualbill: Joi.object().optional(),
         ordertype: Joi.string().optional(),
+        reversechargemech: Joi.boolean().optional(),
         referenceGBId: Joi.objectId().optional(),
         referenceAuctionId: Joi.objectId().optional(),
     };

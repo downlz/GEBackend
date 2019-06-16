@@ -3,11 +3,14 @@ const permit = require('../middleware/permissions');
 const {Order} = require('../models/order');
 const {Item} = require('../models/item');
 const {User} = require('../models/user');
+const {State} = require('../models/state');
+const {Taxrate} = require('../models/taxrates');
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
 const PDFDocument = require('pdfkit');
+
 
 router.get('/id/:id', async (req, res) => {
   id  = req.params.id;
@@ -16,162 +19,239 @@ router.get('/id/:id', async (req, res) => {
 
   // Positions for x and y coordinates 
 
-  var linestart = 20
-  var textlabel_x = 25
+  // var linestart = 20
+  var textlabel_x = 20
+  // var textlabel_x = 25
+  var firstline_y = 40
   var textlabel_xx = 300
-  var textdata_x = 80
-  var textdata_xx = 360
+  var textdata_x = 90
+  var textdata_xx = 375
   var secondlinetext = 360
   var firsthorznline = 580
-  var horznlinefirst_y = 200
-  var horznlinesecond_y = 220
-  var horznlinethird_y = 380
+  var horznlinefirst_y = 220
+  var horznlinetext_y = 225
+  var horznlinesecond_y = 240
+  var horznlinethird_y = 400
+  var certifyline = 420
+  var invoiceline = 440
+  var companyline = 600
+  var footerpos = 180
 
   const result = await Order.findById(id);
-      
+  const cgstresponse = await Taxrate.find({type:'cgst'});        // append date based on order
+  const igstresponse = await Taxrate.find({type:'igst'});
+  const sgstresponse = await Taxrate.find({type:'sgst'});
+
+  discount = 0;
+  // Calculating tax, apply logic to calculate igst and sgst
+
+  cgst = (cgstresponse.ratepct/100) * parseInt(result.cost);
+  if (result.seller.Addresses[0].state.code == result.seller.Addresses[0].state.code) {
+    sgst = (sgstresponse.ratepct/100) * parseInt(result.cost);
+    igst = 0
+  } else {
+    igst = (igstresponse.ratepct/100) * parseInt(result.cost);
+    sgst = 0
+  }
+
+  // Logic to get shipping address
+  if (result.isshippingbillingdiff == true) {
+    shipper = {
+                partyname :  result.shippingaddress.addressbasicdtl.partyname,
+                gstin:  result.shippingaddress.addressbasicdtl.gstin,
+                addressline:  result.shippingaddress.text,
+                state:  result.shippingaddress.state.name,
+                pin:  result.shippingaddress.pin,
+                phone:  result.shippingaddress.phone
+    }
+  } else if (result.isshippingbillingdiff == undefined){
+    shipper = {
+      partyname :  result.buyer.name,
+      gstin: result.buyer.GST,
+    addressline: result.buyer.Addresses[0].text,
+    city: result.buyer.Addresses[0].city.name,
+    state: result.buyer.Addresses[0].city.state.name,
+    pin: result.buyer.Addresses[0].pin,
+    phone: result.buyer.phone
+    }
+  } else {
+    shipper = {
+      partyname : result.buyer.name,
+                     gstin: result.buyer.GST,
+                     text: result.address.text,
+                     state: result.address.state.name,
+                     pin: result.address.pin,
+                     phone: result.buyer.phone
+    }
+  }
+
+  const statedtl = await State.findById(result.Addresses.state);    
       title        = result.orderno,
       quantity      = result.quantity;
       cost = result.cost;
       placedTime  = result.placedTime;
       confirmedTime         = result.status;
       ordertype         = result.ordertype;
-      filename     = encodeURIComponent(title) + '.pdf';
+      filename     = encodeURIComponent('INV-' + title) + '.pdf';
       res.setHeader('Content-disposition', 'attachment; filename="' + filename + '"');
       res.setHeader('Content-type', 'application/pdf');
 
-      doc.image('./assets/images/graineasy.png', 10, 10, {width: 100})
+      doc.image('./assets/images/gelogo.jpeg', 5, 5, {width: 50})
         .text('Tax Invoice', 525, 10); 
-      // Settings Address fields
-        doc
+      // First Column Label
+      doc
         .fontSize(10)
-        .moveDown() 
-        .text('Seller',20,40);
+        .text('Seller',textlabel_x,firstline_y);
       doc
-        .text('Bill To',300,40);
+        .text('Vendor Code',textlabel_x); 
       doc
-        .text('Vendor Code',20);
+        .text('Address',textlabel_x);    
       doc
-        .moveUp()
-        .text('Vendor Code',300);   
+        .moveDown(1) 
+        .text('CIN',textlabel_x);
       doc
-        .text('Address',20);  
+        .text('Place of Supply',textlabel_x);
       doc
-        .moveUp() 
-        .text('Address',300);    
+        .text('State Code',textlabel_x);  
       doc
-        .moveDown() 
-        .text('CIN',20);
+        .text('GSTIN',textlabel_x); 
       doc
-        .moveUp()
-        .text('GSTIN',300);   
-      doc
-        .text('Place of Supply',20);
-      doc
-        .moveUp()
-        .text('Place of Billing',textlabel_xx);     
-      doc
-        .text('GSTIN',20); 
-      doc
-        .moveUp()
-        .text('Ship To',300);  
-      doc
-        // .moveUp()
-        .text('PO No',20); 
-      doc
-        .moveUp()
-        .text('Address',300);     
+        .moveDown(1)
+        .text('PO No',textlabel_x); 
+        
         doc
-        .text('PO Date',20);
-        doc
-        .text('Place of Delivery',300)
-        doc
-        .moveUp()
-        .text('Invoice No.',20); 
-        doc
-        .text('GSTIN',300); 
-        doc
-        .moveUp()
-        .text('Invoice Date',20);
-        // doc
-        // .text('Source',300); 
-        // doc
-        // .text('Destination',300);
+        .text('PO Date',textlabel_x);
+        
         doc
         // .moveUp()
-        .text('Reverse Charge Mechanism',20);
-           
+        .text('Invoice No.',textlabel_x); 
+        
+        doc
+        // .moveUp()
+        .text('Invoice Date',textlabel_x);
+        doc
+        // .moveUp()
+        .text('Reverse Charge Mechanism',textlabel_x);
+      
+      // ************* 2nd Column Labels ****************
+      
+      doc
+        .text('Bill To',textlabel_xx,firstline_y);
+        doc
+        // .moveUp()
+        .text('Vendor Code',textlabel_xx);   
+        doc
+        // .moveUp() 
+        .text('Address',textlabel_xx);  
+        doc
+        .moveDown(1)
+        .text('GSTIN',textlabel_xx);   
+        // doc
+        // // .moveUp()
+        // .text('Place of Billing',textlabel_xx); 
+        doc
+        .moveDown(1)
+        .text('Ship To',textlabel_xx);     
+        doc
+        // .moveUp()
+        .text('Address',textlabel_xx);   
+        doc
+        .moveDown(1)
+        .text('GSTIN',textlabel_xx); 
+        doc
+        .text('Place of Delivery',textlabel_xx)
 
-      // Specify field details here  
+      // **************** Specify field details here ****************
+
+      // **************** First Column Data ******************
+
+
       doc  
-        .text(': Funfact Emarketplace Private Limited',80,40)
-      doc  
-        .text(': ELITE TRADERS',360,40)  
+        .text(': Funfact Emarketplace Private Limited',textdata_x,firstline_y)
+      
       doc
-        .text(': FUNFACT002',80); 
-      doc
-        .moveUp()
-        .text(': ELITRAD102',360)  
-      doc  
-        .text(': NO 39/2, ITPL MAIN ROAD, MUNNEKOLAL, Bangalore 37',80,64,{
-          width: 200,
-          align: 'left'})    
-      doc  
-        .text(': NO.73/9,, 2ND MAIN ROAD,, N.T. PET,, Bengaluru , Karnataka, 560002',360,64,{
-          width: 200,
-          align: 'left'}) 
+        .text(': FUNFACT002'); 
+      
+      // doc  
+      //   .text(': NO 39/2, ITPL MAIN ROAD, MUNNEKOLAL, Bangalore 37',textdata_x,53,{
+      //     width: 200,
+      //     align: 'left'})    
+      
       doc 
-        .text(': CIN No Here',80)      
-      doc 
-        .moveUp()
-        .text(': 29AALFS8665E1ZK',360) 
+        .moveDown(2)
+        .text(': CIN No Here',textdata_x)      
+      
       doc
-        .text(': AGVPH1923R',100)    
-      doc
-        // .moveUp()
-        .text(': WAREHOUSE 1',360)   
+        .text(result.Addresses.state,textdata_x)    
+        doc
+        .text(': 36',textdata_x)    
        doc
-       .moveUp()
-       .text(': 29AALFS8665E1ZK',80);
+      //  .moveDown(1)
+       .text(': 29AALFS8665E1ZK',textdata_x);
+       
+       doc
+       .moveDown(1)
+       .text(': OR-675788',textdata_x);
        doc
       // .moveUp()
-      .text(': OR-123412',80);
-       doc
-       .text(': NO.73/9,, 2ND MAIN ROAD,, N.T. PET,, Bengaluru , Karnataka, 560002',360,123,{
-        width: 200,
-        align: 'left'}) 
-      doc
-      .moveUp()
-      .text(': 03-05-2019',80);
+      .text(': 03-05-2019',textdata_x);
       doc
       // .moveUp()
-      .text(': 112212',80);
+      .text(': 112212',textdata_x);
       doc
       // .moveUp()
-      .text(': 04-05-2019',80);
-      doc
-      .moveUp()
-      .text(': 29AALFS8665E1ZK',360);
+      .text(': 04-05-2019',textdata_x);
+     
       // doc
       // // .moveUp()
       // .text(': Bangalore,KN',360);
       doc
       // .moveUp()
-      .text(': No',170);
+      .text(': No',textdata_x+55);
       // doc
       // .moveUp()
       // .text(': Hyderabad,TN',360);
-      doc.moveTo(20, 200)                               // set the current point
-        .lineTo(580, 200)  
+      // **************** Second Column Data ******************
+      doc  
+        .text(': ELITE TRADERS',textdata_xx,firstline_y)  
+        doc
+        // .moveUp()
+        .text(': ELITRAD102',textdata_xx)    
+        // doc  
+        // .text(': NO.73/9,, 2ND MAIN ROAD,, N.T. PET,, Bengaluru , Karnataka, 560002',360,64,{
+        //   width: 200,
+        //   align: 'left'}) 
+        doc 
+          .moveDown(2)
+          .text(': 29AALFS8665E1ZK',textdata_xx)   
+        doc
+        .moveDown(1)
+        .text(': WAREHOUSE 1',textdata_xx)  
+        // doc
+        // // .moveUp()
+        // .text(': OR-123412',80);
+        //  doc
+        //  .text(': NO.73/9,, 2ND MAIN ROAD,, N.T. PET,, Bengaluru , Karnataka, 560002',360,123,{
+        //   width: 200,
+        //   align: 'left'}) 
+          doc
+          .moveDown(2)         
+          .text(': 29AALFS8665E1ZK',textdata_xx);
+          doc
+          .text(': Gulbarga',textdata_xx);
+      // ******************* Itemised bill ********************
+      doc.moveTo(textlabel_x, horznlinefirst_y)                               // set the current point
+        .lineTo(firsthorznline, horznlinefirst_y)  
         .stroke();                                   // stroke the path
-        doc.moveTo(20, 220)                               // set the current point
-        .lineTo(580, 220)  
+        doc.moveTo(textlabel_x, horznlinesecond_y)                               // set the current point
+        .lineTo(firsthorznline, horznlinesecond_y)  
         .stroke();                                   // stroke the path
-        doc.moveTo(20, 380)                               // set the current point
-        .lineTo(580, 380)  
+        doc.moveTo(textlabel_x, horznlinethird_y)                               // set the current point
+        .lineTo(firsthorznline, horznlinethird_y)  
         .stroke();
         doc
         .fontSize(8)
-        .text('Item No',30,205)
+        .text('Item No',30,horznlinetext_y)
         doc
         .moveUp()
         .text('Description',70)
@@ -213,28 +293,28 @@ router.get('/id/:id', async (req, res) => {
 
         doc
         .moveUp(2)
-        .text('Item No',30)
+        .text(result.item.sampleNo,30)
         doc
         .moveUp()
-        .text('Description',70)
+        .text(result.item.name.name + ',' + result.item.category.name,70)
         doc
         .moveUp() 
-        .text('HSN',130)
+        .text(result.item.name.hsn,130)
         doc
         .moveUp()
-        .text('Qty',170)
+        .text(result.quantity + ' ' + result.unit,170)
         doc
         .moveUp()
-        .text('Rate',210)
+        .text(result.price,210)
         doc
         .moveUp()
-        .text('Gross Amount',250) 
+        .text(result.cost,250) 
         doc
         .moveUp()
-        .text('Discount',310)
+        .text(discount,310)
         doc
         .moveUp()
-        .text('Net Amount',360)
+        .text(result.cost-discount,360)
         // doc
         // .moveUp()
         // .text('Tax',470)
@@ -243,13 +323,13 @@ router.get('/id/:id', async (req, res) => {
         // .text('Amount',530)
         doc
         .moveUp(2)
-        .text('5000',530)
+        .text(cgst,530)
         doc
         // .moveUp()
-        .text('5000',530)
+        .text(igst,530)
         doc
         // .moveUp()
-        .text('NA',530)
+        .text(sgst,530)
 
         // Additional Taxation details
         doc
@@ -276,36 +356,18 @@ router.get('/id/:id', async (req, res) => {
         .text('NA',530);
         doc
         .moveDown(2)
-        .text('Rs. 825776',530);
+        .text((parseInt(result.cost)+cgst+igst+sgst).toFixed(2),530);
 
-        doc
-        // .moveDown()
-        // .fontSize(6)
-        // .text("Sale Sale,Mega sale this month",500,50)   
-      // doc.circle(280, 200, 50).fill('#6600FF');
-      
-      // doc.lineTo(20,400).fillAndStroke('#6600FF');
-      // doc
-      //   .text('Order Value ' + cost, 100, 300)
-      //   .font('Times-Roman', 13)
-      //   .moveDown()
-      //   .text(lorem, {
-      //     width: 412,
-      //     align: 'justify',
-      //     indent: 30,
-      //     columns: 2,
-      //     height: 300,
-      //     ellipsis: true
-      //   });
+
       doc
         .fontSize(6)
-        .text('Certified that the particulars given above are true and correct and the amount indicated',180,400)
+        .text('Certified that the particulars given above are true and correct and the amount indicated',footerpos,certifyline)
       doc
         .fontSize(6)
-        .text('This is an electronically generated invoice. This does not require physical signature',180,420)
+        .text('This is an electronically generated invoice. This does not require physical signature',footerpos,invoiceline)
       doc 
         .fontSize(8)
-        .text('For Funfact eMarkatplace Pvt Ltd',180,520)
+        .text('For Funfact eMarkatplace Pvt Ltd',footerpos+30,companyline)
         doc.pipe(res);
      doc.end();
 });

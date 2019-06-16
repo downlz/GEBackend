@@ -28,13 +28,13 @@ const app = express()
 
 router.post('/', async (req, res) => {
 
-  // const encPassword = crypt.encrypt('yourgmail pass');
+  // const encPassword = crypt.encrypt('Graineasy@2019');
   // console.log(encPassword);
   // console.log(crypt.decrypt(encPassword));
-  // console.log(crypt.decrypt('3e73bfc93fd9d23698a6'));
+  // console.log(crypt.decrypt(''));
   // send mail with defined transport object
 
-  sendEmail('shahnawaz_haq@outlook.com', 'Order Placed', 'Test message');  // can be a await call
+  // sendEmail('shahnawaz_haq@outlook.com', 'Order Placed', 'Test message');  // can be a await call
   // console.log(info);
   // console.log("Message sent: %s", info.messageId);  
   

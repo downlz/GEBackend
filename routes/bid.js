@@ -10,6 +10,7 @@ const uuid = require('uuid')
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
+var ObjectID = require("mongodb").ObjectID;
 const {placeOrder} = require('./orders');
 router.get('/', [auth, permit('seller', 'admin')], async (req, res) => {
     const state = await Bid.find().populate(["auction", "user"]);
@@ -20,7 +21,7 @@ router.get('/', [auth, permit('seller', 'admin')], async (req, res) => {
 router.get('/current', [auth, permit('seller', 'buyer')], async (req, res) => {
     const state = await Bid.find({
         "createdBy": req.user._id
-    }).populate({
+    }).sort({createdAt:-1}).populate({
         path: 'auction',
         model: 'Auction',
         populate: [
@@ -99,6 +100,32 @@ router.get('/:id', async (req, res) => {
     if (!bid) return res.status(404).send('The bid with the given ID was not found.');
 
     res.send(bid);
+});
+
+router.get('/bestbid/:id/type/:type', async (req, res) => {
+    if (req.params.type == 'seller') {
+        const bid = await Bid.find({'auction':req.params.id}).sort({price:-1}).limit(1);
+        res.send(bid);                                      // Improve coding standards
+    } else if (req.params.type == 'buyer') {
+        console.log('here')
+        var auctionid = new ObjectID(req.params.id);
+        const bid = await Bid.aggregate([{ $match: { 'auction' : auctionid }},
+              { $project : 
+                {  
+                  'actualprice' : '$price',  
+                  'marketingExpense' : '$marketingExpense', 
+                  'price' : {'$subtract' : [ '$price', { '$multiply' : ['$marketingExpense','$price', .01 ]}]}
+                }
+              }
+            ]).sort({price:1}).limit(1);
+        // find({'auction':req.params.id}).sort({price:1}).limit(1);
+        res.send(bid);
+    } else {
+        // Do nothing as of now
+    }
+    if (!bid) return res.status(404).send('The bid with the given ID was not found.');
+    
+    
 });
 
 router.post('/confirmOrder/:id', [auth], async (req, res) => {
