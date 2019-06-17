@@ -10,7 +10,7 @@ const {User} = require('../models/user');
 const {State} = require('../models/state');
 const {Address, validateAddress} = require('../models/address');
 const mongoose = require('mongoose');
-const {ObjectId} = require('mongodb');
+// const {ObjectId} = require('mongodb');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
@@ -28,12 +28,11 @@ router.get('/', async (req, res) => {
 
 // Check below permit as in future seller may also place order
 router.post('/', [auth, permit('buyer', 'admin')], async (req, res) => {
-    // console.log("Hello")
     await placeOrder(req.body, req, res)
 });
 
 async function placeOrder(obj, req, res) {
-    console.log(obj);
+    // console.log(obj);
     // const {error} = validate(obj);
     // console.log(error)
     // if (error) return res.status(400).send(error.details[0].message);
@@ -49,7 +48,7 @@ async function placeOrder(obj, req, res) {
     // if (obj.buyerId) {
         buyer = await User.findById(obj.buyerId);
         if (!buyer) return res.status(400).send('Invalid buyer.');
-        console.log(buyer);
+        // console.log(buyer);
     // } else {
         seller = await User.findById(obj.sellerId);
         if (!seller) return res.status(400).send('Invalid seller.');
@@ -61,7 +60,7 @@ async function placeOrder(obj, req, res) {
     
     dropIfDNE(orderObj,['orderno', 'quantity', 'unit','address',
     'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-    'receivedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff'])
+    'receivedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff']);
 
     if (req.body.isshippingbillingdiff == true) {
         state = await State.findById(obj.state);
@@ -71,7 +70,7 @@ async function placeOrder(obj, req, res) {
         partyname: req.body.partyname,
         gstin: req.body.gstin 
     }
-    // console.log(partyObj)
+    
     addressObj = {
         text: req.body.address,
         pin: req.body.pincode,
@@ -113,7 +112,7 @@ async function placeOrder(obj, req, res) {
     let order = new Order(orderObj);
     // console.log(order)
     order = await order.save();
-    // sendEmail('nawazee11@gmail.com', 'Order Placed', 'You order was placed successfully.Order no ' + order.orderno);
+    sendEmail(order.buyer.email, 'Order Placed', 'You order was placed successfully.Order no-' + order.orderno);
     res.send(order);
 
     return order;
@@ -138,12 +137,27 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
         orderObj.address = address;
     }
 
+    if (req.body.status == 'ready') {
+        // orderObj.invoiceno = '';                // Add invoicing rule
+    }
+
+    switch(req.body.status) {
+        case 'confirmed':
+            orderObj.confirmedTime = Date(); 
+        case 'ready':
+            orderObj.readyTime = Date();   
+        case  'shipped':
+            orderObj.shipmentTime = Date();
+        case 'delivered':
+            orderObj.receivedTime = Date();             
+    }
+    
     const order = await Order.findByIdAndUpdate(req.params.id, orderObj, {
         new: true
     });
 
     if (!order) return res.status(404).send('The item with the given ID was not found.');
-
+    sendEmail(order.buyer.email, 'Order Status', 'You order status was changed.Order no-' + order.orderno + ', Status - ' + order.status);
     res.send(order);
 });
 

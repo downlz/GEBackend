@@ -6,12 +6,13 @@ const transport = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
         user: process.env.EMAILUSER,
-        pass: ""//crypt.decrypt(encryptedPassword),
+        // pass: crypt.decrypt(encryptedPassword), // Take a note of this
+        pass: process.env.EMAILPASS
     },
 });
 module.exports = function sendEmail(to, subject, message) {
     const mailOptions = {
-        from: '"Graineasy 👻" <graineasy@gmail.com>',
+        from : 'graineasy@gmail.com',
         to,
         subject,
         html: message,
