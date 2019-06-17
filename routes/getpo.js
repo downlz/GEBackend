@@ -12,7 +12,7 @@ const router = express.Router();
 const _ = require('lodash');
 const PDFDocument = require('pdfkit');
 
-router.get('/id/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   id  = req.params.id;
   const doc = new PDFDocument({ layout : 'portrait', margin: 5});
   var lorem = 'kfdshjkxbkbhdkjhbcn  gkdhfgkjhdfgkh'
@@ -39,7 +39,9 @@ router.get('/id/:id', async (req, res) => {
   const cgstresponse = await Taxrate.find({type:'cgst'});        // append date based on order
   const igstresponse = await Taxrate.find({type:'igst'});
   const sgstresponse = await Taxrate.find({type:'sgst'});
-  // console.log(cgstres);
+  
+  // console.log(cgstresponse[0].ratepct);
+  // console.log('***********');
   const result = await Order.findById(id);
   console.log(result);
   
@@ -87,17 +89,17 @@ router.get('/id/:id', async (req, res) => {
       ordertype         = result.ordertype;
 
       // console.log(result.seller.Addresses[0].state);
-      console.log('**********');
+      // console.log('**********');
       // console.log(result.buyer.Addresses[0]);
 
       // Calculating tax, apply logic to calculate igst and sgst
 
-      cgst = (cgstresponse.ratepct/100) * parseInt(result.cost);
-      if (result.seller.Addresses[0].state.code == result.seller.Addresses[0].state.code) {
-        sgst = (sgstresponse.ratepct/100) * parseInt(result.cost);
+      cgst = (cgstresponse[0].ratepct/100) * parseInt(result.cost);
+      if (result.seller.Addresses[0].state.code == result.buyer.Addresses[0].state.code) {
+        sgst = (sgstresponse[0].ratepct/100) * parseInt(result.cost);
         igst = 0
       } else {
-        igst = (igstresponse.ratepct/100) * parseInt(result.cost);
+        igst = (igstresponse[0].ratepct/100) * parseInt(result.cost);
         sgst = 0
       }
   
@@ -105,7 +107,7 @@ router.get('/id/:id', async (req, res) => {
       res.setHeader('Content-disposition', 'attachment; filename="' + filename + '"');
       res.setHeader('Content-type', 'application/pdf');
       
-      console.log(result);
+      // console.log(result);
       
       doc.image('./assets/images/gelogo.jpeg', 5, 5, {width: 50})
         .text('Purchase Order', 500, 10); 
@@ -197,34 +199,17 @@ router.get('/id/:id', async (req, res) => {
       .text(': OR-'+ result.orderno,textdata_x);
       doc 
         .moveDown(3) 
-        .text(': ' + result.seller.name,textdata_x)
+        .text(': ' + result.seller.name,textdata_x)  
+      // Address and Origin line moved at bottom
       doc
-        .text(': Address line goes here',textdata_x)
-
-        //result.seller.Addresses[0].text + ', ' + result.seller.Addresses[0].city.name + ', ' + result.seller.Addresses[0].city.state.name+ ', ' + result.seller.Addresses[0].pin
-        doc
-        .moveDown(1)
-        .text(': Origin address goes here',textdata_x)  
-        // result.item.address.text + ', ' + result.item.address.city.name + ', ' + result.item.address.pin
-      // // doc  
-      // //   .text(': NO 39/2, ITPL MAIN ROAD, MUNNEKOLAL, Bangalore 37',80,64,{
-      // //     width: 200,
-      // //     align: 'left'})    
-      // // doc  
-      // //   .text(': NO.73/9,, 2ND MAIN ROAD,, N.T. PET,, Bengaluru , Karnataka, 560002',360,64,{
-      // //     width: 200,
-      // //     align: 'left'}) 
-        
-      
-      doc
-        .moveDown(1)
+        .moveDown(4)
         .text(': ' + result.seller.pan,textdata_x)   
         
         doc 
         .text(': ' + result.seller.GST,textdata_x)
-         doc
-      //  .moveUp()
-       .text(': ' + result.seller.cin,textdata_x);    
+      //    doc                                       Disabling seller's cin as of now
+      // //  .moveUp()
+      //  .text(': ' + result.seller.cin,textdata_x);    
       // doc 
       //   // .moveUp()
       //   .text(': WAREHOUSE 1',360)   
@@ -258,11 +243,10 @@ router.get('/id/:id', async (req, res) => {
          .text(': ' + result.buyer.GST,textdata_xx);   
          doc  
          .text(': ' + shipper.partyname,textdata_xx);    
-         doc  
-        .text(': Address line here',textdata_xx)      
-  //        shipper.addressline + ', ' + shipper.state + ', ' + shipper.pin
+         // Shipper address line moved at bottom
+         
         doc                              // cin data section
-        .moveDown(1)
+        .moveDown(2)
         .text(': ' + shipper.gstin,textdata_xx)   
         doc 
         .moveDown(1)
@@ -312,13 +296,13 @@ router.get('/id/:id', async (req, res) => {
         .text('Amount',530)
         doc
         .moveDown(1)
-        .text('CGST@2.5%',470)
+        .text('CGST@' + cgstresponse[0].ratepct,470)
         doc
         // .moveUp()
-        .text('SGST@2.5%',470)
+        .text('SGST@' + sgstresponse[0].ratepct,470)
         doc
         // .moveUp()
-        .text('IGST@2.5%',470)
+        .text('IGST@' + igstresponse[0].ratepct,470)
 
         // Item Details Values
 
@@ -342,10 +326,10 @@ router.get('/id/:id', async (req, res) => {
         .text(result.cost,250) 
         doc
         .moveUp()
-        .text('NA',310)
+        .text(result.discount,310)
         doc
         .moveUp()
-        .text(result.cost,360)
+        .text(result.cost-result.discount,360)
         // doc
         // .moveUp()
         // .text('Tax',470)
@@ -378,16 +362,16 @@ router.get('/id/:id', async (req, res) => {
 
         doc
         .moveUp(6)
-        .text('0',530);
+        .text(result.transportcost,530);
         doc
         // .moveDown(3)
-        .text('0',530);
+        .text(result.insurancecharges,530);
         doc
         // .moveDown(3)
         .text('NA',530);
         doc
         .moveDown(2)
-        .text((parseInt(result.cost)+cgst+igst+sgst).toFixed(2),530);
+        .text((parseInt(result.cost)+cgst+igst+sgst + result.transportcost + result.insurancecharges).toFixed(2),530);
 
       doc
         .fontSize(6)
@@ -404,39 +388,25 @@ router.get('/id/:id', async (req, res) => {
         .text(': ' + result.buyer.Addresses[0].text + ', ' + result.buyer.Addresses[0].city.name + ', ' + result.buyer.Addresses[0].city.state.name+ ', ' + result.buyer.Addresses[0].pin,textdata_xx,98,{
             width: 200,
             align: 'left'})  
+        doc  
+            // .text(': Address line here',textdata_xx)      
+          .text(': ' + shipper.addressline + ', ' + shipper.state + ', ' + shipper.pin,textdata_xx, 144,{
+            width: 200,
+            align: 'left'})  
+          doc
+            // .text(': Address line goes here',textdata_x)
+            .text(': ' + result.seller.Addresses[0].text + ', ' + result.seller.Addresses[0].city.name + ', ' + result.seller.Addresses[0].city.state.name+ ', ' + result.seller.Addresses[0].pin,textdata_x,137,{
+              width: 200,
+              align: 'left'})
+          doc
+            .moveDown(1)
+            // .text(': Origin address goes here',textdata_x)  
+            .text(': ' + result.item.address.text + ', ' + result.item.address.city.name + ', ' + result.item.address.pin,textdata_x,160,{
+              width: 200,
+              align: 'left'})    
      doc.end();
 });
 
-router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
-
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
-  const item = await Item.findById(req.body.itemId);
-  if (!item) return res.status(400).send('Invalid Item.');
-
-  const address = await Address.findById(req.body.addressId);
-  if (!address) return res.status(400).send('Invalid address.');
-
-  const buyer = await User.findById(req.body.buyerId);
-  if (!buyer) return res.status(400).send('Invalid buyer.');
-
-  const seller = await User.findById(req.body.sellerId);
-  if (!seller) return res.status(400).send('Invalid seller.');
-
-  let orderObj = _.pick(req.body, ['orderno','quantity',
-  'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-  'receivedTime', 'paymentMode', 'status','ordertype','price']);
-
-  orderObj.item =  item;
-  orderObj.address =  address;
-  orderObj.buyer =  buyer;
-  orderObj.seller =  seller;
-  let order = new Order(orderObj);
-  order = await order.save();
-
-  res.send(order);
-});
 
 router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
 
@@ -457,22 +427,6 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
   const order = await Order.findByIdAndUpdate(req.params.id, orderObj, {
     new: true
   });
-
-  if (!order) return res.status(404).send('The item with the given ID was not found.');
-
-  res.send(order);
-});
-
-router.delete('/:id', [auth, permit('admin')], async (req, res) => {
-  const order = await Order.findByIdAndRemove(req.params.id);
-
-  if (!order) return res.status(404).send('The item with the given ID was not found.');
-
-  res.send(order);
-});
-
-router.get('/id/:id', [auth], async (req, res) => {
-  const order = await Order.findById(req.params.id);
 
   if (!order) return res.status(404).send('The item with the given ID was not found.');
 

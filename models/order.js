@@ -25,7 +25,8 @@ const userGeneratedBillSchema = new mongoose.Schema({
 const orderSchema = new mongoose.Schema({
     orderno: {
         type: String,
-        required: false
+        required: false,
+        unique : true
     },
     item: {
         type: itemModel.itemSchema,
@@ -42,6 +43,11 @@ const orderSchema = new mongoose.Schema({
     cost: {
         type: Number,
         required: false
+    },
+    discount: {
+        type: Number,
+        required: false,
+        default: 0
     },
     price: {
         type: Number,
@@ -102,7 +108,12 @@ const orderSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['new', 'confirmed', 'ready', 'shipped', 'delivered', 'cancelled'],
-        required: false
+        required: true
+    },
+    invoiceno :{
+        type: String,
+        required: false,
+        unique : true
     },
     remarks: {
         type: String,
@@ -121,6 +132,16 @@ const orderSchema = new mongoose.Schema({
         type: Boolean,
         required: false,
         default: false
+    },
+    transportcost: {
+        type: Number,               
+        required: false,
+        default : 0
+    },
+    insurancecharges: {
+        type: Number,
+        required: false,
+        default : 0
     },
     referenceGB: {
         type: gblistModel.groupbuyingSchema,
@@ -141,6 +162,7 @@ function validateOrder(order) {
         quantity: Joi.number().optional(),
         unit: Joi.string().required(),
         cost: Joi.number().optional(),
+        discount: Joi.number().optional(),
         price: Joi.number().optional(),
         address: Joi.object().optional(),               // To hold partial address
         buyerId: Joi.objectId().optional(),
@@ -154,11 +176,14 @@ function validateOrder(order) {
         receivedTime: Joi.string().optional(),
         lastUpdated: Joi.string().optional(),
         paymentMode: Joi.string().optional(),
-        status: Joi.string().optional(),
+        status: Joi.string().required(),
+        invoiceno: Joi.string().optional(),
         remarks: Joi.string().optional(),
         manualbill: Joi.object().optional(),
         ordertype: Joi.string().optional(),
         reversechargemech: Joi.boolean().optional(),
+        transportcost: Joi.number().optional(),
+        insurancecharges: Joi.number().optional,
         referenceGBId: Joi.objectId().optional(),
         referenceAuctionId: Joi.objectId().optional(),
     };

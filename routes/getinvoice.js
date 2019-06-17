@@ -7,12 +7,13 @@ const {State} = require('../models/state');
 const {Taxrate} = require('../models/taxrates');
 const mongoose = require('mongoose');
 const express = require('express');
+const moment = require('moment');
 const router = express.Router();
 const _ = require('lodash');
 const PDFDocument = require('pdfkit');
 
 
-router.get('/id/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   id  = req.params.id;
   const doc = new PDFDocument({ layout : 'portrait', margin: 5});
   var lorem = 'kfdshjkxbkbhdkjhbcn  gkdhfgkjhdfgkh'
@@ -37,20 +38,26 @@ router.get('/id/:id', async (req, res) => {
   var companyline = 600
   var footerpos = 180
 
-  const result = await Order.findById(id);
   const cgstresponse = await Taxrate.find({type:'cgst'});        // append date based on order
   const igstresponse = await Taxrate.find({type:'igst'});
   const sgstresponse = await Taxrate.find({type:'sgst'});
 
+  const result = await Order.findById(id);
+  
+  if (result.reversechargemech == false){
+    revmech = 'No'
+  } else {
+    revmech = 'Yes'
+  }
   discount = 0;
   // Calculating tax, apply logic to calculate igst and sgst
 
-  cgst = (cgstresponse.ratepct/100) * parseInt(result.cost);
-  if (result.seller.Addresses[0].state.code == result.seller.Addresses[0].state.code) {
-    sgst = (sgstresponse.ratepct/100) * parseInt(result.cost);
+  cgst = (cgstresponse[0].ratepct/100) * parseInt(result.cost);
+  if (result.seller.Addresses[0].state.code == result.buyer.Addresses[0].state.code) {
+    sgst = (sgstresponse[0].ratepct/100) * parseInt(result.cost);
     igst = 0
   } else {
-    igst = (igstresponse.ratepct/100) * parseInt(result.cost);
+    igst = (igstresponse[0].ratepct/100) * parseInt(result.cost);
     sgst = 0
   }
 
@@ -61,6 +68,7 @@ router.get('/id/:id', async (req, res) => {
                 gstin:  result.shippingaddress.addressbasicdtl.gstin,
                 addressline:  result.shippingaddress.text,
                 state:  result.shippingaddress.state.name,
+                statecode: result.shippingaddress.state.code,
                 pin:  result.shippingaddress.pin,
                 phone:  result.shippingaddress.phone
     }
@@ -85,7 +93,8 @@ router.get('/id/:id', async (req, res) => {
     }
   }
 
-  const statedtl = await State.findById(result.Addresses.state);    
+  // const statedtl = await State.findById(result.Addresses.state);    
+
       title        = result.orderno,
       quantity      = result.quantity;
       cost = result.cost;
@@ -168,9 +177,8 @@ router.get('/id/:id', async (req, res) => {
 
       doc  
         .text(': Funfact Emarketplace Private Limited',textdata_x,firstline_y)
-      
       doc
-        .text(': FUNFACT002'); 
+        .text(': ' + result.seller.vendorCode,textdata_x); 
       
       // doc  
       //   .text(': NO 39/2, ITPL MAIN ROAD, MUNNEKOLAL, Bangalore 37',textdata_x,53,{
@@ -179,54 +187,54 @@ router.get('/id/:id', async (req, res) => {
       
       doc 
         .moveDown(2)
-        .text(': CIN No Here',textdata_x)      
+        .text(': U74999BR2018PTC036772',textdata_x)      
       
       doc
-        .text(result.Addresses.state,textdata_x)    
+        .text(': ' + result.seller.Addresses[0].state.name,textdata_x)    
         doc
-        .text(': 36',textdata_x)    
+        .text(': ' + result.seller.Addresses[0].state.code,textdata_x)    
        doc
       //  .moveDown(1)
        .text(': 29AALFS8665E1ZK',textdata_x);
        
        doc
        .moveDown(1)
-       .text(': OR-675788',textdata_x);
+       .text(': OR-'+ result.orderno,textdata_x);
        doc
       // .moveUp()
-      .text(': 03-05-2019',textdata_x);
+      .text(': ' + moment(result.confirmedTime).format('DD-MM-YYYY'),textdata_x);
       doc
       // .moveUp()
-      .text(': 112212',textdata_x);
+      .text(': ' + result.invoiceno,textdata_x);
       doc
       // .moveUp()
-      .text(': 04-05-2019',textdata_x);
+      .text(': ' + moment(result.readyTime).format('DD-MM-YYYY'),textdata_x);
      
       // doc
       // // .moveUp()
       // .text(': Bangalore,KN',360);
       doc
       // .moveUp()
-      .text(': No',textdata_x+55);
+      .text(': '+ revmech,textdata_x+55);
       // doc
       // .moveUp()
       // .text(': Hyderabad,TN',360);
       // **************** Second Column Data ******************
       doc  
-        .text(': ELITE TRADERS',textdata_xx,firstline_y)  
+        .text(': ' + result.buyer.name,textdata_xx,firstline_y)  
         doc
         // .moveUp()
-        .text(': ELITRAD102',textdata_xx)    
+        .text(': ' + result.buyer.vendorCode,textdata_xx)    
         // doc  
         // .text(': NO.73/9,, 2ND MAIN ROAD,, N.T. PET,, Bengaluru , Karnataka, 560002',360,64,{
         //   width: 200,
         //   align: 'left'}) 
         doc 
           .moveDown(2)
-          .text(': 29AALFS8665E1ZK',textdata_xx)   
+          .text(': ' + result.buyer.GST,textdata_xx)    
         doc
         .moveDown(1)
-        .text(': WAREHOUSE 1',textdata_xx)  
+        .text(': ' + shipper.partyname,textdata_xx)  
         // doc
         // // .moveUp()
         // .text(': OR-123412',80);
@@ -236,9 +244,11 @@ router.get('/id/:id', async (req, res) => {
         //   align: 'left'}) 
           doc
           .moveDown(2)         
-          .text(': 29AALFS8665E1ZK',textdata_xx);
+          .text(': ' + shipper.gstin,textdata_xx);
           doc
-          .text(': Gulbarga',textdata_xx);
+          .text(': ' + shipper.state,textdata_xx);
+          // doc                                              // Add delivery code
+          // .text(': ' + shipper.code,textdata_xx);
       // ******************* Itemised bill ********************
       doc.moveTo(textlabel_x, horznlinefirst_y)                               // set the current point
         .lineTo(firsthorznline, horznlinefirst_y)  
@@ -281,13 +291,13 @@ router.get('/id/:id', async (req, res) => {
         .text('Amount',530)
         doc
         .moveDown(1)
-        .text('CGST@2.5%',470)
+        .text('CGST@' + cgstresponse[0].ratepct,470)
         doc
         // .moveUp()
-        .text('SGST@2.5%',470)
+        .text('SGST@' + sgstresponse[0].ratepct,470)
         doc
         // .moveUp()
-        .text('IGST@2.5%',470)
+        .text('IGST@' + igstresponse[0].ratepct,470)
 
         // Item Details
 
@@ -311,10 +321,10 @@ router.get('/id/:id', async (req, res) => {
         .text(result.cost,250) 
         doc
         .moveUp()
-        .text(discount,310)
+        .text(result.discount,310)
         doc
         .moveUp()
-        .text(result.cost-discount,360)
+        .text(result.cost-result.discount,360)
         // doc
         // .moveUp()
         // .text('Tax',470)
@@ -347,18 +357,16 @@ router.get('/id/:id', async (req, res) => {
 
         doc
         .moveUp(6)
-        .text('0',530);
+        .text(result.transportcost ,530);
         doc
         // .moveDown(3)
-        .text('0',530);
+        .text(result.insurancecharges,530);
         doc
         // .moveDown(3)
         .text('NA',530);
         doc
         .moveDown(2)
-        .text((parseInt(result.cost)+cgst+igst+sgst).toFixed(2),530);
-
-
+        .text((parseInt(result.cost)+cgst+igst+sgst + result.transportcost + result.insurancecharges).toFixed(2),530);
       doc
         .fontSize(6)
         .text('Certified that the particulars given above are true and correct and the amount indicated',footerpos,certifyline)
@@ -369,6 +377,22 @@ router.get('/id/:id', async (req, res) => {
         .fontSize(8)
         .text('For Funfact eMarkatplace Pvt Ltd',footerpos+30,companyline)
         doc.pipe(res);
+      
+        doc  
+        .fontSize(10)
+        .text(': ' + result.buyer.Addresses[0].text + ', ' + result.buyer.Addresses[0].city.name + ', ' + result.buyer.Addresses[0].city.state.name+ ', ' + result.buyer.Addresses[0].pin,textdata_xx,65,{
+            width: 200,
+            align: 'left'})  
+        doc  
+            // Shipping address
+          .text(': ' + shipper.addressline + ', ' + shipper.state + ', ' + shipper.pin,textdata_xx, 121,{
+            width: 200,
+            align: 'left'})  
+          doc
+            // .text(': Address line goes here',textdata_x)
+            .text(': ' + result.seller.Addresses[0].text + ', ' + result.seller.Addresses[0].city.name + ', ' + result.seller.Addresses[0].city.state.name+ ', ' + result.seller.Addresses[0].pin,textdata_x,65,{
+              width: 200,
+              align: 'left'})  
      doc.end();
 });
 
