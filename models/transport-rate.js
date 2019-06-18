@@ -21,7 +21,7 @@ const transportRateSchema = new mongoose.Schema({
   isinsured : {                                                 // For Future development
     type : Boolean,
     required: false,
-    defautl: 'FALSE'
+    default: false
   }
 });
 
@@ -33,7 +33,7 @@ function validateTransportRate(transportrate) {
     vehiclestype: Joi.string().optional(),
     capacity: Joi.string().max(20).required(),
     rate : Joi.string().required(),
-    isinsured : Joi.string().required(),
+    isinsured : Joi.string().optional(),
   };
 
   return Joi.validate(transportrate, schema);

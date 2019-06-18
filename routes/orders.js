@@ -157,7 +157,18 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
     });
 
     if (!order) return res.status(404).send('The item with the given ID was not found.');
-    sendEmail(order.buyer.email, 'Order Status', 'You order status was changed.Order no-' + order.orderno + ', Status - ' + order.status);
+    
+    let message = `<p><b>Hello,</b></p>
+        <p>Your order status has changed<br/><br>
+        Order no-` + order.orderno + `,Status - ` + order.status + `
+        <br>
+        <br>
+        Regards,<br>
+        Graineasy
+        </p>`
+
+    sendEmail(order.buyer.email, 'Order Status', message);
+    
     res.send(order);
 });
 
