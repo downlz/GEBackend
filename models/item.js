@@ -115,7 +115,7 @@ function validateItem(item) {
     image: Joi.string().required(),
     categoryId: Joi.objectId().required(),
     qty: Joi.number().required(),
-    bargaintrgqty: Joi.number().required(),
+    bargaintrgqty: Joi.number().optional(),
     unitId: Joi.objectId().required(),
     price: Joi.number().required(),
     moisture: Joi.number().optional(),
