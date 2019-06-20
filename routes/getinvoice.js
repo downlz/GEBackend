@@ -53,7 +53,7 @@ router.get('/:id', async (req, res) => {
   // Calculating tax, apply logic to calculate igst and sgst
 
   cgst = (cgstresponse[0].ratepct/100) * parseInt(result.cost);
-  if (result.seller.Addresses[0].state.code == result.buyer.Addresses[0].state.code) {
+  if (result.seller.Addresses[0].state.name == result.buyer.Addresses[0].state.name) {
     sgst = (sgstresponse[0].ratepct/100) * parseInt(result.cost);
     igst = 0
   } else {
@@ -318,13 +318,13 @@ router.get('/:id', async (req, res) => {
         .text(result.price,210)
         doc
         .moveUp()
-        .text(result.cost,250) 
+        .text(result.cost.toFixed(2),250) 
         doc
         .moveUp()
         .text(result.discount,310)
         doc
         .moveUp()
-        .text(result.cost-result.discount,360)
+        .text((result.cost-result.discount).toFixed(2),360)
         // doc
         // .moveUp()
         // .text('Tax',470)
@@ -333,13 +333,13 @@ router.get('/:id', async (req, res) => {
         // .text('Amount',530)
         doc
         .moveUp(2)
-        .text(cgst,530)
+        .text(cgst.toFixed(2),530)
         doc
         // .moveUp()
-        .text(igst,530)
+        .text(igst.toFixed(2),530)
         doc
         // .moveUp()
-        .text(sgst,530)
+        .text(sgst.toFixed(2),530)
 
         // Additional Taxation details
         doc

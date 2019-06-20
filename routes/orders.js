@@ -55,12 +55,10 @@ async function placeOrder(obj, req, res) {
     // }
 
     let orderObj = _.pick(obj, ['orderno', 'quantity', 'unit','address',
-        'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-        'receivedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff']);
+        'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff']);
     
     dropIfDNE(orderObj,['orderno', 'quantity', 'unit','address',
-    'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-    'receivedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff']);
+    'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff']);
 
     if (req.body.isshippingbillingdiff == true) {
         state = await State.findById(obj.state);
@@ -108,13 +106,14 @@ async function placeOrder(obj, req, res) {
         if (!auction) return res.status(400).send('Invalid Reference Auction id');
         orderObj.referenceAuction = auction;
     }
+    orderObj.lastUpdated = Date();
 
     let order = new Order(orderObj);
     // console.log(order)
     order = await order.save();
     let message = `<p>Dear User,</p>
         <p>Thank you for using GrainEasy.<br>
-        Your order has placed successfully.The order is being reviewed and you would
+        Your order has been placed successfully.The order is being reviewed and you would
         receive email upon order confirmation<br>
         Please feel free to reach out to us on trade@graineasy.com for any clarification.
         <br><br>
@@ -148,23 +147,31 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
     }
 
     if (req.body.status == 'ready') {
-        const orderinv = await Order.find().sort({invoiceno: -1}).limit(1)
-        invoiceno =  parseInt(orderinv.invoiceno) + 1;
+        const orderinv = await Order.find().sort({'invoiceno': -1}).limit(1)
+        // console.log(orderinv);
+        invoiceno =  parseInt(orderinv[0].invoiceno) + 1;
         orderObj.invoiceno = String(invoiceno);
     }
 
     switch(req.body.status) {
         case 'confirmed':
             orderObj.confirmedTime = Date(); 
+            break;
         case 'ready':
             orderObj.readyTime = Date();   
+            break;
         case  'shipped':
             orderObj.shipmentTime = Date();
+            break;
         case 'delivered':
             orderObj.receivedTime = Date();   
-        case 'cancelled':
-
+        // case 'cancelled':
+        //     orderObj.lastUpdated = Date();
+        default :
+            console.log('No action for status');
     }
+
+    orderObj.lastUpdated = Date();
     
     const order = await Order.findByIdAndUpdate(req.params.id, orderObj, {
         new: true
@@ -245,5 +252,6 @@ router.get('/user/:id', [auth], async (req, res) => {
 
 module.exports = {
     router,
-    placeOrder
+    placeOrder,
+    dropIfDNE
 };
