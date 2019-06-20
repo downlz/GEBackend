@@ -1,43 +1,58 @@
 const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
-const {City, validate} = require('../models/city');
-const {State} = require('../models/state'); 
-// const mongoose = require('mongoose');
+const {BargainRqst, validate} = require('../models/bargainrsqt');
+const {Item} = require('../models/item');
+const {User} = require('../models/user');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
 
 router.get('/', async (req, res) => {
-  const city = await City.find().sort('name');
-  res.send(city);
+  const bargainrqst = await BargainRqst.find().sort('lastupdated');
+  res.send(bargainrqst);
 });
 
+
 router.post('/', [auth, permit('admin')], async (req, res) => {
+  
   // const { error } = validate(req.body); 
   // console.log(error);
   // if (error) return res.status(400).send(error.details[0].message);
   
   
-  const state = await State.findById(req.body.stateId);
-  if (!state) return res.status(400).send('Invalid state.');
+  const itemdtl = await Item.findById(req.body.itemId);
+  if (!itemdtl) return res.status(400).send('Invalid item.');
 
-  let cityObj = _.pick(req.body, ['name']);
+  // console.log(item);
 
-  locationObj = {
-    type : req.body.type,
-    coordinates : req.body.coordinates
+  const buyerid = await User.findById(req.body.buyerId);
+  if (!buyerid) return res.status(400).send('Invalid Buyer');
+
+  const sellerid = await User.findById(itemdtl.seller._id);
+  if (!sellerid) return res.status(400).send('Invalid Seller');
+
+  let bargainObj = _.pick(req.body, ['buyerquote']);      // Creating a bargain object
+
+  
+  quoteObj = {
+    requestedon : Date(),
+    buyerquote : bargainObj.buyerquote,
+    sellerquote : '',
+    status : 'placed'
   }
 
-  cityObj.state = state;
-  cityObj.loadingPerKg = 0;
-  cityObj.unloadingPerKg = 0;
-  cityObj.packagingPerKg = 0;
-  cityObj.location = locationObj;
+  bargainObj.bargainstatus = 'placed';
+  bargainObj.lastupdated = Date();
+  bargainObj.firstquote = quoteObj;
+  bargainObj.item = itemdtl;
+  bargainObj.buyer = buyerid;
+  bargainObj.seller = sellerid;
   
-  let city = new City(cityObj);
-  city = await city.save();
+  let bargainrqst = new BargainRqst(bargainObj);
+  bargainrqst = await bargainrqst.save();
   
-  res.send(city);
+  res.send(bargainrqst);
+
 });
 
 router.put('/:id', [auth, permit('admin')], async (req, res) => {

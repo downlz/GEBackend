@@ -187,11 +187,11 @@ router.get('/:id', async (req, res) => {
       // // Specify field details here  
       doc
       .fontSize(8)
-      .text(': ABC1234567',textdata_x,firstline_y);       // Default to grain easy details as of now
+      .text(': AADCFF2827J',textdata_x,firstline_y);       // Default to grain easy details as of now
       doc
-      .text(': QWERTY789012345',textdata_x);  
+      .text(': 29AADCF2827J1ZG',textdata_x);  
       doc
-      .text(': AGHGBNBJHKKJK',textdata_x);  
+      .text(': U74999BR2018PTC036772',textdata_x);  
 
        doc
        .fontSize(10)
