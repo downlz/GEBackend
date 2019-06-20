@@ -30,6 +30,7 @@ const getpo = require('../routes/getpo');
 const uploadbill = require('../routes/uploadbill');
 const billingorg = require('../routes/billingorg');
 const taxrates = require('../routes/taxrates');
+const bargainrqst = require('../routes/bargainrqst');
 
 
 var corsOptions = {
@@ -64,5 +65,6 @@ module.exports = function(app) {
   app.use('/api/uploadbill', uploadbill);
   app.use('/api/billingorg', billingorg);
   app.use('/api/taxrates', taxrates);
+  app.use('/api/bargain', bargainrqst);
   app.use(error);
 }

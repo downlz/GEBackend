@@ -50,6 +50,10 @@ const itemSchema = new mongoose.Schema({
     type: Number,
     required: false
   },
+  bargainenabled: {
+    type: Boolean,
+    required: false
+  },
   unit: {
     type : unit.unitSchema,
     required: false
@@ -116,6 +120,7 @@ function validateItem(item) {
     categoryId: Joi.objectId().required(),
     qty: Joi.number().required(),
     bargaintrgqty: Joi.number().optional(),
+    bargainenabled: Joi.boolean().optional(),
     unitId: Joi.objectId().required(),
     price: Joi.number().required(),
     moisture: Joi.number().optional(),

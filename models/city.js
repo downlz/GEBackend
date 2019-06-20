@@ -2,6 +2,18 @@ const Joi = require('joi');
 const mongoose = require('mongoose');
 const stateModel = require('./state');
 
+const pointSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    enum: ['Point'],
+    required: false
+  },
+  coordinates: {
+    type: [Number],
+    required: false
+  }
+});
+
 const citySchema = new mongoose.Schema({
   name: {
     type: String,
@@ -21,6 +33,11 @@ const citySchema = new mongoose.Schema({
     type: Number,
     required: false
   },
+  location: {
+    type: pointSchema,
+    required : false
+    // index: '2dsphere'
+  },
   state: {
     type: stateModel.stateSchema,
     required: true
@@ -35,6 +52,7 @@ function validateCity(city) {
     loadingPerKg: Joi.number().optional(),
     unloadingPerKg: Joi.number().optional(),
     packagingPerKg: Joi.number().optional(),
+    location: Joi.object().optional(),
     stateId: Joi.objectId().required()
   };
 
