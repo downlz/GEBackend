@@ -57,7 +57,7 @@ async function placeOrder(obj, req, res) {
     let orderObj = _.pick(obj, ['orderno', 'quantity', 'unit','address',
         'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff']);
     
-    dropIfDNE(orderObj,['orderno', 'quantity', 'unit','address',
+    await dropIfDNE(orderObj,['orderno', 'quantity', 'unit','address',
     'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff']);
 
     if (req.body.isshippingbillingdiff == true) {
