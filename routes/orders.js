@@ -114,16 +114,15 @@ async function placeOrder(obj, req, res) {
     let message = `<p>Dear User,</p>
         <p>Thank you for using GrainEasy.<br>
         Your order has been placed successfully.The order is being reviewed and you would
-        receive email upon order confirmation<br>
+        receive an email upon order confirmation<br>
         Please feel free to reach out to us on trade@graineasy.com for any clarification.
         <br><br>
         Regards,<br>
         Graineasy
         </p>`
 
-    sendEmail(order.buyer.email, 'Order Placed-' + order.orderno, message);
+    sendEmail(order.buyer.email, process.env.EMAILCCUSER, 'Order Placed - ' + order.orderno, message);
     res.send(order);
-
     return order;
 }
 
@@ -138,7 +137,7 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
         'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
         'receivedTime','readyTime','lastUpdated', 'paymentMode', 'status','remarks']);
     
-    dropIfDNE = (orderObj,['quantity',
+    await dropIfDNE(orderObj,['quantity',
     'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
     'receivedTime','readyTime','lastUpdated', 'paymentMode', 'status','remarks']); 
 
@@ -148,64 +147,58 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
 
     if (req.body.status == 'ready') {
         const orderinv = await Order.find().sort({'invoiceno': -1}).limit(1)
-        // console.log(orderinv);
         invoiceno =  parseInt(orderinv[0].invoiceno) + 1;
         orderObj.invoiceno = String(invoiceno);
     }
 
-    switch(req.body.status) {
-        case 'confirmed':
-            orderObj.confirmedTime = Date(); 
-            break;
-        case 'ready':
-            orderObj.readyTime = Date();   
-            break;
-        case  'shipped':
-            orderObj.shipmentTime = Date();
-            break;
-        case 'delivered':
-            orderObj.receivedTime = Date();   
-        // case 'cancelled':
-        //     orderObj.lastUpdated = Date();
-        default :
-            console.log('No action for status');
-    }
+    orderObj.lastUpdated = Date();          // Update lastupdated datetimestart
 
-    orderObj.lastUpdated = Date();
-    
     const order = await Order.findByIdAndUpdate(req.params.id, orderObj, {
         new: true
     });
-
+    
     if (!order) return res.status(404).send('The item with the given ID was not found.');
     
-    if (order.status =='cancelled'){
-        
-        let message = `<p>Dear User,</p>
-        <p>Thank you for using GrainEasy.<br/>
-        Your order-`+ order.orderno + ` has been cancelled<br>
-        Order Status - <b>` + order.status + `</b> Order cancellation notes - ` + orderObj.remarks + `<br>
-        Please feel free to reach out to us on trade@graineasy.com for any clarification.   
-        <br><br>
-        Regards,<br>
-        Graineasy
-        </p>`
-        sendEmail(order.buyer.email, 'Order Intimation from Graineasy', message);
-    } else {
-        let message = `<p>Dear User,</p>
-        <p>Thank you for using GrainEasy.<br/>
-        Your order-`+ order.orderno + ` has been accepted by the seller and confirmed by the admin.<br>
-        Order Status - <b>` + order.status + `</b><br>
-        Please feel free to reach out to us on trade@graineasy.com for any clarification.   
-        <br><br>
-        Regards,<br>
-        Graineasy
-        </p>`
-        sendEmail(order.buyer.email, 'Order Intimation from Graineasy', message);
+    var message;
+    var messagegreetings = `<p>Dear User,</p>
+                            <p>Thank you for using GrainEasy.</p>`
+    var messageorderstatus;
+    var messagesign = `<p>Order Status - <b>` + order.status + `</b></p>
+                        <p>Please feel free to reach out to us on trade@graineasy.com for any clarification.   
+                        <br><br>Regards,<br>
+                        Graineasy
+                        </p>`
+
+    switch(req.body.status) {
+        case 'confirmed':
+            orderObj.confirmedTime = Date(); 
+            messageorderstatus = `<p>Your order-`+ order.orderno + ` has been accepted by the seller and confirmed by the admin.</p>`
+            break;
+        case 'ready':
+            orderObj.readyTime = Date();   
+            messageorderstatus = `<p>Your order-`+ order.orderno + ` is ready for dispatch</p>`
+            break;
+        case  'shipped':
+            orderObj.shipmentTime = Date();
+            messageorderstatus = `<p>Your order-`+ order.orderno + ` has been shipped</p>`
+            break;
+        case 'delivered':
+            orderObj.receivedTime = Date();  
+            messageorderstatus = `<p>Your order-`+ order.orderno + ` has been delivered.</p>` 
+            break;
+        case 'cancelled':
+            messageorderstatus = `<p>Your order-`+ order.orderno + ` has been cancelled.</b> Order cancellation notes - ` + orderObj.remarks + `</p>`
+            console.log('Order Cancelled ' + order.orderno + ' ' + Date());
+            break;
+        default:
+            // Do nothing
     }
     
+    message = messagegreetings + messageorderstatus + messagesign
     
+    sendEmail(order.buyer.email, process.env.EMAILCCUSER, 'Order Intimation from Graineasy - ' + order.orderno, message);
     res.send(order);
+
 });
 
 router.delete('/:id', [auth, permit('admin')], async (req, res) => {
