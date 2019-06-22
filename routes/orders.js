@@ -32,11 +32,6 @@ router.post('/', [auth, permit('buyer', 'admin')], async (req, res) => {
 });
 
 async function placeOrder(obj, req, res) {
-    // console.log(obj);
-    // const {error} = validate(obj);
-    // console.log(error)
-    // if (error) return res.status(400).send(error.details[0].message);
-    // console.log(error)
 
     const item = await Item.findById(obj.itemId);
     if (!item) return res.status(400).send('Invalid Item.');
@@ -111,7 +106,7 @@ async function placeOrder(obj, req, res) {
     let order = new Order(orderObj);
     // console.log(order)
     order = await order.save();
-    let message = `<p>Dear User,</p>
+    var message = `<p>Dear User,</p>
         <p>Thank you for using GrainEasy.<br>
         Your order has been placed successfully.The order is being reviewed and you would
         receive an email upon order confirmation<br>
@@ -120,8 +115,14 @@ async function placeOrder(obj, req, res) {
         Regards,<br>
         Graineasy
         </p>`
+    var emailsubject;
+    if (order.ordertype == 'sampleorder'){
+        emailsubject = 'Sample order placed - ' + order.orderno
+    } else {
+        emailsubject = 'Order Placed - ' + order.orderno
+    }
 
-    sendEmail(order.buyer.email, process.env.EMAILCCUSER, 'Order Placed - ' + order.orderno, message);
+    sendEmail(order.buyer.email, process.env.EMAILCCUSER, emailsubject, message);
     res.send(order);
     return order;
 }
@@ -195,8 +196,14 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
     }
     
     message = messagegreetings + messageorderstatus + messagesign
-    
-    sendEmail(order.buyer.email, process.env.EMAILCCUSER, 'Order Intimation from Graineasy - ' + order.orderno, message);
+    var emailsubject;
+    if (order.ordertype == 'sampleorder'){
+        emailsubject = 'Sample order update - ' + order.orderno
+    } else {
+        emailsubject = 'Order Intimation from Graineasy - ' + order.orderno
+    }
+
+    sendEmail(order.buyer.email, process.env.EMAILCCUSER, emailsubject, message);
     res.send(order);
 
 });
