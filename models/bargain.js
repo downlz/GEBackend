@@ -1,10 +1,8 @@
 const Joi = require('joi');
-Joi.objectId = require('joi-objectid')(Joi);
 const mongoose = require('mongoose');
 const user = require('./user');
 const item = require('./item');
 const order = require('./order');
-
 
 const pricerequestSchema = new mongoose.Schema({
   requestedon: {
@@ -50,18 +48,22 @@ const pauseBargain = new mongoose.Schema({
   }
 });
 
-const bargainRsqtSchema = new mongoose.Schema({
+const bargainSchema = new mongoose.Schema({
   item: {
     type: item.itemSchema,
     required: false
   },
   seller: {
     type: user.userSchema,
-    required: true
+    required: false
   },
   buyer: {
     type: user.userSchema,
-    required: true
+    required: false
+  },
+  quantity: {
+    type: Number,
+    required : true
   },
   firstquote : {
     type : pricerequestSchema,
@@ -99,13 +101,14 @@ const bargainRsqtSchema = new mongoose.Schema({
     }
 });
 
-const BargainRqst = mongoose.model('BargainRqst', bargainRsqtSchema);
+const Bargain = mongoose.model('Bargain', bargainSchema);
 
-function validateBargain(bargainrqst) {
+function validateBargain(bargain) {
   const schema = {
     item: Joi.objectId().required(),
-    seller: Joi.objectId().required(),
-    buyer: Joi.objectId().required(),
+    seller: Joi.objectId().optional(),
+    buyer: Joi.objectId().optional(),
+    quantity : Joi.number().required(),
     firstquote: Joi.object().required(),
     secondquote: Joi.object().required(),
     thirdquote: Joi.object().required(),
@@ -119,6 +122,6 @@ function validateBargain(bargainrqst) {
   return Joi.validate(bargainrqst, schema);
 }
 
-exports.bargainRsqtSchema = bargainRsqtSchema;
-exports.BargainRqst = BargainRqst;
+exports.bargainSchema = bargainSchema;
+exports.Bargain = Bargain;
 exports.validate = validateBargain;

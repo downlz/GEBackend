@@ -1,18 +1,27 @@
-const winston = require('winston');
+// const winston = require('winston');
 require('winston-mongodb');
 require('express-async-errors');
 
-module.exports = function() {
-  winston.handleExceptions(
-    new winston.transports.File({ filename: 'uncaughtExceptions.log' }));
+const {createLogger,format,transports} = require('winston');
 
-  process.on('unhandledRejection', (ex) => {
-    throw ex;
-  });
+// module.exports = createLogger({
+//   transports: [
+//     new transports.Console({
+//       level: 'debug'
+//     })
+//   ]
+// });
 
-  winston.add(winston.transports.File, { filename: 'logfile.log' });
-  winston.add(winston.transports.MongoDB, {
-    db: process.env.APPLOG,
-    level: 'info'
-  });
-}
+// const logger = createLogger({
+//   format: combine(
+//     label({ label: 'right meow!' }),
+//     timestamp(),
+//     prettyPrint()
+//   ),
+//   transports: [new transports.Console()]
+// })
+
+// logger.log({
+//   level: 'info',
+//   message: 'What time is the testing at?'
+// });

@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 // const nodemailer = require('nodemailer');
-// const bodyParser = require('body-parser')
-
+// const bodyParser = require('body-parser');
+// const logger = require('./logger');
 const users = require('../routes/users');
 const addimage = require('../routes/addimage');
 const testitem = require('../routes/testitem');
@@ -30,7 +30,7 @@ const getpo = require('../routes/getpo');
 const uploadbill = require('../routes/uploadbill');
 const billingorg = require('../routes/billingorg');
 const taxrates = require('../routes/taxrates');
-const bargainrqst = require('../routes/bargainrqst');
+const bargain = require('../routes/bargain');
 
 
 var corsOptions = {
@@ -39,7 +39,8 @@ var corsOptions = {
 
 module.exports = function(app) {
   app.use(express.json());
-  app.use(cors(corsOptions))
+  app.use(cors(corsOptions));
+  // app.use(logger);
   app.use('/api/user', users);
   app.use('/api/category', categories);
   app.use('/api/item', items);
@@ -65,6 +66,6 @@ module.exports = function(app) {
   app.use('/api/uploadbill', uploadbill);
   app.use('/api/billingorg', billingorg);
   app.use('/api/taxrates', taxrates);
-  app.use('/api/bargain', bargainrqst);
+  app.use('/api/bargain', bargain);
   app.use(error);
 }
