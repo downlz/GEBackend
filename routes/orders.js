@@ -1,4 +1,5 @@
 const auth = require('../middleware/auth');
+const logger = require('../startup/logger');
 const permit = require('../middleware/permissions');
 const sendEmail = require('../middleware/sendemail');
 const {Order, validate} = require('../models/order');
@@ -43,7 +44,7 @@ async function placeOrder(obj, req, res) {
     // if (obj.buyerId) {
         buyer = await User.findById(obj.buyerId);
         if (!buyer) return res.status(400).send('Invalid buyer.');
-        // console.log(buyer);
+        // logger.info(buyer);
     // } else {
         seller = await User.findById(obj.sellerId);
         if (!seller) return res.status(400).send('Invalid seller.');
@@ -77,7 +78,7 @@ async function placeOrder(obj, req, res) {
         savedaddr = await address.save();    
         orderObj.shippingaddress = savedaddr;
     } else if (req.body.isshippingbillingdiff == false){
-        // console.log(typeof(obj.addressreference));
+        // logger.info(typeof(obj.addressreference));
         // orderObj.shippingaddress = obj.addressreference //don't update anything app will pickup default registered address
     } else {
         // Think at some point of time.Critical for other order types
@@ -86,7 +87,7 @@ async function placeOrder(obj, req, res) {
     orderObj.item = item;
     //orderObj.address = address;
     orderObj.buyer = buyer;
-    // console.log(orderObj.buyer);
+    // logger.info(orderObj.buyer);
     orderObj.seller = seller;
     // orderObj.shippingaddress = address;
 
@@ -104,7 +105,7 @@ async function placeOrder(obj, req, res) {
     orderObj.lastUpdated = Date();
 
     let order = new Order(orderObj);
-    // console.log(order)
+    // logger.info(order)
     order = await order.save();
     var message = `<p>Dear User,</p>
         <p>Thank you for using GrainEasy.<br>
@@ -189,7 +190,7 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
             break;
         case 'cancelled':
             messageorderstatus = `<p>Your order-`+ order.orderno + ` has been cancelled.</b> Order cancellation notes - ` + orderObj.remarks + `</p>`
-            console.log('Order Cancelled ' + order.orderno + ' ' + Date());
+            logger.info('Order Cancelled ' + order.orderno + ' ' + Date());
             break;
         default:
             // Do nothing
@@ -235,8 +236,8 @@ router.get('/user/:id', [auth], async (req, res) => {
     // const order = await Order.findById(req.params.id);
 
     const customer = await User.findById(req.params.id);
-    // console.log(req.params.id);
-    // console.log(customer);
+    // logger.info(req.params.id);
+    // logger.info(customer);
     if (!customer) return res.status(400).send('Invalid buyer.');
     let order = null;
     if (customer.isSeller) {

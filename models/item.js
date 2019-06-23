@@ -76,7 +76,7 @@ const itemSchema = new mongoose.Schema({
   },
   sampleNo: {
     type: String,
-    unique : true,
+    // unique : true,
     required: false
   },
   city: {

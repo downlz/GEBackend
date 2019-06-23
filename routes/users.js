@@ -1,4 +1,5 @@
 const auth = require('../middleware/auth');
+const logger = require('../startup/logger');
 const permit = require('../middleware/permissions');
 const jwt = require('jsonwebtoken');
 const config = require('config');
@@ -36,7 +37,7 @@ router.post('/', async (req, res) => {
   dropIfDNE (userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1']);
   // console.log(req.body);
   const { error } = validate(userObj);
-  console.log(error);
+  logger.error(error);
   let user = await User.findOne({ phone: req.body.phone });
   if (user) return res.status(400).send('User already registered.');
   
