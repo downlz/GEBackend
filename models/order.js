@@ -6,6 +6,7 @@ const userModel = require("./user");
 const addressModel = require("./address");
 const gblistModel = require("./gblist");
 const auctionModel = require("./auction");
+const bargainModel = require("./bargain");
 
 const userGeneratedBillSchema = new mongoose.Schema({
     filename: {
@@ -125,7 +126,7 @@ const orderSchema = new mongoose.Schema({
     },
     ordertype: {
         type: String,
-        enum: ['regular', 'groupbuying', 'auction', 'bidding', 'sampleorder'],
+        enum: ['regular', 'groupbuying', 'auction', 'bargainbuy', 'sampleorder'],
         required: false
     },
     reversechargemech:{
@@ -149,6 +150,10 @@ const orderSchema = new mongoose.Schema({
     },
     referenceAuction: {
         type: auctionModel.auctionSchema,
+        required: false
+    },
+    referenceBargain: {
+        type: bargainModel.bargainSchema,
         required: false
     }
 });
@@ -186,6 +191,7 @@ function validateOrder(order) {
         insurancecharges: Joi.number().optional,
         referenceGBId: Joi.objectId().optional(),
         referenceAuctionId: Joi.objectId().optional(),
+        referenceBargain: Joi.objectId().optional()
     };
 
     return Joi.validate(order, schema);

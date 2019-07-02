@@ -91,10 +91,6 @@ const bargainSchema = new mongoose.Schema({
     type : Date,
     required : false
   },
-  orderid : {
-    type : order.orderSchema,
-    required : false
-  },
   pausebargain :{
     type : pauseBargain,
     required: false
@@ -115,7 +111,6 @@ function validateBargain(bargain) {
     bargaincounter: Joi.number().optional(),
     bargainstatus: Joi.string().optional(),
     lastupdated: Joi.string().optional(),
-    orderid : Joi.objectId().optional(),
     pausebargain : Joi.object().optional()
   };
 

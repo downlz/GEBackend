@@ -6,6 +6,7 @@ const {Order, validate} = require('../models/order');
 const {Item} = require('../models/item');
 const {Unit} = require('../models/unit');
 const {GroupbuyingList} = require('../models/gblist');
+const {Bargain} = require('../models/bargain');
 const {Auction} = require('../models/auction');
 const {User} = require('../models/user');
 const {State} = require('../models/state');
@@ -95,6 +96,12 @@ async function placeOrder(obj, req, res) {
         const gblist = await GroupbuyingList.findById(obj.referenceGBId);
         if (!gblist) return res.status(400).send('Invalid Reference Group buying id');
         orderObj.referenceGB = gblist;
+    }
+
+    if (obj.referenceBargainId) {
+        const bargain = await Bargain.findById(obj.referenceBargainId);
+        if (!bargain) return res.status(400).send('Invalid Reference Bargain id');
+        orderObj.referenceBargain = bargain;
     }
 
     if (obj.referenceAuctionId) {
