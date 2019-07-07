@@ -4,7 +4,8 @@ const {Order} = require('../models/order');
 const {Item} = require('../models/item');
 const {User} = require('../models/user');
 const {State} = require('../models/state');
-const {Taxrate} = require('../models/taxrates');
+// const {Taxrate} = require('../models/taxrates');
+const {getTaxBreakup} = require('./orders');
 const mongoose = require('mongoose');
 const express = require('express');
 const moment = require('moment');
@@ -38,9 +39,9 @@ router.get('/:id', async (req, res) => {
   var companyline = 600
   var footerpos = 180
 
-  const cgstresponse = await Taxrate.find({type:'cgst'});        // append date based on order
-  const igstresponse = await Taxrate.find({type:'igst'});
-  const sgstresponse = await Taxrate.find({type:'sgst'});
+  // const cgstresponse = await Taxrate.find({type:'cgst'});        // append date based on order
+  // const igstresponse = await Taxrate.find({type:'igst'});
+  // const sgstresponse = await Taxrate.find({type:'sgst'});
 
   const result = await Order.findById(id);
   
@@ -52,14 +53,19 @@ router.get('/:id', async (req, res) => {
   discount = 0;
   // Calculating tax, apply logic to calculate igst and sgst
 
-  cgst = (cgstresponse[0].ratepct/100) * parseInt(result.cost);
-  if (result.seller.Addresses[0].state.name == result.buyer.Addresses[0].state.name) {
-    sgst = (sgstresponse[0].ratepct/100) * parseInt(result.cost);
-    igst = 0
-  } else {
-    igst = (igstresponse[0].ratepct/100) * parseInt(result.cost);
-    sgst = 0
-  }
+  // cgst = (cgstresponse[0].ratepct/100) * parseInt(result.cost);
+  // if (result.seller.Addresses[0].state.name == result.buyer.Addresses[0].state.name) {
+  //   sgst = (sgstresponse[0].ratepct/100) * parseInt(result.cost);
+  //   igst = 0
+  // } else {
+  //   igst = (igstresponse[0].ratepct/100) * parseInt(result.cost);
+  //   sgst = 0
+  // }
+
+  taxObj = await getTaxBreakup(result);
+      cgst = taxObj.cgst;
+      sgst = taxObj.sgst;
+      igst = taxObj.igst;
 
   // Logic to get shipping address
   if (result.isshippingbillingdiff == true) {
@@ -291,13 +297,13 @@ router.get('/:id', async (req, res) => {
         .text('Amount',530)
         doc
         .moveDown(1)
-        .text('CGST@' + cgstresponse[0].ratepct,470)
+        .text('CGST@' + taxObj.taxrates[0],470)
         doc
         // .moveUp()
-        .text('SGST@' + sgstresponse[0].ratepct,470)
+        .text('SGST@' + taxObj.taxrates[1],470)
         doc
         // .moveUp()
-        .text('IGST@' + igstresponse[0].ratepct,470)
+        .text('IGST@' + taxObj.taxrates[2],470)
 
         // Item Details
 

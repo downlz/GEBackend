@@ -84,7 +84,7 @@ const bargainSchema = new mongoose.Schema({
   },
   bargainstatus: {
     type: String,
-    enum: ['placed', 'negotiation', 'accepted', 'rejected','paused','expired'],
+    enum: ['placed', 'negotiation', 'lastbestprice', 'accepted', 'rejected','paused','expired'],
     required: false
   },
   lastupdated: {

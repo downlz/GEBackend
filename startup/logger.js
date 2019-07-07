@@ -26,7 +26,7 @@ const logger = createLogger({
                         maxsize : 5120000,
                         maxFiles : 4, 
                         filename: `${__dirname}/../logs/combined.log` }),
-    new transports.Console()
+    new transports.Console({level: 'debug'})
     // new transports.MongoDB({
     //           name: 'db-log',
     //           db : 'mongodb://admin:{enterpasswordhere}@ds125331.mlab.com:25331/graineasy-log',
@@ -40,6 +40,7 @@ const logger = createLogger({
                         maxFiles : 4,
                         filename: `${__dirname}/../logs/exceptions.log` })
   ]
+
 });
 
 process.on('unhandledRejection', (ex) => {

@@ -1,8 +1,9 @@
 const auth = require('../middleware/auth');
-const logger = require('../startup/logger');
+// const logger = require('../startup/logger');
 const permit = require('../middleware/permissions');
 const sendEmail = require('../middleware/sendemail');
 const {Order, validate} = require('../models/order');
+const {Taxrate} = require('../models/taxrates');
 const {Item} = require('../models/item');
 const {Unit} = require('../models/unit');
 const {GroupbuyingList} = require('../models/gblist');
@@ -52,10 +53,10 @@ async function placeOrder(obj, req, res) {
     // }
 
     let orderObj = _.pick(obj, ['orderno', 'quantity', 'unit','address',
-        'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff']);
+        'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff','isExistingAddr']);
     
     await dropIfDNE(orderObj,['orderno', 'quantity', 'unit','address',
-    'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff']);
+    'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff','isExistingAddr']);
 
     if (req.body.isshippingbillingdiff == true) {
         state = await State.findById(obj.state);
@@ -75,9 +76,15 @@ async function placeOrder(obj, req, res) {
         addedby: obj.buyerId,
         addresstype: 'delivery',
         }; 
-        address = new Address(addressObj);
-        savedaddr = await address.save();    
-        orderObj.shippingaddress = savedaddr;
+        if (req.body.isExistingAddr == false) {
+            address = new Address(addressObj);
+            savedaddr = await address.save();    
+            orderObj.shippingaddress = savedaddr;
+        } 
+        else {
+            const deliveryaddress = await Address.findById(obj.addressreference._id);
+            orderObj.shippingaddress = deliveryaddress;
+        }
     } else if (req.body.isshippingbillingdiff == false){
         // logger.info(typeof(obj.addressreference));
         // orderObj.shippingaddress = obj.addressreference //don't update anything app will pickup default registered address
@@ -112,7 +119,6 @@ async function placeOrder(obj, req, res) {
     orderObj.lastUpdated = Date();
 
     let order = new Order(orderObj);
-    // logger.info(order)
     order = await order.save();
     var message = `<p>Dear User,</p>
         <p>Thank you for using GrainEasy.<br>
@@ -197,7 +203,7 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
             break;
         case 'cancelled':
             messageorderstatus = `<p>Your order-`+ order.orderno + ` has been cancelled.</b> Order cancellation notes - ` + orderObj.remarks + `</p>`
-            logger.info('Order Cancelled ' + order.orderno + ' ' + Date());
+            console.log('Order Cancelled ' + order.orderno + ' ' + Date());
             break;
         default:
             // Do nothing
@@ -247,19 +253,58 @@ router.get('/user/:id', [auth], async (req, res) => {
     // logger.info(customer);
     if (!customer) return res.status(400).send('Invalid buyer.');
     let order = null;
+    // taxObj = await getTaxBreakup(result);
     if (customer.isSeller) {
         order = await Order.find({seller: customer}).sort({'placedTime': -1});
     } else {
         order = await Order.find({buyer: customer}).sort({'placedTime': -1});
+        // order.forEach(async function(value){
+        //     taxObj = await getTaxBreakup(value);
+        //     value.taxbreakup = taxObj;
+        //     console.log(taxObj.taxrates);
+        //   });
+        // console.log(order);
+        // console.log('----------XXXXXXXXXXXX------------');
+        // taxObj = await getTaxBreakup(order);
     }
 
     if (!order) return res.status(404).send('The item with the given ID was not found.');
-
+    
     res.send(order);
 });
+
+async function getTaxBreakup(userObj) {
+
+  const cgstresponse = await Taxrate.find({type:'cgst'});        // append date based on order
+  const igstresponse = await Taxrate.find({type:'igst'});
+  const sgstresponse = await Taxrate.find({type:'sgst'});
+
+    // Calculating tax, apply logic to calculate igst and sgst
+
+  cgst = (cgstresponse[0].ratepct/100) * parseInt(userObj.cost);
+  if (userObj.seller.Addresses[0].state.name == userObj.buyer.Addresses[0].state.name) {
+    sgst = (sgstresponse[0].ratepct/100) * parseInt(userObj.cost);
+    igst = 0
+  } else {
+    igst = (igstresponse[0].ratepct/100) * parseInt(userObj.cost);
+    sgst = 0
+  }
+  total = parseInt(userObj.cost) + cgst + igst + sgst;
+
+  taxDetail = {
+    'taxwithcost' : total,
+    'cgst' : cgst,
+    'igst' : igst,
+    'sgst' : sgst,
+    'taxrates' : [cgstresponse[0].ratepct,sgstresponse[0].ratepct,igstresponse[0].ratepct]
+  }
+    return taxDetail;
+};
+
 
 module.exports = {
     router,
     placeOrder,
-    dropIfDNE
+    dropIfDNE,
+    getTaxBreakup
 };

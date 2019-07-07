@@ -1,5 +1,5 @@
 const auth = require('../middleware/auth');
-const logger = require('../startup/logger');
+// const logger = require('../startup/logger');
 const permit = require('../middleware/permissions');
 const {
   Bargain,
@@ -22,7 +22,7 @@ const router = express.Router();
 const _ = require('lodash');
 
 router.get('/', async (req, res) => {
-  const bargain = await Bargain.find().sort('lastupdated');
+  const bargain = await Bargain.find().sort({'lastupdated':-1});
   res.send(bargain);
 });
 
@@ -32,10 +32,10 @@ router.post('/', [auth, permit('admin', 'buyer')], async (req, res) => {
   const itemdtl = await Item.findById(req.body.itemId);
   if (!itemdtl) return res.status(400).send('Invalid item.');
 
-  const buyerid = await User.findById(req.body.buyerId).select('-password');
+  const buyerid = await User.findById(req.body.buyerId);
   if (!buyerid) return res.status(400).send('Invalid Buyer');
 
-  const sellerid = await User.findById(itemdtl.seller._id).select('-password');
+  const sellerid = await User.findById(itemdtl.seller._id);
   if (!sellerid) return res.status(400).send('Invalid Seller');
 
   let bargainObj = _.pick(req.body, ['buyerquote', 'quantity']); // Creating a bargain object
@@ -43,6 +43,7 @@ router.post('/', [auth, permit('admin', 'buyer')], async (req, res) => {
   quoteObj = {
     requestedon: Date(),
     buyerquote: bargainObj.buyerquote,
+    quantity: bargainObj.quantity,
     sellerquote: '',
     status: 'placed'
   }
@@ -68,7 +69,7 @@ router.post('/', [auth, permit('admin', 'buyer')], async (req, res) => {
   }); // Add rule for datetime
 
   if (activebargain[0]){
-    logger.info('Active bargain in place cannot create a new one.')
+    console.log('Active bargain in place cannot create a new one.')
   } else {
     let bargain = new Bargain(bargainObj);
     bargain = await bargain.save();
@@ -81,9 +82,10 @@ router.post('/', [auth, permit('admin', 'buyer')], async (req, res) => {
 router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) => {
 
   const bargain = await Bargain.findById(req.params.id);
-  if (!bargain) return res.status(404).send('The genre with the given ID was not found.');
-
-  var bargainObj = _.pick(req.body, ['buyerquote', 'sellerquote']);
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
+  // console.log(bargain)
+  var bargainObj = _.pick(req.body, [parseInt('buyerquote'), parseInt('sellerquote')]);
+  console.log(req.body);
   if (req.body.buyerquote) {
     switch (bargain.bargaincounter) {
       case 1:
@@ -161,16 +163,17 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
   } else if (req.body.sellerquote) {
     switch (bargain.bargaincounter) {
       case 1:
-        if (req.body.sellerquote == bargain.firstquote.buyerquote) {
+        if (req.body.sellerquote == bargain.firstquote.buyerquote || req.body.action === 'accepted') {
           quoteObj = {
             requestedon: bargain.firstquote.requestedon,
             buyerquote: bargain.firstquote.buyerquote,
-            sellerquote: req.body.sellerquote,
+            sellerquote: bargain.firstquote.buyerquote,
             status: 'accepted'
           }
           bargainObj.bargainstatus = 'accepted'
           bargainObj.lastupdated = Date()
           bargainObj.firstquote = quoteObj
+          strikeprice = bargain.firstquote.buyerquote
         } else if (req.body.action == 'rejected') {
           quoteObj = {
             requestedon: bargain.firstquote.requestedon,
@@ -180,7 +183,7 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
           }
           bargainObj.bargainstatus = 'rejected'
           bargainObj.lastupdated = Date()
-          bargainObj.firstquote.status = quoteObj
+          bargainObj.firstquote = quoteObj
         } else {
           quoteObj = {
             requestedon: bargain.firstquote.requestedon,
@@ -195,27 +198,27 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
         }
         break;
       case 2:
-        if (req.body.sellerquote == bargain.secondquote.buyerquote) {
+        if (req.body.sellerquote == bargain.secondquote.buyerquote || req.body.action == 'accepted') {
           quoteObj = {
             requestedon: bargain.secondquote.requestedon,
             buyerquote: bargain.secondquote.buyerquote,
-            sellerquote: req.body.sellerquote,
+            sellerquote: bargain.secondquote.buyerquote,
             status: 'accepted'
           }
-          bargainObj.bargainstatus = 'accepted'
-          bargainObj.lastupdated = Date()
-          bargainObj.secondquote = quoteObj
-          strikeprice = req.body.sellerquote
+          bargainObj.bargainstatus = 'accepted',
+          bargainObj.lastupdated = Date(),
+          bargainObj.secondquote = quoteObj,
+          strikeprice = bargain.secondquote.buyerquote
         } else if (req.body.action == 'rejected') {
           quoteObj = {
             requestedon: bargain.secondquote.requestedon,
             buyerquote: bargain.secondquote.buyerquote,
             sellerquote: req.body.secondquote,
-            status: 'countered'
+            status: 'rejected'
           }
           bargainObj.bargainstatus = 'rejected'
           bargainObj.lastupdated = Date()
-          bargainObj.secondquote.status = quoteObj
+          bargainObj.secondquote = quoteObj
         } else {
           quoteObj = {
             requestedon: bargain.secondquote.requestedon,
@@ -230,14 +233,25 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
         }
         break;
       case 3:
-        if (req.body.sellerquote == bargain.thirdquote.buyerquote) {
+        if (req.body.sellerquote == bargain.thirdquote.buyerquote || req.body.action == 'accepted') {
           quoteObj = {
             requestedon: bargain.thirdquote.requestedon,
             buyerquote: bargain.thirdquote.buyerquote,
-            sellerquote: req.body.sellerquote,
+            sellerquote: bargain.thirdquote.buyerquote,
             status: 'accepted'
           }
           bargainObj.bargainstatus = 'accepted'
+          bargainObj.lastupdated = Date()
+          bargainObj.thirdquote = quoteObj
+          strikeprice = bargain.thirdquote.buyerquote
+        } else if (req.body.action == 'rejected') {
+          quoteObj = {
+            requestedon: bargain.thirdquote.requestedon,
+            buyerquote: bargain.thirdquote.buyerquote,
+            sellerquote: req.body.thirdquote,
+            status: 'rejected'
+          }
+          bargainObj.bargainstatus = 'rejected'
           bargainObj.lastupdated = Date()
           bargainObj.thirdquote = quoteObj
         } else {
@@ -245,21 +259,21 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
             requestedon: bargain.thirdquote.requestedon,
             buyerquote: bargain.thirdquote.buyerquote,
             sellerquote: req.body.sellerquote,
-            status: 'rejected'
+            status: 'countered'
           }
-          bargainObj.bargainstatus = 'rejected'
+          bargainObj.bargainstatus = 'lastbestprice'
           bargainObj.lastupdated = Date()
-          bargainObj.firstquote = quoteObj
+          bargainObj.thirdquote = quoteObj
         }
         break;
       default:
         //Do Nothing
     }
-    strikeprice = req.body.sellerquote
+    // strikeprice = req.body.sellerquote
   } else {
     // Do nothing
   }
-
+  console.log(quoteObj);
   bargainupd = await Bargain.findByIdAndUpdate(req.params.id, bargainObj, {
     new: true
   });
@@ -286,7 +300,7 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
   order.buyerId = bargain.buyer._id;
   order.sellerId = bargain.seller._id;
   order.quantity = bargain.quantity;
-  order.isshippingbillingdiff = 'false';
+  // order.isshippingbillingdiff = 'false';
   order.placedTime = Date();
   order.cost = order.price * order.quantity;
   order.referenceBargainId = req.params.id;
@@ -302,41 +316,48 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
 router.delete('/:id', [auth, permit('admin')], async (req, res) => {
   const bargain = await Bargain.findByIdAndRemove(req.params.id);
 
-  if (!bargain) return res.status(404).send('The genre with the given ID was not found.');
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
   res.send(bargain);
 });
 
 router.get('/:id', async (req, res) => {
   const bargain = await Bargain.findById(req.params.id);
+  // console.log(bargain);
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
-  if (!bargain) return res.status(404).send('The genre with the given ID was not found.');
+  res.send(bargain);
+});
+
+router.get('/buyer/:buyerid', async (req, res) => {
+
+  const bargain = await Bargain.find({'buyer._id': req.params.buyerid});
+
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
+
+  res.send(bargain);
+});
+
+router.get('/seller/:sellerid', async (req, res) => {
+
+  const bargain = await Bargain.find({'seller._id': req.params.sellerid});
+
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
   res.send(bargain);
 });
 
 router.get('/buyer/:buyerid/item/:id', async (req, res) => {
-  // if (req.params.status == 'active'){
-  //     filterlist = 
-  // } else {
-
-  // }
   const bargain = await Bargain.find({$and :[{'buyer._id':req.params.buyerid},{'item._id':req.params.id},{'bargainstatus':{ $nin: [ 'accepted', 'rejected','expired' ] }}]});
-
-  if (!bargain) return res.status(404).send('The genre with the given ID was not found.');
-
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
   res.send(bargain);
 });
 
 router.get('/seller/:sellerid/item/:id', async (req, res) => {
-  // if (req.params.status == 'active'){
 
-  // } else {
-    
-  // }
   const bargain = await Bargain.find({$and :[{'seller._id':req.params.sellerid},{'item._id':req.params.id},{'bargainstatus':{ $nin: [ 'accepted', 'rejected','expired' ] }}]});
 
-  if (!bargain) return res.status(404).send('The genre with the given ID was not found.');
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
   res.send(bargain);
 });
