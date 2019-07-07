@@ -19,14 +19,14 @@ const logger = createLogger({
     // - Write all logs error (and below) to `error.log`.
     //
     new transports.File({ 
-                        maxsize : 2560000,
+                        maxsize : 5120000,
                         maxFiles : 4,
                         filename: `${__dirname}/../logs/error.log`, level: 'error' }),
     new transports.File({
-                        maxsize : 2560000,
+                        maxsize : 5120000,
                         maxFiles : 4, 
                         filename: `${__dirname}/../logs/combined.log` }),
-    new transports.Console()
+    new transports.Console({level: 'debug'})
     // new transports.MongoDB({
     //           name: 'db-log',
     //           db : 'mongodb://admin:{enterpasswordhere}@ds125331.mlab.com:25331/graineasy-log',
@@ -36,10 +36,11 @@ const logger = createLogger({
   ],
   exceptionHandlers: [
     new transports.File({ 
-                        maxsize : 2560000,
+                        maxsize : 5120000,
                         maxFiles : 4,
                         filename: `${__dirname}/../logs/exceptions.log` })
   ]
+
 });
 
 process.on('unhandledRejection', (ex) => {
@@ -51,3 +52,15 @@ process.on('uncaughtException', (ex) => {
 });
 
 module.exports = logger;
+
+// Logging level
+// { 
+//   emerg: 0, 
+//   alert: 1, 
+//   crit: 2, 
+//   error: 3, 
+//   warning: 4, 
+//   notice: 5, 
+//   info: 6, 
+//   debug: 7
+// }

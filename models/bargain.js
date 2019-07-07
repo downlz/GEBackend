@@ -84,15 +84,11 @@ const bargainSchema = new mongoose.Schema({
   },
   bargainstatus: {
     type: String,
-    enum: ['placed', 'negotiation', 'accepted', 'rejected','paused','expired'],
+    enum: ['placed', 'negotiation', 'lastbestprice', 'accepted', 'rejected','paused','expired'],
     required: false
   },
   lastupdated: {
     type : Date,
-    required : false
-  },
-  orderid : {
-    type : order.orderSchema,
     required : false
   },
   pausebargain :{
@@ -115,7 +111,6 @@ function validateBargain(bargain) {
     bargaincounter: Joi.number().optional(),
     bargainstatus: Joi.string().optional(),
     lastupdated: Joi.string().optional(),
-    orderid : Joi.objectId().optional(),
     pausebargain : Joi.object().optional()
   };
 

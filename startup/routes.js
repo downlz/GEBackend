@@ -40,7 +40,6 @@ var corsOptions = {
 module.exports = function(app) {
   app.use(express.json());
   app.use(cors(corsOptions));
-  // app.use(logger);
   app.use('/api/user', users);
   app.use('/api/category', categories);
   app.use('/api/item', items);

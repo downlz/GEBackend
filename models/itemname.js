@@ -24,6 +24,10 @@ const itemnameSchema = new mongoose.Schema({
   season: {
     type: String,
     required: false
+  },
+  mfgdate: {
+    type: String,
+    required: false
   }
 });
 
@@ -35,7 +39,8 @@ function validateItemName(itemname) {
     tax: Joi.number().optional(),
     insurance: Joi.number().optional(),
     hsn: Joi.string().optional(),
-    season: Joi.string().optional()
+    season: Joi.string().optional(),
+    mfgdate: Joi.string().optional()
   };
 
   return Joi.validate(itemname, schema);

@@ -2,10 +2,10 @@ const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const {Order} = require('../models/order');
 const {Item} = require('../models/item');
-const {Taxrate} = require('../models/taxrates');
+// const {Taxrate} = require('../models/taxrates');
 const {User} = require('../models/user');
 const {State} = require('../models/state');
-// const mongoose = require('mongoose');
+const {getTaxBreakup} = require('./orders');
 const express = require('express');
 const moment = require('moment');
 const router = express.Router();
@@ -15,7 +15,6 @@ const PDFDocument = require('pdfkit');
 router.get('/:id', async (req, res) => {
   id  = req.params.id;
   const doc = new PDFDocument({ layout : 'portrait', margin: 5});
-  var lorem = 'kfdshjkxbkbhdkjhbcn  gkdhfgkjhdfgkh'
 
   // Positions for x and y coordinates 
 
@@ -36,14 +35,11 @@ router.get('/:id', async (req, res) => {
   var companyline = termsline + 160
   var footerpos = 180
   
-  const cgstresponse = await Taxrate.find({type:'cgst'});        // append date based on order
-  const igstresponse = await Taxrate.find({type:'igst'});
-  const sgstresponse = await Taxrate.find({type:'sgst'});
-  
-  // console.log(cgstresponse[0].ratepct);
-  // console.log('***********');
+  // const cgstresponse = await Taxrate.find({type:'cgst'});        // append date based on order
+  // const igstresponse = await Taxrate.find({type:'igst'});
+  // const sgstresponse = await Taxrate.find({type:'sgst'});
+ 
   const result = await Order.findById(id);
-  console.log(result);
   
   // Logic to get shipping address
   if (result.isshippingbillingdiff == true) {
@@ -74,10 +70,7 @@ router.get('/:id', async (req, res) => {
                      pin: result.address.pin,
                      phone: result.buyer.phone
     }
-  }
-                  
-               
-                    
+  }                  
                   
   // const statedtl = await State.findById(result.Addresses.state); 
       
@@ -88,21 +81,22 @@ router.get('/:id', async (req, res) => {
       confirmedTime         = result.status;
       ordertype         = result.ordertype;
 
-      // console.log(result.seller.Addresses[0].state);
-      // console.log('**********');
-      // console.log(result.buyer.Addresses[0]);
 
       // Calculating tax, apply logic to calculate igst and sgst
+      // cgst = (cgstresponse[0].ratepct/100) * parseInt(result.cost);
+      // if (result.seller.Addresses[0].state.name == result.buyer.Addresses[0].state.name) {
+      //   sgst = (sgstresponse[0].ratepct/100) * parseInt(result.cost);
+      //   igst = 0
+      // } else {
+      //   igst = (igstresponse[0].ratepct/100) * parseInt(result.cost);
+      //   sgst = 0
+      // }
+      
+      taxObj = await getTaxBreakup(result);
+      cgst = taxObj.cgst;
+      sgst = taxObj.sgst;
+      igst = taxObj.igst;
 
-      cgst = (cgstresponse[0].ratepct/100) * parseInt(result.cost);
-      if (result.seller.Addresses[0].state.name == result.buyer.Addresses[0].state.name) {
-        sgst = (sgstresponse[0].ratepct/100) * parseInt(result.cost);
-        igst = 0
-      } else {
-        igst = (igstresponse[0].ratepct/100) * parseInt(result.cost);
-        sgst = 0
-      }
-  
       filename     = encodeURIComponent('PO-' + title) + '.pdf';
       res.setHeader('Content-disposition', 'attachment; filename="' + filename + '"');
       res.setHeader('Content-type', 'application/pdf');
@@ -296,13 +290,13 @@ router.get('/:id', async (req, res) => {
         .text('Amount',530)
         doc
         .moveDown(1)
-        .text('CGST@' + cgstresponse[0].ratepct,470)
+        .text('CGST@' + taxObj.taxrates[0],470)
         doc
         // .moveUp()
-        .text('SGST@' + sgstresponse[0].ratepct,470)
+        .text('SGST@' + taxObj.taxrates[1],470)
         doc
         // .moveUp()
-        .text('IGST@' + igstresponse[0].ratepct,470)
+        .text('IGST@' + taxObj.taxrates[2],470)
 
         // Item Details Values
 

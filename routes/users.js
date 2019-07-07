@@ -1,5 +1,5 @@
 const auth = require('../middleware/auth');
-const logger = require('../startup/logger');
+// const logger = require('../startup/logger');
 const permit = require('../middleware/permissions');
 const jwt = require('jsonwebtoken');
 const config = require('config');
@@ -35,9 +35,10 @@ router.post('/', async (req, res) => {
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
   'isEmpL0', 'isEmpL1']);
   dropIfDNE (userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1']);
-  // console.log(req.body);
+  
   const { error } = validate(userObj);
-  logger.error(error);
+  // logger.error(error);
+  console.log(error);
   let user = await User.findOne({ phone: req.body.phone });
   if (user) return res.status(400).send('User already registered.');
   
@@ -87,19 +88,6 @@ router.post('/', async (req, res) => {
   user.isSeller = false;
 
   await user.save();
-  // Update user address 
-  // console.log(addressid);
-  // console.log(typeof(userid));
-  // updatingAddr = await Address.updateOne({_id : addressid}, {$set: {addedby: userid,addresstype:'registered'}});
-  // console.log(updatingAddr)
-  // if (!updatingAddr) return res.status(404).send('The item with the given ID was not found.');
-  //       res.send(user);
-  //     } else {
-  //       // console.log("No result")
-  //       res.status(404).send({
-  //         message :"No valid data found"
-  //       });
-  //     }
 
   const token = user.generateAuthToken();
   res.header('x-auth-token', token).send(_.pick(user, ['_id', 'name', 'email', 'phone',
@@ -160,34 +148,6 @@ router.put('/me', [auth], async (req, res) => {
 
   res.send(usr);
 
-  // const city = await City.findById(req.body.cityId);
-  // if (!city) return res.status(400).send('Invalid city.');
-
-  // const address = await Address.findById(req.body.addressId);
-  // if (!address) return res.status(400).send('Invalid address.');
-
-  // addressObj = {
-  //   text: req.body.address,
-  //   city: city,
-  //   pin: req.body.pin
-  // };
-
-  // const { errorAddr } = validateAddress(addressObj);
-  // if (errorAddr) return res.status(400).send(error.details[0].message);
-  // address = new Address(addressObj);
-  // await address.save();
-
-  // if (error) return res.status(400).send(error.details[0].message);
-
-  // user = new User(userObj);
-  // user.Addresses.push(address);
-  // const salt = await bcrypt.genSalt(10);
-  // user.password = await bcrypt.hash(user.password, salt);
-  // await user.save();
-
-  // const token = user.generateAuthToken();
-  // res.header('x-auth-token', token).send(_.pick(user, ['_id', 'name', 'email', 'phone',
-  // 'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'role']));
 });
 
 router.get('/seller', [auth, permit('admin')], async (req, res) => {                       //Check Security violation as auth is taken off

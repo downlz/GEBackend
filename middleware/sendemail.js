@@ -12,7 +12,7 @@ const transport = nodemailer.createTransport({
 });
 module.exports = function sendEmail(to, cc, subject, message) {
     const mailOptions = {
-        from : 'graineasy@gmail.com',
+        from : process.env.SENDEMAILUSER,
         to,
         cc,
         subject,
