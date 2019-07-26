@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const mongoose = require('mongoose');
+const User = require('./user');
 
 const transportRateSchema = new mongoose.Schema({
   name: {
@@ -7,7 +8,7 @@ const transportRateSchema = new mongoose.Schema({
     required: false
   },
   vehicletype:{
-    type: String,
+    type: String,         // Open Body,Closed Body
     required: false
   },
   capacity:{
@@ -22,6 +23,19 @@ const transportRateSchema = new mongoose.Schema({
     type : Boolean,
     required: false,
     default: false
+  },
+  addedby : {
+    type: User.userSchema,
+    required: true
+  },
+  createdOn :{
+    type: Date,
+    required: true,
+    default: null
+  },
+  lastUpdatedOn :{
+    type: Date,
+    required: false
   }
 });
 
@@ -34,6 +48,9 @@ function validateTransportRate(transportrate) {
     capacity: Joi.string().max(20).required(),
     rate : Joi.string().required(),
     isinsured : Joi.string().optional(),
+    addedby : Joi.objectid().optional(),
+    createdOn : Joi.string().optional(),
+    lastUpdatedOn : Joi.string().optional()
   };
 
   return Joi.validate(transportrate, schema);

@@ -49,7 +49,6 @@ router.get('/', async (req, res) => {
     res.send(item);
   }
   else {
-    // const item = await Item.find(filter,{"isLive":true}).sort({'price':-1});    // Check how to disable active item, valid whether or is correct way to push
     const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort({'price':-1}); 
     res.send(item);
   }
