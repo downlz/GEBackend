@@ -52,7 +52,8 @@ const itemSchema = new mongoose.Schema({
   },
   bargainenabled: {
     type: Boolean,
-    required: false
+    required: false,
+    default : false
   },
   unit: {
     type : unit.unitSchema,
