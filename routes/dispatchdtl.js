@@ -3,6 +3,7 @@ const permit = require('../middleware/permissions');
 const {DispatchDtl, validate} = require('../models/dispatchdtl');
 // const mongoose = require('mongoose');
 // const {City} = require('../models/city');
+const { Order} = require('../models/order');
 const {User} = require('../models/user');
 const {dropIfDNE} = require('./orders');
 const express = require('express');
@@ -29,8 +30,11 @@ router.post('/', [auth, permit('admin','buyer','seller','transporter')], async (
   // const from = await City.findById(req.body.fromId);
   // if (!from) return res.status(400).send('Invalid city.');
 
-  // const to = await City.findById(req.body.toId);
-  // if (!to) return res.status(400).send('Invalid city.');
+  const order = await Order.find({
+    'orderno': req.body.orderno
+  });
+  // console.log(order);
+  if (!order) return res.status(400).send('Invalid Order No.');
 
   const user = await User.findById(req.body.addedby);
   if (!user) return res.status(400).send('Invalid User');
@@ -42,6 +46,7 @@ router.post('/', [auth, permit('admin','buyer','seller','transporter')], async (
   // dispatchDtlObj.from = from;
   // dispatchDtlObj.to = to;
   dispatchDtlObj.createdOn = Date();
+  dispatchDtlObj.orderid = order[0];
   // dispatchDtlObj.isactive = true;
 
   let dispatchdtl = new DispatchDtl(dispatchDtlObj);
@@ -89,6 +94,15 @@ router.get('/:id', async (req, res) => {
 router.get('/user/:id', async (req, res) => {
   const dispatchdtl = await DispatchDtl.find({
     addedby: req.params.id
+  })
+  if (!dispatchdtl) return res.status(404).send('The dispatchdtl with the given ID was not found.');
+
+  res.send(dispatchdtl);
+});
+
+router.get('/userdispatch/:id', async (req, res) => {
+  const dispatchdtl = await DispatchDtl.find({
+    'orderid.buyer._id': req.params.id
   })
   if (!dispatchdtl) return res.status(404).send('The dispatchdtl with the given ID was not found.');
 

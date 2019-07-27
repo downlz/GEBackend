@@ -9,8 +9,7 @@ const dispatchDtlSchema = new mongoose.Schema({
       required: true
     },
   orderid: {                                            // For future development
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Order',
+    type: Order.orderSchema,
     required: false
   },
   vehicleno: {
@@ -54,7 +53,7 @@ const DispatchDtl = mongoose.model('DispatchDtl', dispatchDtlSchema);
 function validateDispatchDtl(dispatchdtl) {
   const schema = {
     orderno: Joi.string().required(),
-    orderid: Joi.objectId(),
+    orderid: Joi.objectId().optional(),
     vehicleno : Joi.string().required(),
     vehicledtl : Joi.string(),
     transportcost : Joi.number(),
