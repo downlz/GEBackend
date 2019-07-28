@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
   res.send(dispatchdtl);
 });
 
-router.post('/', [auth, permit('admin','buyer','seller','transporter')], async (req, res) => {
+router.post('/', [auth], async (req, res) => {
 
   const { error } = validate(req.body);
   if (error) {
@@ -55,7 +55,7 @@ router.post('/', [auth, permit('admin','buyer','seller','transporter')], async (
   res.send(dispatchdtl);
 });
 
-router.put('/:id', [auth, permit('admin')], async (req, res) => {
+router.put('/:id', [auth], async (req, res) => {
   // console.log(req.body);
   // const { error } = validate(req.body);
   

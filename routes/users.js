@@ -33,8 +33,9 @@ router.post('/', async (req, res) => {
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
-  'isEmpL0', 'isEmpL1']);
-  dropIfDNE (userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1']);
+  'isEmpL0', 'isEmpL1', 'isTransporter']);
+  dropIfDNE(userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1', 
+                    'isAgent', 'isNbfc', 'isBank', 'isTransporter']);
   
   const { error } = validate(userObj);
   // logger.error(error);
@@ -119,9 +120,10 @@ router.put('/:id', [auth, permit('admin')], async (req, res) => {
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
-  'isEmpL0', 'isEmpL1']);
+  'isEmpL0', 'isEmpL1', 'isTransporter']);
   //const { error } = validate(userObj);
-  dropIfDNE (userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1']);
+  dropIfDNE(userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1', 
+                      'isAgent','isNbfc','isBank','isTransporter']);
 
   user = await User.findByIdAndUpdate(req.params.id, userObj, {
     new: true
@@ -136,9 +138,10 @@ router.put('/me', [auth], async (req, res) => {
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
-  'isEmpL0', 'isEmpL1']);
+  'isEmpL0', 'isEmpL1', 'isTransporter']);
   //const { error } = validate(userObj);
-  dropIfDNE (userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1']);
+  dropIfDNE(userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1',
+          'isAgent', 'isNbfc', 'isBank', 'isTransporter']);
 
   user = await User.findByIdAndUpdate(req.user.id, userObj, {
     new: true
@@ -150,14 +153,21 @@ router.put('/me', [auth], async (req, res) => {
 
 });
 
-router.get('/seller', [auth, permit('admin')], async (req, res) => {                       //Check Security violation as auth is taken off
+router.get('/seller', [auth, permit('admin','seller')], async (req, res) => {                       //Check Security violation as auth is taken off
   const user = await User.find({"isSeller":true}).sort('name').select('-password');
   res.send(user);
 });
 
 
-router.get('/buyer', [auth, permit('admin')], async (req, res) => {
+router.get('/buyer', [auth, permit('admin','buyer')], async (req, res) => {
   const user = await User.find({"isBuyer":true}).sort('name').select('-password');
+  res.send(user);
+});
+
+router.get('/transporter', [auth, permit('admin','transporter')], async (req, res) => {
+  const user = await User.find({
+    "isTransporter": true
+  }).sort('name').select('-password');
   res.send(user);
 });
 
