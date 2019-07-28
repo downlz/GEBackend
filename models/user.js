@@ -105,7 +105,10 @@ const userSchema = new mongoose.Schema({
   },
   isAdmin: Boolean,
   isSeller: Boolean,
-  // isTransporter: Boolean,
+  isTransporter: Boolean,
+  isNbfc: Boolean,
+  isAgent: Boolean,
+  isBank: Boolean,
   isBuyer: Boolean,
   isEmpL0: Boolean,
   isEmpL1: Boolean,
@@ -132,7 +135,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.generateAuthToken = function() {
   const token = jwt.sign({ _id: this._id, isAdmin: this.isAdmin, isSeller: this.isSeller,
-    isBuyer: this.isBuyer, isEmpL0: this.isEmpL0, isEmpL1: this.isEmpL1}, config.get('jwtPrivateKey'));
+    isBuyer: this.isBuyer, isEmpL0: this.isEmpL0, isEmpL1: this.isEmpL1, isTransporter: this.isTransporter}, config.get('jwtPrivateKey'));
     // console.log(token);
   return token;
 }
@@ -154,7 +157,10 @@ function validateUser(user) {
     isAdmin: Joi.boolean().optional(),
     isSeller: Joi.boolean().optional(),
     isBuyer: Joi.boolean().optional(),
-    // isTransporter: Joi.boolean.optional(),
+    isTransporter: Joi.boolean.optional(),
+    isAgent: Joi.boolean().optional(),
+    isNbfc: Joi.boolean().optional(),
+    isBank: Joi.boolean().optional(),
     isEmpL0: Joi.boolean().optional(),
     isEmpL1: Joi.boolean().optional(),
     sellerFeePerKg: Joi.number().optional(),

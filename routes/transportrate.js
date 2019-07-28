@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
   res.send(transportrate);
 });
 
-router.post('/', [auth, permit('admin')], async (req, res) => {
+router.post('/', [auth] , async (req, res) => { // permit('admin', 'transporter')],
 
   const { error } = validate(req.body);
   if (error) {
@@ -50,7 +50,7 @@ router.post('/', [auth, permit('admin')], async (req, res) => {
   res.send(transportrate);
 });
 
-router.put('/:id', [auth, permit('admin')], async (req, res) => {
+router.put('/:id', [auth], async (req, res) => {
   // console.log(req.body);
   // const { error } = validate(req.body);
   
