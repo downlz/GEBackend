@@ -100,9 +100,14 @@ const itemSchema = new mongoose.Schema({
     type: Boolean,
     required: false
   },
+  isTaxable: {
+    type: Boolean,
+    required: false,
+    default: true
+  },
   manufacturer:{
     type: manufacturer.manufacturerSchema,
-    required: true
+    required: true,
   }
   // },
   // saletype: {
@@ -133,6 +138,7 @@ function validateItem(item) {
     sellerId: Joi.objectId().required(),
     origin: Joi.string().optional(),
     isLive: Joi.boolean().optional(),
+    isTaxable: Joi.boolean().optional(),
     specs: Joi.object().optional(),
     manufacturerId: Joi.objectId().required()
   };

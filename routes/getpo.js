@@ -92,10 +92,19 @@ router.get('/:id', async (req, res) => {
       //   sgst = 0
       // }
       
-      taxObj = await getTaxBreakup(result);
-      cgst = taxObj.cgst;
-      sgst = taxObj.sgst;
-      igst = taxObj.igst;
+      if (result.item.isTaxable == true) {
+        taxObj = await getTaxBreakup(result);
+        cgst = taxObj.cgst;
+        sgst = taxObj.sgst;
+        igst = taxObj.igst;
+      } else {
+        taxObj = {}
+        taxObj.taxrates = [0, 0, 0]
+        // taxObj = await getTaxBreakup(result);
+        cgst = 0;
+        sgst = 0;
+        igst = 0;
+      }
 
       filename     = encodeURIComponent('PO-' + title) + '.pdf';
       res.setHeader('Content-disposition', 'attachment; filename="' + filename + '"');
@@ -266,22 +275,22 @@ router.get('/:id', async (req, res) => {
         .text('Description',70)
         doc
         .moveUp() 
-        .text('HSN',130)
+        .text('HSN',140)
         doc
         .moveUp()
-        .text('Qty',170)
+        .text('Qty',200)
         doc
         .moveUp()
-        .text('Rate',210)
+        .text('Rate',240)
         doc
         .moveUp()
-        .text('Gross Amount',250) 
+        .text('Gross Amount',290) 
         doc
         .moveUp()
-        .text('Discount',310)
+        .text('Discount',350)
         doc
         .moveUp()
-        .text('Net Amount',360)
+        .text('Net Amount',400)
         doc
         .moveUp()
         .text('Tax',470)
@@ -308,22 +317,22 @@ router.get('/:id', async (req, res) => {
         .text(result.item.name.name + ',' + result.item.category.name,70)
         doc
         .moveUp() 
-        .text(result.item.name.hsn,130)       
+        .text(result.item.name.hsn,140)       
         doc
         .moveUp()
-        .text(result.quantity + ' ' + result.unit,170)
+        .text(result.quantity + ' ' + result.unit,200)
         doc
         .moveUp()
-        .text(result.price,210)
+        .text(result.price,250)
         doc
         .moveUp()
-        .text(result.cost.toFixed(2),250) 
+        .text(result.cost.toFixed(2),290) 
         doc
         .moveUp()
-        .text(result.discount,310)
+        .text(result.discount,350)
         doc
         .moveUp()
-        .text((result.cost-result.discount).toFixed(2),360)
+        .text((result.cost-result.discount).toFixed(2),400)
         // doc
         // .moveUp()
         // .text('Tax',470)
@@ -365,7 +374,7 @@ router.get('/:id', async (req, res) => {
         .text('NA',530);
         doc
         .moveDown(2)
-        .text((parseInt(result.cost)+cgst+igst+sgst + result.transportcost + result.insurancecharges).toFixed(2),530);
+        .text('Rs.'+(parseInt(result.cost)+cgst+igst+sgst + result.transportcost + result.insurancecharges).toFixed(2),530);
 
       doc
         .fontSize(6)

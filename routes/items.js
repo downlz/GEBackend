@@ -80,8 +80,8 @@ router.get('/current/', [auth], async (req, res) => {
 router.post('/', [auth, permit('seller', 'admin')], async (req, res) => {
 
     let itemObj = _.pick(req.body, ['image',
-        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'specs']);
-    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'specs']);
+        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs']);
+    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs']);
 
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
@@ -145,7 +145,7 @@ router.put('/:id', [auth, permit('seller', 'admin')], async (req, res) => {
     if (!unit) return res.status(400).send('Invalid unit.');
 
     itemObj = _.pick(req.body, ['name', 'image',
-        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive']);
+        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable']);
 
     itemObj.category = category;
     itemObj.name = name;

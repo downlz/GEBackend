@@ -85,7 +85,7 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
   if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
   // console.log(bargain)
   var bargainObj = _.pick(req.body, [parseInt('buyerquote'), parseInt('sellerquote')]);
-  console.log(req.body);
+  // console.log(req.body);
   if (req.body.buyerquote) {
     switch (bargain.bargaincounter) {
       case 1:
@@ -361,6 +361,19 @@ router.get('/seller/:sellerid/item/:id', async (req, res) => {
 
   res.send(bargain);
 });
+
+// router.get('/squareoff', async (req, res) => {
+
+//   // const bargain = await Bargain.find({});
+  
+//   // if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
+
+//   // res.send(bargain);
+//   const bargain = await Bargain.find().sort({
+//     'lastupdated': -1
+//   });
+//   res.send(bargain);
+// });
 
 module.exports = router;
 

@@ -276,16 +276,25 @@ router.get('/user/:id', [auth], async (req, res) => {
 async function getTaxBreakup(userObj) {
 
   const cgstresponse = await Taxrate.find({type:'cgst'});        // append date based on order
-  const igstresponse = await Taxrate.find({type:'igst'});
-  const sgstresponse = await Taxrate.find({type:'sgst'});
+  var sgstresponse = [{'ratepct':0}];
+//   sgstresponse[0].ratepct = 0;
+  var igstresponse = [{
+      'ratepct': 0
+  }];
+//   sgstresponse[0].ratepct = 0;
 
     // Calculating tax, apply logic to calculate igst and sgst
-
   cgst = (cgstresponse[0].ratepct/100) * parseInt(userObj.cost);
-  if (userObj.seller.Addresses[0].state.name == userObj.buyer.Addresses[0].state.name) {
+  if (userObj.seller.Addresses[0].state.name === userObj.buyer.Addresses[0].state.name) {
+      var sgstresponse = await Taxrate.find({
+          type: 'sgst'
+      });
     sgst = (sgstresponse[0].ratepct/100) * parseInt(userObj.cost);
     igst = 0
   } else {
+      var igstresponse = await Taxrate.find({
+          type: 'igst'
+      });
     igst = (igstresponse[0].ratepct/100) * parseInt(userObj.cost);
     sgst = 0
   }
