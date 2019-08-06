@@ -35,7 +35,7 @@ const bargain = require('../routes/bargain');
 
 
 var corsOptions = {
-  origin: '*'
+  origin: process.env.WEBSERVERPROD
 }
 
 module.exports = function(app) {
