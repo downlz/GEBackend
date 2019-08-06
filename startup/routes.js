@@ -37,7 +37,7 @@ const bargain = require('../routes/bargain');
 var corsOptions = {
   origin: '*',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  preflightContinue: false,
+  allowedHeaders: 'Content-Type, Authorization,Origin,X-Requested-With,Accept',
   optionsSuccessStatus: 200
 }
 
