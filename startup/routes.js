@@ -35,9 +35,9 @@ const bargain = require('../routes/bargain');
 
 
 var corsOptions = {
-  origin: 'https://18.224.195.125:4200',
+  origin: '*',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  // preflightContinue: false,
+  preflightContinue: false,
   optionsSuccessStatus: 200
 }
 
