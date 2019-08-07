@@ -33,7 +33,6 @@ const billingorg = require('../routes/billingorg');
 const taxrates = require('../routes/taxrates');
 const bargain = require('../routes/bargain');
 
-
 var corsOptions = {
   origin: '*',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
