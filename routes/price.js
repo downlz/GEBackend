@@ -52,6 +52,7 @@ router.post('/', [auth],  async (req, res) => {
   // console.log(quantity_dash, P1, P2, Num, Den, P_invoice_rate, P_gross, p_final);
   // console.log()
   price  = {'price' : p_final};
+  console.log(price);
   res.send(price);
 });
 

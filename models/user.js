@@ -157,7 +157,7 @@ function validateUser(user) {
     isAdmin: Joi.boolean().optional(),
     isSeller: Joi.boolean().optional(),
     isBuyer: Joi.boolean().optional(),
-    isTransporter: Joi.boolean.optional(),
+    isTransporter: Joi.boolean().optional(),
     isAgent: Joi.boolean().optional(),
     isNbfc: Joi.boolean().optional(),
     isBank: Joi.boolean().optional(),
