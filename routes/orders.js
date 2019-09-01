@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
 });
 
 // Check below permit as in future seller may also place order
-router.post('/', [auth, permit('buyer', 'admin')], async (req, res) => {
+router.post('/', [auth, permit('buyer', 'admin' ,'agent')], async (req, res) => {
     await placeOrder(req.body, req, res)
 });
 

@@ -31,7 +31,6 @@ var storage = multer.diskStorage({
     cb(null, './uploads')
   },
   filename: function (req, file, cb) {
-    // cb(null, file.fieldname + '-' + Date.now())
     cb(null, Date.now() + path.extname(file.originalname)) //Appending extension
   }
 })
@@ -75,14 +74,13 @@ router.put('/', [auth,upload.single('myFile')], async (req, res, next) => {
     error.httpStatusCode = 400
     return next(error)
   }
-  console.log(req.body);
 
   orderObj = {
     filename: file.filename,
     addedOn: Date.now()
   }
   // Posting image to firebase https://www.youtube.com/watch?v=YkvqLNcJz3Y
-  // console.log(orderObj);
+
   const order = await Order.updateOne({_id : req.body.orderId}, {$set: {'manualbill': orderObj}});
   console.log(order);
   if (!order) 

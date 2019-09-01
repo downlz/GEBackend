@@ -126,7 +126,7 @@ const orderSchema = new mongoose.Schema({
     },
     ordertype: {
         type: String,
-        enum: ['regular', 'groupbuying', 'auction', 'bargainbuy', 'sampleorder'],
+        enum: ['regular', 'groupbuying', 'auction', 'bargainbuy', 'sampleorder', 'agentorder'],
         required: false
     },
     reversechargemech:{
