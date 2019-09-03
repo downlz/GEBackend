@@ -12,15 +12,15 @@ const city = require('./city');
 
 const itemspecSchema = new mongoose.Schema({
   moisture: {
-    type: Number,
+    type: String,
     required: false
   },
   graincount: {
-    type: Number,
+    type: String,
     required: false
   },
   icumsa: {
-    type: Number,
+    type: String,
     required: false
   }
 });
@@ -64,11 +64,11 @@ const itemSchema = new mongoose.Schema({
     required: false
   },
   moisture: {
-    type: Number,
+    type: String,
     required: false
   },
   grainCount: {
-    type: Number,
+    type: String,
     required: false
   },
   grade: {
@@ -129,8 +129,8 @@ function validateItem(item) {
     bargainenabled: Joi.boolean().optional(),
     unitId: Joi.objectId().required(),
     price: Joi.number().required(),
-    moisture: Joi.number().optional(),
-    grainCount: Joi.number().optional(),
+    moisture: Joi.string().optional(),
+    grainCount: Joi.string().optional(),
     grade: Joi.string().optional(),
     sampleNo: Joi.string().required(),
     cityId: Joi.objectId().required(),
