@@ -53,10 +53,10 @@ async function placeOrder(obj, req, res) {
     // }
 
     let orderObj = _.pick(obj, ['orderno', 'quantity', 'unit','address',
-        'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff','isExistingAddr']);
+        'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'paymentterms','price','isshippingbillingdiff','isExistingAddr']);
     
     await dropIfDNE(orderObj,['orderno', 'quantity', 'unit','address',
-    'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'price','isshippingbillingdiff','isExistingAddr']);
+    'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'paymentterms','price','isshippingbillingdiff','isExistingAddr']);
 
     if (req.body.isshippingbillingdiff == true) {
         state = await State.findById(obj.state);
@@ -150,11 +150,11 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
 
     let orderObj = _.pick(req.body, ['quantity',
         'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-        'receivedTime','readyTime','lastUpdated', 'paymentMode', 'status','remarks']);
+        'receivedTime','readyTime','lastUpdated', 'paymentMode', 'paymentterms','status','remarks']);
     
     await dropIfDNE(orderObj,['quantity',
     'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
-    'receivedTime','readyTime','lastUpdated', 'paymentMode', 'status','remarks']); 
+    'receivedTime','readyTime','lastUpdated', 'paymentMode','paymentterms', 'status','remarks']); 
 
     if (req.body.addressId) {
         orderObj.address = address;

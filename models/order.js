@@ -134,6 +134,11 @@ const orderSchema = new mongoose.Schema({
         required: false,
         default: false
     },
+    paymentterms:{
+        type: String,
+        enum: ['Pre Dispatch', 'Pre Delivery', '10 Days', '20 Days', '30 Days', '45 Days'],
+        required: false
+    },
     transportcost: {
         type: Number,               
         required: false,
@@ -187,6 +192,7 @@ function validateOrder(order) {
         manualbill: Joi.object().optional(),
         ordertype: Joi.string().optional(),
         reversechargemech: Joi.boolean().optional(),
+        paymentterms: Joi.string().optional(),
         transportcost: Joi.number().optional(),
         insurancecharges: Joi.number().optional,
         referenceGBId: Joi.objectId().optional(),
