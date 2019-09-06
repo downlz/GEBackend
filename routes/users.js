@@ -19,7 +19,7 @@ function dropIfDNE(Obj, arr) {
   }
 }
 
-router.get('/', [auth, permit('admin')], async (req, res) => {
+router.get('/', [auth, permit('admin', 'agent')], async (req, res) => {
   const user = await User.find().sort('name').select('-password');
   res.send(user);
 });
@@ -153,18 +153,18 @@ router.put('/me', [auth], async (req, res) => {
 
 });
 
-router.get('/seller', [auth, permit('admin','seller')], async (req, res) => {                       //Check Security violation as auth is taken off
+router.get('/seller', async (req, res) => {                       //Check Security violation as auth is taken off
   const user = await User.find({"isSeller":true}).sort('name').select('-password');
   res.send(user);
 });
 
 
-router.get('/buyer', [auth, permit('admin','buyer')], async (req, res) => {
+router.get('/buyer', [auth, permit('admin', 'buyer', 'agent')], async (req, res) => {
   const user = await User.find({"isBuyer":true}).sort('name').select('-password');
   res.send(user);
 });
 
-router.get('/transporter', [auth, permit('admin','transporter')], async (req, res) => {
+router.get('/transporter', [auth, permit('admin', 'transporter', 'agent')], async (req, res) => {
   const user = await User.find({
     "isTransporter": true
   }).sort('name').select('-password');
