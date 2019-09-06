@@ -1,7 +1,7 @@
 const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const {State, validate} = require('../models/state');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');

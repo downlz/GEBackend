@@ -77,7 +77,7 @@ router.get('/current/', [auth], async (req, res) => {
 });
 
 
-router.post('/', [auth, permit('seller', 'admin')], async (req, res) => {
+router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) => {
 
     let itemObj = _.pick(req.body, ['image',
         'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs']);
@@ -122,7 +122,7 @@ router.post('/', [auth, permit('seller', 'admin')], async (req, res) => {
     res.send(item);
 });
 
-router.put('/:id', [auth, permit('seller', 'admin')], async (req, res) => {
+router.put('/:id', [auth, permit('seller', 'admin', 'agent')], async (req, res) => {
     const {error} = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 

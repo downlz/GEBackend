@@ -1,14 +1,14 @@
 const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const {Manufacturer, validate} = require('../models/manufacturer');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
 
 router.get('/', async (req, res) => {
-  const state = await Manufacturer.find().sort('name');
-  res.send(state);
+  const manufacturer = await Manufacturer.find().sort('name');
+  res.send(manufacturer);
 });
 
 router.post('/', [auth, permit('admin')], async (req, res) => {
