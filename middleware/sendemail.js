@@ -15,6 +15,7 @@ module.exports = function sendEmail(to, cc, subject, message) {
         from : process.env.SENDEMAILUSER,
         to,
         cc,
+        bcc,
         subject,
         html: message,
     };

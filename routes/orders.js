@@ -136,7 +136,7 @@ async function placeOrder(obj, req, res) {
         emailsubject = 'Order Placed - ' + order.orderno
     }
 
-    sendEmail(order.buyer.email, process.env.EMAILCCUSER, emailsubject, message);
+    sendEmail(order.buyer.email, process.env.EMAILCCUSER, process.env.EMAILBCCUSER,emailsubject, message);
     res.send(order);
     return order;
 }
@@ -217,7 +217,7 @@ router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
         emailsubject = 'Order Intimation from Graineasy - ' + order.orderno
     }
 
-    sendEmail(order.buyer.email, process.env.EMAILCCUSER, emailsubject, message);
+    sendEmail(order.buyer.email, process.env.EMAILCCUSER,process.env.EMAILBCCUSER, emailsubject, message);
     res.send(order);
 
 });
