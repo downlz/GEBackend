@@ -154,7 +154,7 @@ router.put('/me', [auth], async (req, res) => {
 });
 
 router.get('/seller', async (req, res) => {                       //Check Security violation as auth is taken off
-  const user = await User.find({"isSeller":true}).sort('name').select('-password');
+  const user = await User.find({ $and : [{"isSeller":true},{"isactive":true}]}).sort('name').select('-password');
   res.send(user);
 });
 
