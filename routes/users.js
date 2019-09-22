@@ -67,7 +67,7 @@ router.post('/', async (req, res) => {
   console.log(errorAddr);
   if (errorAddr) return res.status(400).send(error.details[0].message);
   address = new Address(addressObj);
-  await address.save();
+  address.save();   // Replacing await 
 
   if (error) return res.status(400).send(error.details[0].message);
   console.log(error)

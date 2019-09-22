@@ -20,7 +20,7 @@ router.post('/', [auth],  async (req, res) => {
 
   // price calculation engine 
   let sellingPrice = item.price;
-  let tax = item.name.tax ? item.name.tax : 0;
+  let tax = item.name.tax ? (item.name.tax/100) : 0;
   let transporationPerKg = item.transporationPerKg ? item.transporationPerKg: 0;
   let insurance = seller.Addresses[0].city.insurance ? seller.Addresses[0].city.insurance : 0;
   let loadingPerKg = seller.Addresses[0].city.loadingPerKg ? seller.Addresses[0].city.loadingPerKg: 0;
@@ -67,7 +67,7 @@ router.post('/', [auth],  async (req, res) => {
   let gross_amt = Q_dash * total_ded_before_D3;  // Gross Amount
   let D3 = buyerDiscount3Lumpsump;  // Lump Sum discount
   let net_amt = gross_amt - D3;
-  let net_payable = net_amt + tax + insurance;
+  let net_payable = net_amt + (sellingPrice * tax) + insurance;
 
   // Balancing Formula
   // Y*Q'-(B+D1)*Q'*Y-D2*Q'-D3=P6*Q
@@ -78,7 +78,7 @@ router.post('/', [auth],  async (req, res) => {
   let Y_final = Y_dash - buyerDiscount2PerKg;
 
   let gross_amt_using_y = Y_final * Q_dash;
-  let net_payable_using_y = gross_amt_using_y + tax + insurance;
+  let net_payable_using_y = gross_amt_using_y + (sellingPrice * tax) + insurance;
   price  = {'price' : net_payable_using_y,
             'y' : Y,
             'qty' : Q,

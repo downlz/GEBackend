@@ -108,6 +108,10 @@ const itemSchema = new mongoose.Schema({
   manufacturer:{
     type: manufacturer.manufacturerSchema,
     required: true,
+  },
+  addedby : {
+    type: user.userSchema,
+    required: false
   }
   // },
   // saletype: {
@@ -139,6 +143,7 @@ function validateItem(item) {
     origin: Joi.string().optional(),
     isLive: Joi.boolean().optional(),
     isTaxable: Joi.boolean().optional(),
+    addedby : Joi.objectId().required(),
     specs: Joi.object().optional(),
     manufacturerId: Joi.objectId().required()
   };
