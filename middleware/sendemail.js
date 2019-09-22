@@ -10,7 +10,7 @@ const transport = nodemailer.createTransport({
         pass: process.env.EMAILPASS
     },
 });
-module.exports = function sendEmail(to, cc, subject, message) {
+module.exports = function sendEmail(to, cc, bcc,subject, message) {
     const mailOptions = {
         from : process.env.SENDEMAILUSER,
         to,
