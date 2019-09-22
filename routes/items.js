@@ -105,6 +105,9 @@ router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) =>
     const unit = await Unit.findById(req.body.unitId);
     if (!unit) return res.status(400).send('Invalid unit.');
 
+    const user = await User.findById(req.body.addedby);
+    if (!user) return res.status(400).send('Invalid User');
+
     const manufacturer = await Manufacturer.findById(req.body.manufacturerId);
     if (!manufacturer) return res.status(400).send('Invalid Manufacturer');
 
@@ -115,6 +118,7 @@ router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) =>
     itemObj.seller = seller;
     itemObj.unit = unit;
     itemObj.manufacturer = manufacturer;
+    itemObj.addedby = user;
 
   let item = new Item(itemObj);
   item = await item.save();
