@@ -29,12 +29,12 @@ const userSchema = new mongoose.Schema({
     minlength: 13,
     maxlength: 13
   },
-  // pan: {
-  //   type: String,
-  //   required: false,
-  //   minlength: 5,
-  //   maxlength: 50
-  // },
+  pan: {
+    type: String,
+    required: false,
+    minlength: 5,
+    maxlength: 50
+  },
   GST: {
     type: String,
     required: false,
@@ -115,7 +115,6 @@ const userSchema = new mongoose.Schema({
   vendorCode: {
     type: String,
     required: false,
-    unique : true,
     default: ''
   },
   cin : {
@@ -148,7 +147,7 @@ function validateUser(user) {
     email: Joi.string().min(5).max(255).optional().email(),
     password: Joi.string().min(8).max(255).required(),
     phone: Joi.string().length(13).required(),
-    // pan: Joi.string().min(5).max(50),
+    pan: Joi.string().min(5).max(50).optional(),
     GST: Joi.string().min(5).max(100).optional(),
     Addresses: Joi.array().optional(),
     PocName: Joi.string().min(5).max(50).optional(),
