@@ -67,8 +67,6 @@ router.post('/', async (req, res) => {
   console.log(errorAddr);
   if (errorAddr) return res.status(400).send(error.details[0].message);
   address = new Address(addressObj);
-  address.save();   // Replacing await 
-
   if (error) return res.status(400).send(error.details[0].message);
   console.log(error)
   user = new User(userObj);
@@ -89,6 +87,8 @@ router.post('/', async (req, res) => {
   user.isSeller = false;
 
   await user.save();
+
+  await address.save();   //Save address once user profile is saved
 
   const token = user.generateAuthToken();
   res.header('x-auth-token', token).send(_.pick(user, ['_id', 'name', 'email', 'phone',
