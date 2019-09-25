@@ -88,7 +88,7 @@ router.put('/:id', [auth], async (req, res) => {
         new: true
     }).populate(["sampleNo", "user", "unit",]);
 
-    if (!auction) return res.status(404).send('The genre with the given ID was not found.');
+    if (!auction) return res.status(404).send('The auction with the given ID was not found.');
 
     res.send(auction);
 });

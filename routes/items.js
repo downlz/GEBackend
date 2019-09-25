@@ -70,12 +70,18 @@ router.get('/byCategory/:category', async (req, res) => {
  * Api to get current  user listings
  */
 router.get('/current/', [auth], async (req, res) => {
-    const state = await Item.find({
-        'seller._id': req.user._id
+    const state = await Item.find({ $or : [{'seller._id': req.user._id},{'addedby._id': req.user._id}]
     }).sort('name.name');
     res.send(state);
 });
 
+/**
+ * Api to get all listings
+ */
+router.get('/all/', [auth,permit('seller', 'admin', 'agent')], async (req, res) => {
+  const item = await Item.find({}).sort('sampleNo');
+  res.send(item);
+});
 
 router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) => {
 
@@ -126,36 +132,54 @@ router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) =>
     res.send(item);
 });
 
-router.put('/:id', [auth, permit('seller', 'admin', 'agent')], async (req, res) => {
-    const {error} = validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+router.put('/activate/:id', [auth], async (req, res) => {
+  const item = await Item.findById(req.params.id);
 
-    const category = await Category.findOne({name: req.body.categoryId});
-    if (!category) return res.status(400).send('Invalid customer.');
+  itemObj = { 'isLive' : true}
+  itemupd = await Item.findByIdAndUpdate(req.params.id, itemObj, {
+    new: true
+  });
 
-    const name = await ItemName.findById(req.body.nameId);
-    if (!name) return res.status(400).send('Invalid category.');
+  if (!itemupd) return res.status(404).send('Issue with updating the document');
 
-    const city = await City.findById(req.body.cityId);
-    if (!city) return res.status(400).send('Invalid city.');
+  res.send(itemupd);
+});
 
-    const address = await Address.findById(req.body.addressId);
-    if (!address) return res.status(400).send('Invalid address');
+router.put('/:id', [auth], async (req, res) => {
+    // const {error} = validate(req.body);
+    // console.log(error);
+    // if (error) return res.status(400).send(error.details[0].message);
+    
+    let itemObj = _.pick(req.body, ['image',
+        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs']);
+    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs']);
 
-    const seller = await User.findById(req.body.sellerId);
-    if (!seller) return res.status(400).send('Invalid seller');
+    // const category = await Category.findOne({name: req.body.categoryId});
+    // if (!category) return res.status(400).send('Invalid customer.');
+
+    // const name = await ItemName.findById(req.body.nameId);
+    // if (!name) return res.status(400).send('Invalid category.');
+
+    // const city = await City.findById(req.body.cityId);
+    // if (!city) return res.status(400).send('Invalid city.');
+
+    // const address = await Address.findById(req.body.addressId);
+    // if (!address) return res.status(400).send('Invalid address');
+
+    // const seller = await User.findById(req.body.sellerId);
+    // if (!seller) return res.status(400).send('Invalid seller');
 
     const unit = await Unit.findById(req.body.unitId);
     if (!unit) return res.status(400).send('Invalid unit.');
 
-    itemObj = _.pick(req.body, ['name', 'image',
-        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable']);
+    // itemObj = _.pick(req.body, ['name', 'image',
+    //     'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable']);
 
-    itemObj.category = category;
-    itemObj.name = name;
-    itemObj.city = city;
-    itemObj.address = address;
-    itemObj.seller = seller;
+    // itemObj.category = category;
+    // itemObj.name = name;
+    // itemObj.city = city;
+    // itemObj.address = address;
+    // itemObj.seller = seller;
     itemObj.unit = unit;
 
     const item = await Item.findByIdAndUpdate(req.params.id, itemObj, {
