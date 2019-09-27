@@ -120,15 +120,16 @@ router.put('/:id', [auth, permit('admin')], async (req, res) => {
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
-  'isEmpL0', 'isEmpL1', 'isTransporter']);
+  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive']);
   //const { error } = validate(userObj);
-  dropIfDNE(userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1', 
-                      'isAgent','isNbfc','isBank','isTransporter']);
-
+  dropIfDNE(userObj, ['name', 'email', 'password', 'phone',
+  'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
+  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive']);
+  
   user = await User.findByIdAndUpdate(req.params.id, userObj, {
     new: true
   });
-
+  
   if (!user) return res.status(404).send('The item with the given ID was not found.');
 
   res.send(user);
@@ -138,10 +139,10 @@ router.put('/me', [auth], async (req, res) => {
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
-  'isEmpL0', 'isEmpL1', 'isTransporter']);
+  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive']);
   //const { error } = validate(userObj);
   dropIfDNE(userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1',
-          'isAgent', 'isNbfc', 'isBank', 'isTransporter']);
+          'isAgent', 'isNbfc', 'isBank', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive']);
 
   user = await User.findByIdAndUpdate(req.user.id, userObj, {
     new: true
