@@ -238,11 +238,10 @@ router.get('/id/:id', [auth], async (req, res) => {
     res.send(order);
 });
 
-router.get('/orderno', [auth], async (req, res) => {
+router.get('/orderno', [auth,permit('admin','agent','seller','buyer')], async (req, res) => {
     const order = await Order.find().sort({orderno: -1}).limit(1)
     if (!order) return res.status(404).send('The item with the given ID was not found.');
     res.send(order);
-    // res.send(order[0].orderno);
 });
 
 router.get('/user/:id', [auth], async (req, res) => {

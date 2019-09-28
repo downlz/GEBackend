@@ -6,6 +6,7 @@ const config = require('config');
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
 const {User, validate} = require('../models/user');
+const sendEmail = require('../middleware/sendemail');
 const {Address, validateAddress} = require('../models/address');
 const {City} = require('../models/city');
 const {State} = require('../models/state');
@@ -33,7 +34,7 @@ router.post('/', async (req, res) => {
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
-  'isEmpL0', 'isEmpL1', 'isTransporter']);
+  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent', 'isNbfc', 'isBank']);
   dropIfDNE(userObj, ['pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer', 'isEmpL0', 'isEmpL1', 
                     'isAgent', 'isNbfc', 'isBank', 'isTransporter']);
   
@@ -109,7 +110,6 @@ router.post('/resetpassword', async (req, res) => {
       if (!user) return res.status(404).send('The item with the given ID was not found.');
         res.send(user);
       } else {
-        // console.log("No result")
         res.status(404).send({
           message :"No valid data found"
         });
@@ -118,10 +118,13 @@ router.post('/resetpassword', async (req, res) => {
 
 router.put('/:id', [auth, permit('admin')], async (req, res) => {
 
+  const useremail = await User.findById(req.params.id);
+  if (!useremail) return res.status(400).send('Invalid User.');
+
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
   'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive']);
-  //const { error } = validate(userObj);
+
   dropIfDNE(userObj, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
   'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive']);
@@ -129,8 +132,22 @@ router.put('/:id', [auth, permit('admin')], async (req, res) => {
   user = await User.findByIdAndUpdate(req.params.id, userObj, {
     new: true
   });
-  
+
   if (!user) return res.status(404).send('The item with the given ID was not found.');
+
+  var message = `<p>Dear User,</p>
+        <p>Thank you for registration on GrainEasy.<br>
+        Your account has been successfully activated.You can now login to the application and explore products,place orders and do much more.<br>
+        Please feel free to reach out to us on trade@graineasy.com for any clarification.
+        <br><br>
+        Regards,<br>
+        Graineasy
+        </p>`
+    var emailsubject;
+    emailsubject = 'Graineasy account Activated'
+    if (userObj.isactive == true){
+      sendEmail(useremail.email, process.env.EMAILCCUSER, process.env.EMAILBCCUSER,emailsubject, message);
+    }
 
   res.send(user);
 });
@@ -154,7 +171,7 @@ router.put('/me', [auth], async (req, res) => {
 
 });
 
-router.get('/seller', async (req, res) => {                       //Check Security violation as auth is taken off
+router.get('/seller',[auth, permit('admin', 'seller', 'agent')], async (req, res) => {                     
   const user = await User.find({ $and : [{"isSeller":true},{"isactive":true}]}).sort('name').select('-password');
   res.send(user);
 });
@@ -162,6 +179,11 @@ router.get('/seller', async (req, res) => {                       //Check Securi
 
 router.get('/buyer', [auth, permit('admin', 'buyer', 'agent')], async (req, res) => {
   const user = await User.find({"isBuyer":true}).sort('name').select('-password');
+  res.send(user);
+});
+
+router.get('/agent', [auth, permit('admin', 'agent')], async (req, res) => {
+  const user = await User.find({"isAgent":true}).sort('name').select('-password');
   res.send(user);
 });
 

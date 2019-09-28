@@ -2,10 +2,8 @@
 module.exports = function permit(...roles) {
     
     return (req, res, next) => {
-
         if (!req.user) {
-            res.status(403).json({message: "Forbidden"}); // user is forbidden
-
+            res.status(403).json({message: "Forbidden - User missing"}); // user is forbidden
         }
         var allowed = false;
         for(var i = 0, size = roles.length; i < size ; i++){ 
@@ -16,6 +14,12 @@ module.exports = function permit(...roles) {
                 allowed = true;
             }
             if ((roles[i] === 'seller') && (req.user.isSeller)) {
+                allowed = true;
+            }
+            if ((roles[i] === 'transporter') && (req.user.isTransporter)) {
+                allowed = true;
+            }
+            if ((roles[i] === 'agent') && (req.user.isAgent)) {
                 allowed = true;
             }
             if ((roles[i] === 'emp0') && (req.user.isEmp0)) {
@@ -29,7 +33,7 @@ module.exports = function permit(...roles) {
             next();
         }
         else {
-            res.status(403).json({message: "Forbidden"}); // user is forbidden
+            res.status(403).json({message: "Forbidden, Not Authorized"}); // user is forbidden
         }
     }
   }
