@@ -134,8 +134,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.generateAuthToken = function() {
   const token = jwt.sign({ _id: this._id, isAdmin: this.isAdmin, isSeller: this.isSeller,
-    isBuyer: this.isBuyer, isEmpL0: this.isEmpL0, isEmpL1: this.isEmpL1, isTransporter: this.isTransporter}, config.get('jwtPrivateKey'));
-    // console.log(token);
+    isBuyer: this.isBuyer, isEmpL0: this.isEmpL0, isEmpL1: this.isEmpL1, isTransporter: this.isTransporter,isAgent: this.isAgent}, config.get('jwtPrivateKey'));
   return token;
 }
 
