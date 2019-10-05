@@ -2,10 +2,10 @@ const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const {City, validate} = require('../models/city');
 const {State} = require('../models/state'); 
-// const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
+const {toLatLon, toLatitudeLongitude, headingDistanceTo, moveTo, insidePolygon,insideCircle} = require('geolocation-utils');
 
 router.get('/', async (req, res) => {
   const city = await City.find().sort('name');
@@ -25,7 +25,7 @@ router.post('/', [auth, permit('admin')], async (req, res) => {
 
   locationObj = {
     type : req.body.type,
-    coordinates : req.body.coordinates
+    coordinates : [req.body.lat,req.body.lng]
   }
 
   cityObj.state = state;
@@ -67,6 +67,31 @@ router.get('/:id', async (req, res) => {
   if (!city) return res.status(404).send('The genre with the given ID was not found.');
 
   res.send(city);
+});
+
+router.get('/createfixcluster/source', async (req, res) => {
+
+  validSource =[]
+  const city = await City.find({'name':req.query.source});
+
+  const center = {lat: city[0].location.coordinates[0], lon: city[0].location.coordinates[1]}
+  radius = 200000                                                   // 200 km make it dynamic
+
+  const cityAll = await City.find({'location.coordinates':{$ne:null}});
+  if (!cityAll) return res.status(400).send('No nearby by cities found');
+
+  cityAll.forEach(function(point) {
+    var pointName = point.name;
+    result = insideCircle({lat: point.location.coordinates[0], lon: point.location.coordinates[1]}, center, radius) // true
+    if (result == true) {
+      validSource.push(pointName)
+    }
+    });
+  
+  const selectedPoints = await City.find({'name':{$in :validSource}});
+  
+  res.send(selectedPoints);
+  
 });
 
 module.exports = router;

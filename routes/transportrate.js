@@ -7,6 +7,7 @@ const {User} = require('../models/user');
 const {dropIfDNE} = require('./orders');
 const express = require('express');
 const router = express.Router();
+const axios = require('axios')
 const _ = require('lodash');
 
 router.get('/', async (req, res) => {
@@ -99,9 +100,39 @@ router.get('/user/:id', async (req, res) => {
 });
 
 router.get('/source/:src/destination/:destn', async (req, res) => {
+
+  // const transportrate = await TransportRate.find({ $and : [
+  //   {'from._id': req.params.src},
+  //   {'to._id' : req.params.destn}]
+  // }).sort('from.name');
+  // if (!transportrate) return res.status(404).send('The transportrate with the given ID was not found.');
+
+  // res.send(transportrate);
+  sourceMatch = []
+  destnMatch = []
+  const sourceCity = await City.findById(req.params.src);
+  // if (!sourceCity) return res.status(400).send('Invalid city.');
+
+  const destnCity = await City.findById(req.params.destn);
+  // if (!destnCity) return res.status(400).send('Invalid city.');
+
+  getsourceCluster = process.env.GEAPILOCALSERVER + '/api/city/createfixcluster/source?source='+sourceCity.name
+  getdestnCluster = process.env.GEAPILOCALSERVER + '/api/city/createfixcluster/source?source='+destnCity.name
+
+  sourceCluster =  await axios.get(getsourceCluster)
+  destnCluster =   await axios.get(getdestnCluster)
+  
+  sourceCluster.data.forEach(function(point) {
+    sourceMatch.push(point._id)
+    });
+
+  destnCluster.data.forEach(function(point) {
+    destnMatch.push(point._id)
+    });
+
   const transportrate = await TransportRate.find({ $and : [
-    {'from._id': req.params.src},
-    {'to._id' : req.params.destn}]
+    {'from._id': {$in :sourceMatch}},
+    {'to._id' : {$in :destnMatch}}]
   }).sort('from.name');
   if (!transportrate) return res.status(404).send('The transportrate with the given ID was not found.');
 
