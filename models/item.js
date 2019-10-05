@@ -136,7 +136,7 @@ function validateItem(item) {
     moisture: Joi.string().optional(),
     grainCount: Joi.string().optional(),
     grade: Joi.string().optional(),
-    sampleNo: Joi.string().required(),
+    sampleNo: Joi.string(),
     cityId: Joi.objectId().required(),
     addressId: Joi.objectId().required(),
     sellerId: Joi.objectId().required(),
