@@ -22,7 +22,7 @@ router.post('/', async (req, res) => {
   userInfo = { name: user.name, _id: user._id, isAdmin: user.isAdmin,
    isBuyer: user.isBuyer, isSeller: user.isSeller, isTransporter: user.isTransporter,
    isAgent: user.isAgent, isNbfc: user.isNbfc, isBank: user.isBank,
-   isActive: user.isactive, token: token
+   isActive: user.isactive, token: token, phone: user.phone
    }
    if (userInfo.isTransporter == true || userInfo.isAdmin == true ) {
           // User profile cannot be overridden

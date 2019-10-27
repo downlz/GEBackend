@@ -132,7 +132,8 @@ router.get('/source/:src/destination/:destn', async (req, res) => {
 
   const transportrate = await TransportRate.find({ $and : [
     {'from._id': {$in :sourceMatch}},
-    {'to._id' : {$in :destnMatch}}]
+    {'to._id' : {$in :destnMatch}},
+    {'isactive' : true}]
   }).sort('from.name');
   if (!transportrate) return res.status(404).send('The transportrate with the given ID was not found.');
 
