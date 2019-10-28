@@ -60,7 +60,8 @@ router.get('/', async (req, res) => {
  */
 router.get('/byCategory/:category', async (req, res) => {
     const state = await Item.find({
-        'category._id': req.params.category
+        $and : [{'category._id': req.params.category},
+        {'isLive': true}]
     }).sort('name.name');
     res.send(state);
 });
@@ -78,7 +79,7 @@ router.get('/current/', [auth], async (req, res) => {
 /**
  * Api to get all listings
  */
-router.get('/all/', [auth,permit('seller', 'admin', 'agent')], async (req, res) => {
+router.get('/all/', [auth,permit('seller', 'admin', 'agent','buyer')], async (req, res) => {
   const item = await Item.find({}).sort('sampleNo');
   res.send(item);
 });
