@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
 });
 
 // Check below permit as in future seller may also place order
-router.post('/', [auth, permit('buyer', 'admin' ,'agent')], async (req, res) => {
+router.post('/', async (req, res) => {          //[auth, permit('buyer', 'admin' ,'agent')]
     await placeOrder(req.body, req, res)
 });
 
@@ -141,7 +141,7 @@ async function placeOrder(obj, req, res) {
     return order;
 }
 
-router.put('/:id', [auth, permit('buyer', 'admin')], async (req, res) => {
+router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req, res) => {
 
     if (req.body.addressId) {
         const address = await Address.findById(req.body.addressId);
