@@ -245,27 +245,37 @@ router.get('/orderno', [auth,permit('admin','agent','seller','buyer')], async (r
 });
 
 router.get('/user/:id', [auth], async (req, res) => {
-    // const order = await Order.findById(req.params.id);
 
     const customer = await User.findById(req.params.id);
     // logger.info(req.params.id);
     // logger.info(customer);
-    if (!customer) return res.status(400).send('Invalid buyer.');
+    if (!customer) return res.status(400).send('Invalid buyer or seller');
     let order = null;
-    // taxObj = await getTaxBreakup(result);
+    // order = await Order.find({buyer: customer}).sort({'placedTime': -1});
+
+    // Due to role policy first check if buyer id is same as seller/agent if yes fetch the details else pull seller details
+    
     if (customer.isSeller) {
         order = await Order.find({seller: customer}).sort({'placedTime': -1});
     } else {
         order = await Order.find({buyer: customer}).sort({'placedTime': -1});
-        // order.forEach(async function(value){
-        //     taxObj = await getTaxBreakup(value);
-        //     value.taxbreakup = taxObj;
-        //     console.log(taxObj.taxrates);
-        //   });
-        // console.log(order);
-        // console.log('----------XXXXXXXXXXXX------------');
-        // taxObj = await getTaxBreakup(order);
-    }
+    }    
+    if (!order) return res.status(404).send('The item with the given ID was not found.');
+    
+    res.send(order);
+});
+
+
+router.get('/agent/:id', [auth], async (req, res) => {
+
+    const customer = await User.findById(req.params.id);
+   
+    if (!customer) return res.status(400).send('Invalid buyer or seller');
+    let order = null;
+
+    // Due to role policy first check if buyer id is same as seller/agent if yes fetch the details else pull seller details
+    
+    order = await Order.find({buyer: customer}).sort({'placedTime': -1});
 
     if (!order) return res.status(404).send('The item with the given ID was not found.');
     
