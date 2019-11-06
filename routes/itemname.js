@@ -15,7 +15,7 @@ router.post('/', [auth, permit('admin')], async (req, res) => {
   const { error } = validate(req.body); 
   if (error) return res.status(400).send(error.details[0].message);
 
-  let itemNameObj = _.pick(req.body, ['name','hsn']);
+  let itemNameObj = _.pick(req.body, ['name','hsn','image','tax']);
   itemNameObj.tax = 0;
   itemNameObj.insurance = 0;
 

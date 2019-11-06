@@ -9,6 +9,10 @@ const itemnameSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 50
   },
+  image: {
+    type: String,
+    required: false
+  },
   hsn: {
     type: String,
     required: false,
@@ -37,6 +41,7 @@ function validateItemName(itemname) {
   const schema = {
     name: Joi.string().min(3).max(50).required(),
     tax: Joi.number().optional(),
+    image: Joi.string(),
     insurance: Joi.number().optional(),
     hsn: Joi.string().optional(),
     season: Joi.string().optional(),
