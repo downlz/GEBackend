@@ -66,6 +66,17 @@ router.get('/byCategory/:category', async (req, res) => {
     res.send(state);
 });
 
+/**
+ * Api to get listings by itemname
+ */
+router.get('/byItemname/:itemname', async (req, res) => {
+  const state = await Item.find({
+      $and : [{'name._id': req.params.itemname},
+      {'isLive': true}]
+  }).sort('name.name');
+  res.send(state);
+});
+
 
 /**
  * Api to get current  user listings
