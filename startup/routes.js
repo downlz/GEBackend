@@ -32,6 +32,7 @@ const uploadbill = require('../routes/uploadbill');
 const billingorg = require('../routes/billingorg');
 const taxrates = require('../routes/taxrates');
 const bargain = require('../routes/bargain');
+const bankaccount = require('../routes/bankaccount');
 
 var corsOptions = {
   origin: '*',
@@ -70,5 +71,6 @@ module.exports = function(app) {
   app.use('/api/billingorg', billingorg);
   app.use('/api/taxrates', taxrates);
   app.use('/api/bargain', bargain);
+  app.use('/api/bankaccount',bankaccount);
   app.use(error);
 }

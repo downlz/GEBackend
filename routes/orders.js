@@ -142,7 +142,7 @@ async function placeOrder(obj, req, res) {
 }
 
 router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req, res) => {
-
+    // console.log(req.body);
     if (req.body.addressId) {
         const address = await Address.findById(req.body.addressId);
         if (!address) return res.status(400).send('Invalid category.');

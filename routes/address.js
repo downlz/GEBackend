@@ -2,7 +2,12 @@
 const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const {Address, validate} = require('../models/address');
-const mongoose = require('mongoose');
+const {User} = require('../models/user');
+const {State} = require('../models/state');
+const {City} = require('../models/city');
+
+// const mongoose = require('mongoose');
+
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
@@ -14,15 +19,24 @@ router.get('/', [auth], async (req, res) => {
 
 router.post('/', [auth], async (req, res) => {
   const { error } = validate(req.body);
-  console.log(error)
+  // console.log(error)
   if (error) return res.status(400).send(error.details[0].message);
 
-  const city = await City.findById(req.body.cityId);
+  const city = await City.findById(req.body.city);
+
   if (!city) return res.status(400).send('Invalid city.');
 
-  let addressObj = _.pick(req.body, ['text','pin']);
+  const state = await State.findById(req.body.state);
+  if (!state) return res.status(400).send('Invalid state.');
 
-  itemObj.city =  city;
+  const user = await User.findById(req.body.addedby);
+  if (!user) return res.status(400).send('Invalid User');
+
+  let addressObj = _.pick(req.body, ['text','pin','addresstype','phone']);
+
+  addressObj.city =  city;
+  addressObj.state = state;
+  addressObj.addedby = user;
 
   let address = new Address(addressObj);
   address = await address.save();
@@ -30,11 +44,28 @@ router.post('/', [auth], async (req, res) => {
   res.send(address);
 });
 
-router.put('/:id', [auth, permit('admin','buyer','seller','agent','transporter')], async (req, res) => {
+router.put('/:id', [auth], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const address = await Address.findByIdAndUpdate(req.params.id, { name: req.body.text }, {
+  const city = await City.findById(req.body.city);
+  if (!city) return res.status(400).send('Invalid city.');
+
+  const state = await State.findById(req.body.state);
+  if (!state) return res.status(400).send('Invalid state.');
+
+  // const user = await User.findById(req.body.addedby);
+  // if (!user) return res.status(400).send('Invalid User');
+
+  const address = await Address.findByIdAndUpdate(req.params.id, { 
+    text: req.body.text,
+    city: city,
+    state: state,
+    pin: req.body.pin,
+    addresstype: req.body.addresstype,
+    phone: req.body.phone
+    // addedby: user,
+   }, {
     new: true
   });
 
