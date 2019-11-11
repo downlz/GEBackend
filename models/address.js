@@ -3,7 +3,7 @@ const Joi = require('joi');
 const mongoose = require('mongoose');
 const cityModel = require('./city');
 const stateModel = require('./state');
-// const userModel = require('./user');
+// const userModel = require("./user");
 // const ObjectId = Schema.Types.ObjectId
 
 const addridentifier = new mongoose.Schema({
@@ -32,10 +32,10 @@ const addressSchema = new mongoose.Schema({
     type: stateModel.stateSchema,
     required: false
   }, 
-  addedby: {
-    type: String,
-    required: false
-  },
+  // addedby: {
+  //   type: userModel.userSchema,
+  //   required: false
+  // },
   pin: {
     type: String,
     required: false, 
@@ -63,13 +63,13 @@ const address = mongoose.model('Address', addressSchema);
 function validateAddress(address) {
   const schema = {
     text: Joi.string().min(5).max(150).optional(),
-    city: Joi.object().optional(),
+    city: Joi.objectId().optional(),
     state: Joi.objectId().optional(),
     pin: Joi.string().min(6).max(6).optional(),
     addresstype: Joi.string().optional(),
-    addressbasicdtl: Joi.object().optional(),
-    phone: Joi.string().max(18).optional(),
-    addedby: Joi.string().optional()
+    addressbasicdtl: Joi.object(),
+    phone: Joi.string().max(18).optional()
+    // addedby: Joi.objectId()
   };
 
   return Joi.validate(address, schema);
@@ -77,4 +77,4 @@ function validateAddress(address) {
 
 exports.addressSchema = addressSchema;
 exports.Address = address; 
-exports.validateAddress = validateAddress;
+exports.validate = validateAddress;
