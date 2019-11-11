@@ -1,5 +1,5 @@
 {
-  "name": "GrainEasy",
+  "name": "graineasy",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -29,7 +29,7 @@
     "jsonwebtoken": "^8.1.1",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
-    "mongoose": "^5.0.2",
+    "mongoose": "^5.7.5",
     "multer": "^1.4.1",
     "nodemailer": "^6.1.1",
     "pdfkit": "^0.9.0",
