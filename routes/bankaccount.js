@@ -20,7 +20,7 @@ router.post('/', [auth], async (req, res) => {
   const user = await User.findById(req.body.user);
   if (!user) return res.status(400).send('Invalid user.');
 
-  let bankAccountObj = _.pick(req.body, ['accountType','accountNo','micr','ifsc','accountPreference'
+  let bankAccountObj = _.pick(req.body, ['accountType','accountNo','bank','name','micr','ifsc','accountPreference'
                         ,'approved','remarks','createdBy','updatedAt']);
 
   dropIfDNE(bankAccountObj, ['accountType','accountNo','micr','ifsc','accountPreference'
@@ -42,6 +42,8 @@ router.put('/:id', [auth, permit('admin')], async (req, res) => {
   const bankacc = await BankAccount.findByIdAndUpdate(req.params.id, { accountNo: req.body.accountNo,
                   micr: req.body.micr,
                   ifsc: req.body.ifsc,
+                  name: req.body.name,
+                  bank: req.body.bank,
                   accountPreference: req.body.accountPreference,
                   remarks: req.body.remarks,
                   updatedAt: Date.now()

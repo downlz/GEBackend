@@ -6,6 +6,14 @@ const bankAccountSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
     },
+    name: {
+        type: String,
+        required: false
+    },
+    bank: {
+        type: String,
+        required: false
+    },
     accountType: {
         type: String,
         enum: ['Current', 'Savings'],
@@ -54,6 +62,8 @@ const BankAccount = mongoose.model('BankAccount', bankAccountSchema);
 function validateBankAccount(bankaccount) {
     const schema = {
         user: Joi.objectId().required(),
+        name: Joi.string().optional(),
+        bank: Joi.string().optional(),
         accountType: Joi.string().optional(),
         accountNo: Joi.string().optional(),
         micr: Joi.string().required(),
