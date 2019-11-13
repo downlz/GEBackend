@@ -11,6 +11,7 @@ const {Bargain} = require('../models/bargain');
 const {Auction} = require('../models/auction');
 const {User} = require('../models/user');
 const {State} = require('../models/state');
+const {City} = require('../models/city');
 const {Address, validateAddress} = require('../models/address');
 const mongoose = require('mongoose');
 // const {ObjectId} = require('mongodb');
@@ -62,6 +63,7 @@ async function placeOrder(obj, req, res) {
         state = await State.findById(obj.state);
         if (!state) return res.status(400).send('Invalid State');
 
+
     partyObj = {
         partyname: req.body.partyname,
         gstin: req.body.gstin 
@@ -72,10 +74,19 @@ async function placeOrder(obj, req, res) {
         pin: req.body.pincode,
         addressbasicdtl: partyObj,
         state: state,
+        // city: city,
         phone: '+91' + req.body.phone,
-        addedby: obj.buyerId,
+        addedby: obj.addedby,
         addresstype: 'delivery',
         }; 
+
+        // Added to collect city
+        if (obj.city){
+            city = await City.findById(obj.city);
+            if (!city) return res.status(400).send('Invalid City');
+
+            addressObj.city = city;
+        }
         if (req.body.isExistingAddr == false) {
             address = new Address(addressObj);
             savedaddr = await address.save();    

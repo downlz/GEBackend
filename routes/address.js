@@ -63,8 +63,8 @@ router.put('/:id', [auth], async (req, res) => {
     state: state,
     pin: req.body.pin,
     addresstype: req.body.addresstype,
-    phone: req.body.phone
-    // addedby: user,
+    phone: req.body.phone,
+    addedby: user,
    }, {
     new: true
   });
