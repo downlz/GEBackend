@@ -32,10 +32,10 @@ const addressSchema = new mongoose.Schema({
     type: stateModel.stateSchema,
     required: false
   }, 
-  // addedby: {
-  //   type: userModel.userSchema,
-  //   required: false
-  // },
+  addedby: {
+    type: String,
+    required: false
+  },
   pin: {
     type: String,
     required: false, 
@@ -68,8 +68,8 @@ function validateAddress(address) {
     pin: Joi.string().min(6).max(6).optional(),
     addresstype: Joi.string().optional(),
     addressbasicdtl: Joi.object(),
-    phone: Joi.string().max(18).optional()
-    // addedby: Joi.objectId()
+    phone: Joi.string().max(18).optional(),
+    addedby: Joi.string()
   };
 
   return Joi.validate(address, schema);
