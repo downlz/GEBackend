@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
   
   const { error } = validate(userObj);
   // logger.error(error);
-  console.log(error);
+  // console.log(error);
   let user = await User.findOne({ phone: req.body.phone });
   if (user) return res.status(400).send('User already registered.');
   
@@ -64,12 +64,12 @@ router.post('/', async (req, res) => {
     addressbasicdtl: partyObj,
   };
 
-  const { errorAddr } = validateAddress(addressObj);
-  console.log(errorAddr);
-  if (errorAddr) return res.status(400).send(error.details[0].message);
+  // const { errorAddr } = validateAddress(addressObj);
+  // console.log(errorAddr);
+  // if (errorAddr) return res.status(400).send(error.details[0].message);
   address = new Address(addressObj);
   if (error) return res.status(400).send(error.details[0].message);
-  console.log(error)
+  // console.log(error)
   user = new User(userObj);
   user.Addresses.push(address);
   const salt = await bcrypt.genSalt(10);
