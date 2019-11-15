@@ -159,12 +159,12 @@ router.post('/confirmOrder/:id', [auth], async (req, res) => {
 
         const statename = await State.findById(bid.auction.state);
         // console.log(statename);
-        const orderno = await Order.find().sort({orderno: -1}).limit(1)
+        // const orderno = await Order.find().sort({orderno: -1}).limit(1)
 
-        if (!orderno) return res.status(404).send('The item with the given ID was not found.');
+        // if (!orderno) return res.status(404).send('The item with the given ID was not found.');
 
         // order.orderno = uuid.v4();                          // to be updated with orderno logic.
-        order.orderno = String(parseInt(orderno[0].orderno) + 1);
+        // order.orderno = String(parseInt(orderno[0].orderno) + 1);
         order.itemId = bid.auction.sampleNo._id.toString();
         
         order.unit = bid.auction.unit.mass;
