@@ -43,6 +43,9 @@ async function placeOrder(obj, req, res) {
     // const address = await Address.findById(obj.addressId);
     // if (!address) return res.status(400).send('Invalid address.');
 
+    const ordno = await Order.find().sort({orderno: -1}).limit(1)
+    if (!ordno) return res.status(404).send('The item with the given ID was not found.');
+
     let buyer, seller;
     // if (obj.buyerId) {
         buyer = await User.findById(obj.buyerId);
@@ -53,12 +56,14 @@ async function placeOrder(obj, req, res) {
         if (!seller) return res.status(400).send('Invalid seller.');
     // }
 
-    let orderObj = _.pick(obj, ['orderno', 'quantity', 'unit','address',
+    let orderObj = _.pick(obj, [ 'quantity', 'unit','address',
         'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'paymentterms','price','isshippingbillingdiff','isExistingAddr']);
     
-    await dropIfDNE(orderObj,['orderno', 'quantity', 'unit','address',
+    await dropIfDNE(orderObj,['quantity', 'unit','address',
     'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'paymentterms','price','isshippingbillingdiff','isExistingAddr']);
 
+    orderObj.orderno = parseInt(ordno[0].orderno) + 1
+    // console.log(orderObj.orderno)
     if (req.body.isshippingbillingdiff == true) {
         state = await State.findById(obj.state);
         if (!state) return res.status(400).send('Invalid State');

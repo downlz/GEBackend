@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
 });
 
 
-router.post('/', [auth, permit('admin', 'buyer')], async (req, res) => {
+router.post('/', [auth], async (req, res) => {
 
   const itemdtl = await Item.findById(req.body.itemId);
   if (!itemdtl) return res.status(400).send('Invalid item.');
@@ -284,13 +284,13 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
 
   // **************************** Convert to order **************************** 
  if (req.body.action == 'accepted'){
-  const orderno = await Order.find().sort({
-    orderno: -1
-  }).limit(1)
+  // const orderno = await Order.find().sort({
+  //   orderno: -1
+  // }).limit(1)
 
-  if (!orderno) return res.status(404).send('The item with the given ID was not found.');
+  // if (!orderno) return res.status(404).send('The item with the given ID was not found.');
   let order = {};
-  order.orderno = String(parseInt(orderno[0].orderno) + 1);
+  // order.orderno = String(parseInt(orderno[0].orderno) + 1);
   order.itemId = bargain.item._id;
 
   order.unit = bargain.item.unit.mass;
