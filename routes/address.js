@@ -98,7 +98,7 @@ router.get('/:id',[auth], async (req, res) => {
 
 // This is to pull list of all active address associated with user
 router.get('/byuser/:id/phone/:phone',[auth], async (req, res) => {
-  const address = await Address.find({ $or : [{addedby : req.params.id},{phone: req.params.phone}]});
+  const address = await Address.find({ $or : [{addedby : req.params.id},{phone: req.params.phone}]}).sort('_id');
 
   if (!address) return res.status(404).send('The genre with the given ID was not found.');
 

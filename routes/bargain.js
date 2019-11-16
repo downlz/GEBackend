@@ -388,7 +388,8 @@ router.put('/pause/:id', async (req, res) => {
     'pausebargain.pausestarttime' : Date.now(),
     'pausebargain.pauseendtime' : Date.now() + 60*60*1000 * req.body.pausehrs,
     'lastupdated' : Date.now(),
-    'bargainstatus' : 'paused'
+    'bargainstatus' : 'paused',
+    'pausedby': req.body.pausedby
    }, {
     new: true
   });
