@@ -45,6 +45,10 @@ const pauseBargain = new mongoose.Schema({
   pauseendtime: {
     type: Date,
     required: false
+  },
+  pausedby : {
+    type: String,
+    required: false 
   }
 });
 

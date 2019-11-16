@@ -362,18 +362,59 @@ router.get('/seller/:sellerid/item/:id', async (req, res) => {
   res.send(bargain);
 });
 
-// router.get('/squareoff', async (req, res) => {
+router.post('/squareoff', async (req, res) => {
 
-//   // const bargain = await Bargain.find({});
+  const bargain = await Bargain.updateMany({
+    $and: [{
+      'lastupdated': { $lte: Date.now() - 60*60*1000*24*2}
+    },
+    {
+      bargainstatus: {
+        $in: ['negotiation', 'placed', 'paused']
+      }
+    }]
+  },{'lastupdated': Date.now(),'bargainstatus': 'expired'});
   
-//   // if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
-//   // res.send(bargain);
-//   const bargain = await Bargain.find().sort({
-//     'lastupdated': -1
-//   });
-//   res.send(bargain);
-// });
+  res.send(bargain);
+});
+
+router.put('/pause/:id', async (req, res) => {
+  const bargain = await Bargain.findByIdAndUpdate(req.params.id, { 
+    'pausebargain.isPaused' : true,
+    'pausebargain.pausetype': req.body.pausetype,
+    'pausebargain.pausehrs' :  req.body.pausehrs,
+    'pausebargain.pausestarttime' : Date.now(),
+    'pausebargain.pauseendtime' : Date.now() + 60*60*1000 * req.body.pausehrs,
+    'lastupdated' : Date.now(),
+    'bargainstatus' : 'paused'
+   }, {
+    new: true
+  });
+
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
+
+  res.send(bargain);
+});
+
+router.put('/release/:id', async (req, res) => {
+  const bargain = await Bargain.findByIdAndUpdate(req.params.id, { 
+    'pausebargain.isPaused' : false,
+    // 'pausebargain.pausetype': req.body.pausetype,
+    // 'pausebargain.pausehrs' :  req.body.pausehrs,
+    // 'pausebargain.pausestarttime' : Date.now(),
+    // 'pausebargain.pauseendtime' : Date.now() + 60*60*1000 * req.body.pausehrs,
+    'lastupdated' : Date.now(),
+    'bargainstatus' : 'negotiation'
+   }, {
+    new: true
+  });
+
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
+
+  res.send(bargain);
+});
 
 module.exports = router;
 

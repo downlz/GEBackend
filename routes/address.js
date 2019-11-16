@@ -29,14 +29,19 @@ router.post('/', [auth], async (req, res) => {
   const state = await State.findById(req.body.state);
   if (!state) return res.status(400).send('Invalid state.');
 
-  const user = await User.findById(req.body.addedby);
-  if (!user) return res.status(400).send('Invalid User');
+  // const user = await User.findById(req.body.addedby);
+  // if (!user) return res.status(400).send('Invalid User');
 
-  let addressObj = _.pick(req.body, ['text','pin','addresstype','phone']);
+  let addressObj = _.pick(req.body, ['text','pin','addresstype','phone','partyname','addressbasicdtl']);
+  partyObj = {
+    partyname: addressObj.addressbasicdtl.partyname,
+    gstin: addressObj.addressbasicdtl.gstin 
+  }
 
   addressObj.city =  city;
   addressObj.state = state;
-  addressObj.addedby = user;
+  addressObj.addedby = req.body.addedby;
+  addressObj.addressbasicdtl = partyObj;
 
   let address = new Address(addressObj);
   address = await address.save();
@@ -56,6 +61,7 @@ router.put('/:id', [auth], async (req, res) => {
 
   // const user = await User.findById(req.body.addedby);
   // if (!user) return res.status(400).send('Invalid User');
+  // console.log(req.body.addedby);
 
   const address = await Address.findByIdAndUpdate(req.params.id, { 
     text: req.body.text,
