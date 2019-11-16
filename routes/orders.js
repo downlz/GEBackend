@@ -82,7 +82,7 @@ async function placeOrder(obj, req, res) {
         // city: city,
         phone: '+91' + req.body.phone,
         addedby: obj.addedby,
-        addresstype: 'delivery',
+        addresstype: obj.addresstype,
         }; 
 
         // Added to collect city
@@ -98,7 +98,7 @@ async function placeOrder(obj, req, res) {
             orderObj.shippingaddress = savedaddr;
         } 
         else {
-            const deliveryaddress = await Address.findById(obj.addressreference._id);
+            const deliveryaddress = await Address.findById(obj.addressreference);
             orderObj.shippingaddress = deliveryaddress;
         }
     } else if (req.body.isshippingbillingdiff == false){
