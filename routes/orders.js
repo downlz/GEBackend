@@ -163,6 +163,8 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
         const address = await Address.findById(req.body.addressId);
         if (!address) return res.status(400).send('Invalid category.');
     }
+    
+    // const order = await Order.findById(req.params.id);
 
     let orderObj = _.pick(req.body, ['quantity',
         'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
@@ -194,7 +196,7 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
     var messagegreetings = `<p>Dear User,</p>
                             <p>Thank you for using GrainEasy.</p>`
     var messageorderstatus;
-    var messagesign = `<p>Order Status - <b>` + order.status + `</b></p>
+    var messagesign = `<p>Order Status - <b>` + req.body.status + `</b></p>
                         <p>Please feel free to reach out to us on trade@graineasy.com for any clarification.   
                         <br><br>Regards,<br>
                         Graineasy
@@ -225,6 +227,7 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
             // Do nothing
     }
     
+    
     message = messagegreetings + messageorderstatus + messagesign
     var emailsubject;
     if (order.ordertype == 'sampleorder'){
@@ -232,7 +235,7 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
     } else {
         emailsubject = 'Order Intimation from Graineasy - ' + order.orderno
     }
-
+    
     sendEmail(order.buyer.email, process.env.EMAILCCUSER,process.env.EMAILBCCUSER, emailsubject, message);
     res.send(order);
 
