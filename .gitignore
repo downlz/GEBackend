@@ -37,7 +37,7 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
-/uploads
+/uploads/*
 /logs
 
 # System Files

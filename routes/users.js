@@ -20,7 +20,7 @@ function dropIfDNE(Obj, arr) {
   }
 }
 
-router.get('/', [auth, permit('admin', 'agent')], async (req, res) => {
+router.get('/', [auth], async (req, res) => {
   const user = await User.find().sort('name').select('-password');
   res.send(user);
 });
@@ -116,18 +116,18 @@ router.post('/resetpassword', async (req, res) => {
     }
 });
 
-router.put('/:id', [auth, permit('admin')], async (req, res) => {
+router.put('/:id', [auth], async (req, res) => {
 
   const useremail = await User.findById(req.params.id);
   if (!useremail) return res.status(400).send('Invalid User.');
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
-  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive']);
+  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive','devicedtl','fcmkey']);
 
   dropIfDNE(userObj, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
-  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive']);
+  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive','devicedtl','fcmkey']);
   
   user = await User.findByIdAndUpdate(req.params.id, userObj, {
     new: true
