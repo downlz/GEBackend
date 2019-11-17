@@ -30,6 +30,11 @@ router.get('/me', [auth], auth, async (req, res) => {
   res.send(user);
 });
 
+router.get('/:id', [auth], auth, async (req, res) => {
+  const user = await User.findById(req.params.id).select('-password');
+  res.send(user);
+});
+
 router.post('/', async (req, res) => {
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
