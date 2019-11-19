@@ -150,6 +150,10 @@ userSchema.methods.generateAuthToken = function() {
 
 const User = mongoose.model('User', userSchema);
 
+// const User = new mongooseClient.Schema({
+//   userSchema: { type: mongoose.SchemaTypes.ObjectId, required: true, index: true }
+// });
+
 function validateUser(user) {
   const schema = {
     name: Joi.string().min(5).max(50).required(),
@@ -158,7 +162,7 @@ function validateUser(user) {
     phone: Joi.string().length(13).required(),
     pan: Joi.string().min(5).max(50).optional(),
     GST: Joi.string().min(5).max(100).optional(),
-    Addresses: Joi.array().optional(),
+    Addresses: Joi.array(),
     PocName: Joi.string().min(5).max(50).optional(),
     PocPhone: Joi.string().length(13).optional(),
     PocEmail: Joi.string().min(5).max(255).optional().email(),
