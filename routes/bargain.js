@@ -331,7 +331,7 @@ router.get('/:id', async (req, res) => {
 
 router.get('/buyer/:buyerid', async (req, res) => {
 
-  const bargain = await Bargain.find({'buyer._id': req.params.buyerid});
+  const bargain = await Bargain.find({'buyer._id': req.params.buyerid}).sort({'lastupdated':-1});
 
   if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
@@ -340,7 +340,7 @@ router.get('/buyer/:buyerid', async (req, res) => {
 
 router.get('/seller/:sellerid', async (req, res) => {
 
-  const bargain = await Bargain.find({'seller._id': req.params.sellerid});
+  const bargain = await Bargain.find({'seller._id': req.params.sellerid}).sort({'lastupdated':-1});
 
   if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
