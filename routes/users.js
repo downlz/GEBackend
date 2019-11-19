@@ -10,7 +10,7 @@ const sendEmail = require('../middleware/sendemail');
 const {Address, validateAddress} = require('../models/address');
 const {City} = require('../models/city');
 const {State} = require('../models/state');
-// const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 
@@ -25,15 +25,19 @@ router.get('/', [auth], async (req, res) => {
   res.send(user);
 });
 
-router.get('/me', [auth], auth, async (req, res) => {
+router.get('/me', [auth], async (req, res) => {
   const user = await User.findById(req.user._id).select('-password');
   res.send(user);
 });
 
-router.get('/:id', [auth], auth, async (req, res) => {
-  const user = await User.findById(req.params.id).select('-password');
-  res.send(user);
-});
+// router.get('/:id', [auth], async (req, res) => {
+  // if (!mongoose.Types.ObjectId.isValid(req.params.id))
+// return res.status(404).send('Invalid ID.');
+//   const user = await User.findById(req.params.id).select('-password');
+//   res.send(user);
+// });
+
+
 
 router.post('/', async (req, res) => {
 
@@ -76,6 +80,7 @@ router.post('/', async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
   // console.log(error)
   user = new User(userObj);
+  user.Addresses = []
   user.Addresses.push(address);
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
@@ -176,7 +181,8 @@ router.put('/me', [auth], async (req, res) => {
 
 });
 
-router.get('/seller',[auth, permit('admin', 'seller', 'agent')], async (req, res) => {                     
+
+router.get('/seller',[auth], async (req, res) => {   
   const user = await User.find({ $and : [{"isSeller":true},{"isactive":true}]}).sort('name').select('-password');
   res.send(user);
 });
