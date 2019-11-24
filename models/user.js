@@ -134,6 +134,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  devspecs : {
+    type: String,
+    required: false
+  },
   devicedtl : {
     type: String,
     required: false
@@ -144,7 +148,7 @@ userSchema.methods.generateAuthToken = function() {
   const token = jwt.sign({ _id: this._id, isAdmin: this.isAdmin, isSeller: this.isSeller,
     isBuyer: this.isBuyer, isEmpL0: this.isEmpL0, isEmpL1: this.isEmpL1, 
     isTransporter: this.isTransporter,isAgent: this.isAgent,
-    fcmkey: this.fcmkey,devicedtl: this.devicedtl}, config.get('jwtPrivateKey'));
+    fcmkey: this.fcmkey,devicedtl: this.devicedtl,devspecs : this.devspecs}, config.get('jwtPrivateKey'));
   return token;
 }
 
@@ -190,6 +194,7 @@ function validateUser(user) {
     isactive: Joi.boolean().optional(),
     userType: Joi.string().optional(),
     fcmkey: Joi.string().optional(),
+    devspecs: Joi.string().optional(),
     devicedtl : Joi.string().optional()
   };
 
