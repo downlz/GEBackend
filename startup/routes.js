@@ -33,6 +33,7 @@ const billingorg = require('../routes/billingorg');
 const taxrates = require('../routes/taxrates');
 const bargain = require('../routes/bargain');
 const bankaccount = require('../routes/bankaccount');
+const fcmnotifications = require('../routes/fcmnotifications');
 
 var corsOptions = {
   origin: '*',
@@ -72,5 +73,6 @@ module.exports = function(app) {
   app.use('/api/taxrates', taxrates);
   app.use('/api/bargain', bargain);
   app.use('/api/bankaccount',bankaccount);
+  app.use('/api/fcmnotifications',fcmnotifications);
   app.use(error);
 }

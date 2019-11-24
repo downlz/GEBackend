@@ -23,6 +23,7 @@
     "express-async-errors": "^2.1.0",
     "express-session": "^1.16.2",
     "fawn": "^2.1.5",
+    "firebase-admin": "^8.8.0",
     "geolocation-utils": "^1.2.2",
     "joi": "^13.1.0",
     "joi-objectid": "^2.0.0",
