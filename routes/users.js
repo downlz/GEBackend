@@ -133,11 +133,11 @@ router.put('/:id', [auth], async (req, res) => {
 
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
-  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive','devicedtl','fcmkey']);
+  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive','devicedtl','fcmkey','devspecs']);
 
   dropIfDNE(userObj, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
-  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive','devicedtl','fcmkey']);
+  'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive','devicedtl','fcmkey','devspecs']);
   
   user = await User.findByIdAndUpdate(req.params.id, userObj, {
     new: true
@@ -180,6 +180,22 @@ router.put('/me', [auth], async (req, res) => {
   res.send(usr);
 
 });
+
+// router.put('/device', [auth], async (req, res) => {
+
+//   userObj = _.pick(req.body, ['fcmkey','devplatform','devicedtl']);
+//   //const { error } = validate(userObj);
+//   dropIfDNE(userObj, ['fcmkey','devplatform','devicedtl']);
+
+//   user = await User.findByIdAndUpdate(req.user.id, userObj, {
+//     new: true
+//   });
+
+//   if (!user) return res.status(404).send('The item with the given ID was not found.');
+
+//   res.send(usr);
+
+// });
 
 
 router.get('/seller',[auth], async (req, res) => {   
