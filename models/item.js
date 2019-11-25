@@ -112,6 +112,10 @@ const itemSchema = new mongoose.Schema({
   addedby : {
     type: user.userSchema,
     required: false
+  },
+  updatedon :{
+    type : Date,
+    required : false
   }
   // },
   // saletype: {
@@ -145,7 +149,8 @@ function validateItem(item) {
     isTaxable: Joi.boolean().optional(),
     addedby : Joi.objectId().required(),
     specs: Joi.object().optional(),
-    manufacturerId: Joi.objectId().required()
+    manufacturerId: Joi.objectId().required(),
+    updatedon : Joi.string.optional()
   };
 
   return Joi.validate(item, schema);
