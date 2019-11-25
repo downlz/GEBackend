@@ -87,7 +87,6 @@ router.get('/createfixcluster/source', async (req, res) => {
       validSource.push(pointName)
     }
     });
-  
   const selectedPoints = await City.find({'name':{$in :validSource}});
   
   res.send(selectedPoints);

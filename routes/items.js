@@ -6,13 +6,14 @@ const {ItemName} = require('../models/itemname');
 const {City} = require('../models/city');
 const {User} = require('../models/user');
 const {Unit} = require('../models/unit');
+const {Order} = require('../models/order');
 const {Manufacturer} = require('../models/manufacturer');
 const {Address, validateAddress} = require('../models/address');
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
 const _ = require('lodash');
-
 
 function dropIfDNE(Obj, arr) {
     for (var i = 0, size = arr.length; i < size; i++) {
@@ -95,6 +96,44 @@ router.get('/all/', [auth,permit('seller', 'admin', 'agent','buyer')], async (re
   res.send(item);
 });
 
+/**
+ *  Api to get newly added items
+ */
+
+router.get('/recent/', async (req, res) => {
+  const recentitem = await Item.find({}).sort({'updatedon': -1}).limit(4);
+  res.send(recentitem);
+});
+
+router.get('/ordered/', async (req, res) => {
+  const recentlyordered = await Order.find({},{item : 1}).sort({'placedTime': -1}).limit(4);
+  res.send(recentlyordered);
+});
+
+/*
+* Api to select nearby items
+*/
+
+router.post('/nearme/',[auth], async (req, res) => {
+  // Ideally should be done based on user location 
+  nearbyCities = [];
+  const user = await User.findById(req.user._id).select('-password');
+
+  getsourcePoint = process.env.GEAPILOCALSERVER + '/api/city/createfixcluster/source?source='+user.Addresses[0].city.name;
+  // getdestnCluster = process.env.GEAPILOCALSERVER + '/api/city/createfixcluster/source?source='+destnCity.name
+  sourcePoints =  await axios.get(getsourcePoint)
+  sourcePoints.data.forEach(function(point) {
+    nearbyCities.push(point._id)
+    });
+  
+  const item = await Item.find({ $and : [
+      {'city._id': {$in :nearbyCities}}]
+      // {'isactive' : true}]                   //Search for only active item.
+    }).sort({'updatedon': -1}).limit(5);
+
+  res.send(item);
+});
+
 router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) => {
 
     let itemObj = _.pick(req.body, ['image',
@@ -150,6 +189,7 @@ router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) =>
     itemObj.unit = unit;
     itemObj.manufacturer = manufacturer;
     itemObj.addedby = user;
+    itemObj.updatedon = Date();
 
   let item = new Item(itemObj);
   item = await item.save();
@@ -160,7 +200,7 @@ router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) =>
 router.put('/activate/:id', [auth], async (req, res) => {
   const item = await Item.findById(req.params.id);
 
-  itemObj = { 'isLive' : true}
+  itemObj = { 'isLive' : true,'updatedon' : Date()}
   itemupd = await Item.findByIdAndUpdate(req.params.id, itemObj, {
     new: true
   });
@@ -206,6 +246,7 @@ router.put('/:id', [auth], async (req, res) => {
     // itemObj.address = address;
     // itemObj.seller = seller;
     itemObj.unit = unit;
+    itemObj.updatedon = Date();
 
     const item = await Item.findByIdAndUpdate(req.params.id, itemObj, {
         new: true
