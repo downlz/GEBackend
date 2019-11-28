@@ -281,4 +281,87 @@ router.get('/sampleno/:id', [auth], async (req, res) => {
     res.send(item);
 });
 
+router.get('/search/:text', [auth], async (req, res) => {         // Improve Search technique
+  searchtext=req.params.text;
+  // var searchtext=req.query.text;
+  const item = await Item.find({
+
+    $or :
+        [{sampleNo: {
+      $regex: new RegExp(searchtext),
+      $options: 'i'
+    } },
+          {origin: {
+            $regex: new RegExp(searchtext),
+            $options: 'i'
+          }},
+          {'manufacturer.name': {
+            $regex: new RegExp(searchtext),
+            $options: 'i'
+          }},
+          {'category.name': {
+            $regex: new RegExp(searchtext),
+            $options: 'i'
+          }},
+          {'name.name': {
+            $regex: new RegExp(searchtext),
+            $options: 'i'
+          }},
+          {'seller.name': {
+            $regex: new RegExp(searchtext),
+            $options: 'i'
+          }}]
+        });
+
+// Junk Code for testing
+  //   sampleNo : 
+  //   {
+  //     $regex: new RegExp(searchtext),
+  //     $options: 'i'
+  //   }
+  // },{
+  //     _id : 0,
+  //     __v:0
+  //   }
+  // )
+//     // $match: {
+
+//     //   sampleNo: {
+      
+//     //   $regex: req.params.text,
+      
+//     //   '$options': 'i'
+//     //   }
+//     // }
+//     // $or :
+//     // [{'sampleNo': '/' + req.params.text.toUpperCase() + '/'},
+//     //   {'origin': '/' + req.params.text + '/'},
+//     //   {'manufacturer.name': '/' + req.params.text + '/'},
+//     //   {'category.name': '/' + req.params.text + '/'},
+//     //   {'name.name': '/' + req.params.text + '/'}]
+//     // $match: {
+//     //   $or: [
+//     //   { sampleNo: {
+//     //   $regex: req.params.text,
+//     //   $options: 'i'
+//     //   }},
+//     //   { origin: {
+//     //   $regex: req.params.text,
+//     //   $options: 'i'
+//     //   }}
+//     //   ]
+//     //   }
+//     });
+
+//   // const item = await Item.find({
+//   //   "$text": {
+//   //           "$search": req.params.text
+//   //   }
+//   // });
+
+  if (!item) return res.status(404).send('The item with the given sample was not found.');
+
+  res.send(item);
+});
+
 module.exports = router;
