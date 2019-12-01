@@ -116,6 +116,10 @@ const itemSchema = new mongoose.Schema({
   updatedon :{
     type : Date,
     required : false
+  },
+  remarks :{
+    type : String,
+    required: false
   }
   // },
   // saletype: {
@@ -150,7 +154,8 @@ function validateItem(item) {
     addedby : Joi.objectId().required(),
     specs: Joi.object().optional(),
     manufacturerId: Joi.objectId().required(),
-    updatedon : Joi.string.optional()
+    updatedon : Joi.string().optional(),
+    remarks : Joi.string().optional()
   };
 
   return Joi.validate(item, schema);

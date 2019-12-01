@@ -120,15 +120,14 @@ router.post('/nearme/',[auth], async (req, res) => {
   const user = await User.findById(req.user._id).select('-password');
 
   getsourcePoint = process.env.GEAPILOCALSERVER + '/api/city/createfixcluster/source?source='+user.Addresses[0].city.name;
-  // getdestnCluster = process.env.GEAPILOCALSERVER + '/api/city/createfixcluster/source?source='+destnCity.name
   sourcePoints =  await axios.get(getsourcePoint)
   sourcePoints.data.forEach(function(point) {
     nearbyCities.push(point._id)
     });
   
   const item = await Item.find({ $and : [
-      {'city._id': {$in :nearbyCities}}]
-      // {'isactive' : true}]                   //Search for only active item.
+      {'city._id': {$in :nearbyCities}},
+      {'isLive' : true}]                   //Search for only active item.
     }).sort({'updatedon': -1}).limit(5);
 
   res.send(item);
@@ -138,7 +137,7 @@ router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) =>
 
     let itemObj = _.pick(req.body, ['image',
         'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs']);
-    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs']);
+    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs','remarks']);
    
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
@@ -198,7 +197,7 @@ router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) =>
 });
 
 router.put('/activate/:id', [auth], async (req, res) => {
-  const item = await Item.findById(req.params.id);
+  // const item = await Item.findById(req.params.id);
 
   itemObj = { 'isLive' : true,'updatedon' : Date()}
   itemupd = await Item.findByIdAndUpdate(req.params.id, itemObj, {
@@ -217,7 +216,7 @@ router.put('/:id', [auth], async (req, res) => {
     
     let itemObj = _.pick(req.body, ['image',
         'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs','bargainenabled','bargaintrgqty']);
-    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs','bargainenabled','bargaintrgqty']);
+    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs','bargainenabled','bargaintrgqty','remarks']);
 
     // const category = await Category.findOne({name: req.body.categoryId});
     // if (!category) return res.status(400).send('Invalid customer.');

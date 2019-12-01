@@ -55,4 +55,45 @@ res.status(200).send({
         });
 });
 
+router.post('/addtopic/:topicid', [auth], async (req, res) => {
+  var registrationTokens = [
+    'e1yzCU1Po8M:APA91bGuduUlSKTczP5K76Xuw_PzT789dr9zXR-plMwqrEZ0JHR-h1sWR6IUR5C83gisRvbTBzU9sI_3nuVWJUPyyWed-YM8nYsmI7AELxRKcdy4MdrNVaTUsLlxcuN6DPtJ7K6pXzQ3',
+    'YOUR_REGISTRATION_TOKEN_n'
+  ];
+
+  admin.messaging().subscribeToTopic(registrationTokens, req.params.topicid)
+  .then(function(response) {
+    // See the MessagingTopicManagementResponse reference documentation
+    // for the contents of response.
+    console.log('Successfully subscribed to topic:', response);
+  })
+  .catch(function(error) {
+    console.log('Error subscribing to topic:', error);
+  });
+  res.status(200).send({
+    message: 'Success'
+});
+});
+
+router.put('/removefromtopic/:topicid', [auth], async (req, res) => {
+  var registrationTokens = [
+    'e1yzCU1Po8M:APA91bGuduUlSKTczP5K76Xuw_PzT789dr9zXR-plMwqrEZ0JHR-h1sWR6IUR5C83gisRvbTBzU9sI_3nuVWJUPyyWed-YM8nYsmI7AELxRKcdy4MdrNVaTUsLlxcuN6DPtJ7K6pXzQ3',
+    'YOUR_REGISTRATION_TOKEN_n'
+  ];
+
+  admin.messaging().unsubscribeFromTopic(registrationTokens, req.params.topicid)
+  .then(function(response) {
+    // See the MessagingTopicManagementResponse reference documentation
+    // for the contents of response.
+    console.log('Successfully unsubscribed from topic:', response);
+  })
+  .catch(function(error) {
+    console.log('Error unsubscribing from topic:', error);
+  });
+
+  res.status(200).send({
+    message: 'Success'
+});
+});
+
 module.exports = router;
