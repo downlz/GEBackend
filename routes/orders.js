@@ -178,10 +178,13 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
         orderObj.address = address;
     }
 
-    if (((orderdtl[0].invoiceno != null) && (req.body.status == 'ready' || req.body.status == 'shipped' || req.body.status == 'delivered'))) {
+    
+    if ((orderdtl.invoiceno === undefined || orderdtl.invoiceno == null) && (req.body.status == 'ready' || req.body.status == 'shipped' || req.body.status == 'delivered')) {
+        
         const orderinv = await Order.find().sort({'invoiceno': -1}).limit(1)
         invoiceno =  parseInt(orderinv[0].invoiceno) + 1;
         orderObj.invoiceno = String(invoiceno);
+        
     } else if (req.body.status == 'cancelled'){
         orderObj.invoiceno = null;
     } else {
