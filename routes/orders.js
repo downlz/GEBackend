@@ -272,8 +272,7 @@ router.get('/orderno', [auth,permit('admin','agent','seller','buyer')], async (r
 
 router.get('/user/:id', [auth], async (req, res) => {
     const customer = await User.findById(req.params.id);
-    // logger.info(req.params.id);
-    // logger.info(customer);
+    
     if (!customer) return res.status(400).send('Invalid buyer or seller');
     let order = null;
     // order = await Order.find({buyer: customer}).sort({'placedTime': -1});
@@ -281,9 +280,9 @@ router.get('/user/:id', [auth], async (req, res) => {
     // Due to role policy first check if buyer id is same as seller/agent if yes fetch the details else pull seller details
     
     if (customer.isSeller) {
-        order = await Order.find({seller: customer}).sort({'placedTime': -1});
+        order = await Order.find({'seller._id': customer._id}).sort({'placedTime': -1});
     } else {
-        order = await Order.find({buyer: customer}).sort({'placedTime': -1});
+        order = await Order.find({'buyer._id': customer._id}).sort({'placedTime': -1});
     }    
     if (!order) return res.status(404).send('The item with the given ID was not found.');
     
