@@ -164,7 +164,7 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
         if (!address) return res.status(400).send('Invalid category.');
     }
     
-    // const order = await Order.findById(req.params.id);
+    const orderdtl = await Order.findById(req.params.id);
 
     let orderObj = _.pick(req.body, ['quantity',
         'cost', 'placedTime', 'confirmedTime', 'shipmentTime',
@@ -178,10 +178,14 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
         orderObj.address = address;
     }
 
-    if (req.body.status == 'ready') {
+    if (((orderdtl[0].invoiceno != null) && (req.body.status == 'ready' || req.body.status == 'shipped' || req.body.status == 'delivered'))) {
         const orderinv = await Order.find().sort({'invoiceno': -1}).limit(1)
         invoiceno =  parseInt(orderinv[0].invoiceno) + 1;
         orderObj.invoiceno = String(invoiceno);
+    } else if (req.body.status == 'cancelled'){
+        orderObj.invoiceno = null;
+    } else {
+        // Do Nothing
     }
 
     orderObj.lastUpdated = Date();          // Update lastupdated datetimestart
@@ -264,7 +268,6 @@ router.get('/orderno', [auth,permit('admin','agent','seller','buyer')], async (r
 });
 
 router.get('/user/:id', [auth], async (req, res) => {
-
     const customer = await User.findById(req.params.id);
     // logger.info(req.params.id);
     // logger.info(customer);
