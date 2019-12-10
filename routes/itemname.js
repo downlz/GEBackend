@@ -26,10 +26,14 @@ router.post('/', [auth, permit('admin')], async (req, res) => {
 });
 
 router.put('/:id', [auth, permit('admin')], async (req, res) => {
-  const { error } = validate(req.body); 
-  if (error) return res.status(400).send(error.details[0].message);
+  
+  // const { error } = validate(req.body); 
+  // console.log(error)
+  let itemNameObj = _.pick(req.body, ['name','hsn','tax']);
+  
+  // if (error) return res.status(400).send(error.details[0].message);
 
-  const itemName = await ItemName.findByIdAndUpdate(req.params.id, { name: req.body.name }, {
+  const itemName = await ItemName.findByIdAndUpdate(req.params.id, itemNameObj, {
     new: true
   });
 
