@@ -41,10 +41,24 @@ router.post('/', [auth], async (req, res) => {
 });
 
 router.put('/:id', [auth, permit('admin')], async (req, res) => {
-  const { error } = validate(req.body); 
-  if (error) return res.status(400).send(error.details[0].message);
+  // const { error } = validate(req.body); 
+  // console.log(error);
+  // if (error) return res.status(400).send(error.details[0].message);
 
-  const city = await City.findByIdAndUpdate(req.params.id, { name: req.body.name }, {
+  const state = await State.findById(req.body.stateId);
+  if (!state) return res.status(400).send('Invalid state.');
+
+  let cityObj = _.pick(req.body, ['name']);
+
+  locationObj = {
+    type : req.body.type,
+    coordinates : [req.body.lat,req.body.lng]
+  }
+
+  cityObj.state = state;
+  cityObj.location = locationObj;
+
+  const city = await City.findByIdAndUpdate(req.params.id, cityObj, {
     new: true
   });
 
