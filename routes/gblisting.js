@@ -21,9 +21,21 @@ function dropIfDNE(Obj, arr) {
 }
 
 router.get('/', async (req, res) => {
-  const order = await GroupbuyingList.find().sort({'gbstarttime':-1});
+  const order = await GroupbuyingList.find({isactive : true}).sort({'gbstarttime':-1});
   res.send(order);
 });
+
+// router.get('/active', async (req, res) => {
+//   const order = await GroupbuyingList.find({$and : [
+//     {gbstarttime : {
+//       $lt: Date.now()
+//     }},
+//     {gbendtime : {
+//       $gte: Date.now()
+//     }}]
+// }).sort({'gbstarttime':-1});
+//   res.send(order);
+// });
 
 router.post('/', [auth, permit('buyer', 'admin')],  async (req, res) => {
 
