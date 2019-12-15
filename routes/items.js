@@ -106,7 +106,9 @@ router.get('/recent/', async (req, res) => {
 });
 
 router.get('/ordered/', async (req, res) => {
-  const recentlyordered = await Order.find({},{item : 1}).sort({'placedTime': -1}).limit(4);
+  const recentlyordered = await Order.find({},{item:1}).sort({'placedTime': -1}).limit(4);
+  // const recentlyordered = await Order.distinct('item').sort({'placedTime': -1}).limit(4);
+  // const recentlyordered = await Order.aggregate( [ { $project : { 'item': 0 } } ] ).sort({'placedTime': -1}).limit(4);
   res.send(recentlyordered);
 });
 
