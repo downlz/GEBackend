@@ -23,7 +23,6 @@ router.post('/', [auth], async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   const city = await City.findById(req.body.city);
-
   if (!city) return res.status(400).send('Invalid city.');
 
   const state = await State.findById(req.body.state);

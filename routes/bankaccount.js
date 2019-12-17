@@ -72,4 +72,11 @@ router.get('/:id', async (req, res) => {
   res.send(bankacc);
 });
 
+router.get('/user/:id', async (req, res) => {
+  const bankacc = await BankAccount.find({user:req.params.id});
+
+  if (!bankacc) return res.status(404).send('The bankaccount with the given ID was not found.');
+
+  res.send(bankacc);
+});
 module.exports = router;

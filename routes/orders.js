@@ -65,7 +65,11 @@ async function placeOrder(obj, req, res) {
     orderObj.orderno = parseInt(ordno[0].orderno) + 1
     // console.log(orderObj.orderno)
     if (req.body.isshippingbillingdiff == true) {
-        state = await State.findById(obj.state);
+
+        city = await City.findById(obj.city);
+        if (!city) return res.status(400).send('Invalid City');
+
+        state = await State.findById(city.state._id);
         if (!state) return res.status(400).send('Invalid State');
 
 
@@ -79,19 +83,19 @@ async function placeOrder(obj, req, res) {
         pin: req.body.pincode,
         addressbasicdtl: partyObj,
         state: state,
-        // city: city,
+        city: city,
         phone: '+91' + req.body.phone,
         addedby: obj.addedby,
         addresstype: obj.addresstype,
         }; 
 
         // Added to collect city
-        if (obj.city){
-            city = await City.findById(obj.city);
-            if (!city) return res.status(400).send('Invalid City');
+        // if (obj.city){
+        //     city = await City.findById(obj.city);
+        //     if (!city) return res.status(400).send('Invalid City');
 
-            addressObj.city = city;
-        }
+        //     addressObj.city = city;
+        // }
         if (req.body.isExistingAddr == false) {
             address = new Address(addressObj);
             savedaddr = await address.save();    

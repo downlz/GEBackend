@@ -58,6 +58,19 @@ router.post('/', async (req, res) => {
 
 });
 
+router.get('/banner', async (req, res) => {
+
+  var msg = {
+    'banner1' : 'https://res.cloudinary.com/dkhlc6xlj/image/upload/v1555253437/qpdbvi2vhlrged6ymemq.png',
+    'banner2' : 'https://res.cloudinary.com/dkhlc6xlj/image/upload/v1576426887/hvr1omhtkpgvxcn8v8my.jpg',
+    'banner3' : 'https://res.cloudinary.com/dkhlc6xlj/image/upload/v1567519756/zzfrugh6ji0xta71jncm.jpg',
+  }
+  res.send({
+    msg
+  });
+
+});
+
 router.post('/receivewhatsapp', (req, res) => {
   
   const smsCount = req.session.counter || 0;
