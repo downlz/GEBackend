@@ -35,19 +35,17 @@ router.post('/', [auth], async (req, res) => {
   res.send(bankaccount);
 });
 
-router.put('/:id', [auth, permit('admin')], async (req, res) => {
+router.put('/:id', [auth], async (req, res) => {
   const { error } = validate(req.body); 
   if (error) return res.status(400).send(error.details[0].message);
+  let bankAccountObj = _.pick(req.body, ['accountType','accountNo','bank','name','micr','ifsc','accountPreference'
+                        ,'approved','remarks','createdBy','updatedAt']);
 
-  const bankacc = await BankAccount.findByIdAndUpdate(req.params.id, { accountNo: req.body.accountNo,
-                  micr: req.body.micr,
-                  ifsc: req.body.ifsc,
-                  name: req.body.name,
-                  bank: req.body.bank,
-                  accountPreference: req.body.accountPreference,
-                  remarks: req.body.remarks,
-                  updatedAt: Date.now()
-                }, {
+  dropIfDNE(bankAccountObj, ['accountType','accountNo','micr','ifsc','accountPreference'
+  ,'approved','remarks','createdBy','updatedAt']);
+
+  bankAccountObj.updatedAt = Date.now()
+  const bankacc = await BankAccount.findByIdAndUpdate(req.params.id,bankAccountObj , {
     new: true
   });
 
@@ -64,7 +62,7 @@ router.delete('/:id', [auth, permit('admin')], async (req, res) => {
   res.send(bankacc);
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id',[auth], async (req, res) => {
   const bankacc = await BankAccount.findById(req.params.id);
 
   if (!bankacc) return res.status(404).send('The bankaccount with the given ID was not found.');
@@ -72,7 +70,7 @@ router.get('/:id', async (req, res) => {
   res.send(bankacc);
 });
 
-router.get('/user/:id', async (req, res) => {
+router.get('/user/:id',[auth], async (req, res) => {
   const bankacc = await BankAccount.find({user:req.params.id});
 
   if (!bankacc) return res.status(404).send('The bankaccount with the given ID was not found.');

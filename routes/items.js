@@ -101,12 +101,12 @@ router.get('/all/', [auth,permit('seller', 'admin', 'agent','buyer')], async (re
  */
 
 router.get('/recent/', async (req, res) => {
-  const recentitem = await Item.find({}).sort({'updatedon': -1}).limit(4);
+  const recentitem = await Item.find({}).sort({'updatedon': -1}).limit(6);
   res.send(recentitem);
 });
 
 router.get('/ordered/', async (req, res) => {
-  const recentlyordered = await Order.find({},{item:1}).sort({'placedTime': -1}).limit(4);
+  const recentlyordered = await Order.find({},{item:1}).sort({'placedTime': -1}).limit(6);
   // const recentlyordered = await Order.distinct('item').sort({'placedTime': -1}).limit(4);
   // const recentlyordered = await Order.aggregate( [ { $project : { 'item': 0 } } ] ).sort({'placedTime': -1}).limit(4);
   res.send(recentlyordered);
@@ -130,7 +130,7 @@ router.post('/nearme/',[auth], async (req, res) => {
   const item = await Item.find({ $and : [
       {'city._id': {$in :nearbyCities}},
       {'isLive' : true}]                   //Search for only active item.
-    }).sort({'updatedon': -1}).limit(5);
+    }).sort({'updatedon': -1}).limit(8);
 
   res.send(item);
 });
