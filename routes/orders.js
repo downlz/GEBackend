@@ -2,6 +2,7 @@ const auth = require('../middleware/auth');
 // const logger = require('../startup/logger');
 const permit = require('../middleware/permissions');
 const sendEmail = require('../middleware/sendemail');
+const sendNotifications = require('../middleware/fcm');
 const {Order, validate} = require('../models/order');
 const {Taxrate} = require('../models/taxrates');
 const {Item} = require('../models/item');
@@ -347,10 +348,33 @@ async function getTaxBreakup(userObj) {
     return taxDetail;
 };
 
+async function sendAppNotifications(usertoken,msgtitle,msgbody,pageid,page) {
+
+    // var registrationToken = 'e2D8wUCeHTE:APA91bHrtgPjTTYFkGAkCI7-9ZL8P6-32D--F8a40Fe0nbb-o9tw_wJlS5BGwrZnCNylxCeknSUn_sQc87HegwxeKUks28JYCpzjvsdS4xcwgPTiH0ojB1E5pF-kMeJjELS_sdoMJFgW';
+
+var message = {
+    notification: {
+        title: msgtitle,
+        body: msgbody
+      },
+//   data: {
+//     score: '850',
+//     time: '2:45'
+//   },
+      data :{
+          id: pageid,
+          type: page
+      },
+  token: usertoken
+};
+sendNotifications(message);
+    return message;
+}
 
 module.exports = {
     router,
     placeOrder,
     dropIfDNE,
-    getTaxBreakup
+    getTaxBreakup,
+    sendAppNotifications
 };

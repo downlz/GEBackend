@@ -35,6 +35,7 @@ const bargain = require('../routes/bargain');
 const bankaccount = require('../routes/bankaccount');
 const fcmnotifications = require('../routes/fcmnotifications');
 const banner = require('../routes/banner');
+const agentbuyer = require('../routes/agentbuyer');
 
 var corsOptions = {
   origin: '*',
@@ -76,5 +77,6 @@ module.exports = function(app) {
   app.use('/api/bankaccount',bankaccount);
   app.use('/api/fcmnotifications',fcmnotifications);
   app.use('/api/banner',banner);
+  app.use('/api/agentbuyer',agentbuyer);
   app.use(error);
 }

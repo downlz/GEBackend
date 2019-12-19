@@ -1,6 +1,8 @@
 const auth = require('../middleware/auth');
 // const logger = require('../startup/logger');
 const permit = require('../middleware/permissions');
+const sendNotifications = require('../middleware/fcm');
+const {sendAppNotifications} = require('./orders');
 const {
   Bargain,
   validate
@@ -73,6 +75,11 @@ router.post('/', [auth], async (req, res) => {
   } else {
     let bargain = new Bargain(bargainObj);
     bargain = await bargain.save();
+    sendAppNotifications(sellerid.fcmkey,
+      'Bargain Request raised for ' + bargainObj.item.sampleNo,
+      'A bargain trade has been placed by buyer.Click to negiotate the trade',
+      bargain._id,
+      BargainDetail);
   }
 
   res.send(activebargain);
