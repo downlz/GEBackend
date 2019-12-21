@@ -25,6 +25,7 @@ router.post('/', async (req, res) => {
    isActive: user.isactive, token: token, phone: user.phone,
    fcmkey: user.fcmkey, devicedtl: user.devicedtl
    }
+
    if (userInfo.isTransporter == true || userInfo.isAdmin == true ) {
           // User profile cannot be overridden
    } else {

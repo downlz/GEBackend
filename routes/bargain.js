@@ -65,7 +65,7 @@ router.post('/', [auth], async (req, res) => {
       'buyer._id': buyerid._id
     }, {
       bargainstatus: {
-        $in: ['negotiation', 'placed', 'paused']
+        $in: ['negotiation', 'placed', 'paused', 'lastbestprice']
       }
     }]
   }); // Add rule for datetime
@@ -75,11 +75,11 @@ router.post('/', [auth], async (req, res) => {
   } else {
     let bargain = new Bargain(bargainObj);
     bargain = await bargain.save();
-    sendAppNotifications(sellerid.fcmkey,
-      'Bargain Request raised for ' + bargainObj.item.sampleNo,
-      'A bargain trade has been placed by buyer.Click to negiotate the trade',
-      bargain._id,
-      BargainDetail);
+    // sendAppNotifications(sellerid.fcmkey,
+    //   'Bargain Request raised for ' + bargainObj.item.sampleNo,
+    //   'A bargain trade has been placed by buyer.Click to negiotate the trade',
+    //   bargain._id,
+    //   BargainDetail);
   }
 
   res.send(activebargain);
@@ -377,7 +377,7 @@ router.post('/squareoff', async (req, res) => {
     },
     {
       bargainstatus: {
-        $in: ['negotiation', 'placed', 'paused']
+        $in: ['negotiation', 'placed', 'paused','lastbestprice']
       }
     }]
   },{'lastupdated': Date.now(),'bargainstatus': 'expired'});
