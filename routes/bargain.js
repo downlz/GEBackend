@@ -1,6 +1,8 @@
 const auth = require('../middleware/auth');
 // const logger = require('../startup/logger');
 const permit = require('../middleware/permissions');
+const sendNotifications = require('../middleware/fcm');
+const {sendAppNotifications} = require('./orders');
 const {
   Bargain,
   validate
@@ -63,7 +65,7 @@ router.post('/', [auth], async (req, res) => {
       'buyer._id': buyerid._id
     }, {
       bargainstatus: {
-        $in: ['negotiation', 'placed', 'paused']
+        $in: ['negotiation', 'placed', 'paused', 'lastbestprice']
       }
     }]
   }); // Add rule for datetime
@@ -73,6 +75,11 @@ router.post('/', [auth], async (req, res) => {
   } else {
     let bargain = new Bargain(bargainObj);
     bargain = await bargain.save();
+    // sendAppNotifications(sellerid.fcmkey,
+    //   'Bargain Request raised for ' + bargainObj.item.sampleNo,
+    //   'A bargain trade has been placed by buyer.Click to negiotate the trade',
+    //   bargain._id,
+    //   BargainDetail);
   }
 
   res.send(activebargain);
@@ -370,7 +377,7 @@ router.post('/squareoff', async (req, res) => {
     },
     {
       bargainstatus: {
-        $in: ['negotiation', 'placed', 'paused']
+        $in: ['negotiation', 'placed', 'paused','lastbestprice']
       }
     }]
   },{'lastupdated': Date.now(),'bargainstatus': 'expired'});
@@ -397,6 +404,23 @@ router.put('/pause/:id', async (req, res) => {
   if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
   res.send(bargain);
+});
+
+router.get('/lapsetime/:id', [auth], async (req, res) => {
+
+  const bargain = await Bargain.findById(req.params.id);
+  if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
+
+  // var epochdate = new Date(bargain.firstquote.requestedon)
+  // lapsedate = epochdate.setHours(epochdate.getHours()+18); 
+  // var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+  // d.setUTCSeconds(lapsedate);
+  // Math.floor(new Date(bargain.firstquote.requestedon) / 1000)
+  
+
+  res.send({
+    "bargainlapse" : new Date(bargain.firstquote.requestedon.getTime() + 1000 * 3600 * 24 * 1)
+  });
 });
 
 router.put('/release/:id', async (req, res) => {

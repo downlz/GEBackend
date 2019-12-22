@@ -2,6 +2,7 @@ const auth = require('../middleware/auth');
 // const logger = require('../startup/logger');
 const permit = require('../middleware/permissions');
 const sendEmail = require('../middleware/sendemail');
+const sendNotifications = require('../middleware/fcm');
 const {Order, validate} = require('../models/order');
 const {Taxrate} = require('../models/taxrates');
 const {Item} = require('../models/item');
@@ -65,7 +66,11 @@ async function placeOrder(obj, req, res) {
     orderObj.orderno = parseInt(ordno[0].orderno) + 1
     // console.log(orderObj.orderno)
     if (req.body.isshippingbillingdiff == true) {
-        state = await State.findById(obj.state);
+
+        city = await City.findById(obj.city);
+        if (!city) return res.status(400).send('Invalid City');
+
+        state = await State.findById(city.state._id);
         if (!state) return res.status(400).send('Invalid State');
 
 
@@ -79,19 +84,19 @@ async function placeOrder(obj, req, res) {
         pin: req.body.pincode,
         addressbasicdtl: partyObj,
         state: state,
-        // city: city,
+        city: city,
         phone: '+91' + req.body.phone,
         addedby: obj.addedby,
         addresstype: obj.addresstype,
         }; 
 
         // Added to collect city
-        if (obj.city){
-            city = await City.findById(obj.city);
-            if (!city) return res.status(400).send('Invalid City');
+        // if (obj.city){
+        //     city = await City.findById(obj.city);
+        //     if (!city) return res.status(400).send('Invalid City');
 
-            addressObj.city = city;
-        }
+        //     addressObj.city = city;
+        // }
         if (req.body.isExistingAddr == false) {
             address = new Address(addressObj);
             savedaddr = await address.save();    
@@ -343,10 +348,33 @@ async function getTaxBreakup(userObj) {
     return taxDetail;
 };
 
+async function sendAppNotifications(usertoken,msgtitle,msgbody,pageid,page) {
+
+    // var registrationToken = 'e2D8wUCeHTE:APA91bHrtgPjTTYFkGAkCI7-9ZL8P6-32D--F8a40Fe0nbb-o9tw_wJlS5BGwrZnCNylxCeknSUn_sQc87HegwxeKUks28JYCpzjvsdS4xcwgPTiH0ojB1E5pF-kMeJjELS_sdoMJFgW';
+
+var message = {
+    notification: {
+        title: msgtitle,
+        body: msgbody
+      },
+//   data: {
+//     score: '850',
+//     time: '2:45'
+//   },
+      data :{
+          id: pageid,
+          type: page
+      },
+  token: usertoken
+};
+sendNotifications(message);
+    return message;
+}
 
 module.exports = {
     router,
     placeOrder,
     dropIfDNE,
-    getTaxBreakup
+    getTaxBreakup,
+    sendAppNotifications
 };

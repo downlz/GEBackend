@@ -16,7 +16,7 @@ const bankAccountSchema = new mongoose.Schema({
     },
     accountType: {
         type: String,
-        enum: ['Current', 'Savings'],
+        enum: ['Current', 'Savings' ,'Nodal'],
         required: false
     },
     accountNo: {
@@ -25,7 +25,7 @@ const bankAccountSchema = new mongoose.Schema({
     },
     micr: {
         type: String
-        , required: true
+        , required: false
     },
     ifsc: {
         type: String
@@ -33,8 +33,8 @@ const bankAccountSchema = new mongoose.Schema({
     },
     accountPreference: {
         type: String,
-        enum: ['Primary', 'Secondary', 'Tertiary'],
-        required: true
+        enum: ['Primary', 'Secondary', 'Tertiary','Others'],
+        required: false
     },
     approved: {
         type: Boolean,
@@ -45,7 +45,7 @@ const bankAccountSchema = new mongoose.Schema({
         required: false
     },
     createdBy: {
-        type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
+        type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false
     },
     createdAt: {
         type: Date,
@@ -66,9 +66,9 @@ function validateBankAccount(bankaccount) {
         bank: Joi.string().optional(),
         accountType: Joi.string().optional(),
         accountNo: Joi.string().optional(),
-        micr: Joi.string().required(),
+        micr: Joi.string().optional(),
         ifsc: Joi.string().required(),
-        accountPreference: Joi.string().required(),
+        accountPreference: Joi.string().optional(),
         approved: Joi.boolean(),
         remarks: Joi.string(),
         createdAt: Joi.string(),
