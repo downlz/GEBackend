@@ -75,11 +75,29 @@ router.post('/', [auth], async (req, res) => {
   } else {
     let bargain = new Bargain(bargainObj);
     bargain = await bargain.save();
-    // sendAppNotifications(sellerid.fcmkey,
-    //   'Bargain Request raised for ' + bargainObj.item.sampleNo,
-    //   'A bargain trade has been placed by buyer.Click to negiotate the trade',
-    //   bargain._id,
-    //   BargainDetail);
+
+    sendAppNotifications(sellerid.fcmkey,
+      'Bargain Request raised for ' + bargainObj.item.sampleNo,
+      'A bargain trade has been placed by buyer.Click to negiotate the trade',
+      bargain._id,
+      'BargainDetail');
+  //   var message = {
+  //     notification: {
+  //         title: 'Bargain Request raised for ' + bargainObj.item.sampleNo,
+  //         body: 'A bargain trade has been placed by buyer.Click to negiotate the trade',
+            
+  //       },
+  // //   data: {
+  // //     score: '850',
+  // //     time: '2:45'
+  // //   },
+  //       data : {
+  //           id: JSON.stringify(bargain._id),
+  //           type: 'BargainDetail'
+  //       },
+  //   token: sellerid.fcmkey
+  // };
+  // sendNotifications(message);
   }
 
   res.send(activebargain);
@@ -167,6 +185,12 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
       default:
         //Do Nothing
     }
+    // Send Notification to Seller
+    sendAppNotifications(bargain.seller.fcmkey,
+      'Bargain Request raised for ' + bargain.item.sampleNo,
+      'Buyer responded to your bargain request',
+      bargain._id,
+      'BargainDetail');
   } else if (req.body.sellerquote) {
     switch (bargain.bargaincounter) {
       case 1:
@@ -276,6 +300,14 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
       default:
         //Do Nothing
     }
+
+    // Send Notification to Buyer
+    sendAppNotifications(bargain.buyer.fcmkey,
+      'Bargain Request raised for ' + bargain.item.sampleNo,
+      'Seller responded to your bargain request',
+      bargain._id,
+      'BargainDetail');
+
     // strikeprice = req.body.sellerquote
   } else {
     // Do nothing
