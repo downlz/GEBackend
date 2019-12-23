@@ -158,6 +158,11 @@ async function placeOrder(obj, req, res) {
     }
 
     sendEmail(order.buyer.email, process.env.EMAILCCUSER, process.env.EMAILBCCUSER,emailsubject, message);
+    sendAppNotifications(order.buyer.fcmkey,
+        'Order Placed',
+        'Thank you for booking your order.The order is placed successfully and you will be notified soon.',
+        order._id,
+        'OrderDetail');
     res.send(order);
     return order;
 }
@@ -249,6 +254,11 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
     }
     
     sendEmail(order.buyer.email, process.env.EMAILCCUSER,process.env.EMAILBCCUSER, emailsubject, message);
+    sendAppNotifications(order.buyer.fcmkey,
+        emailsubject,
+        messageorderstatus.slice(3,-4),
+        order._id,
+        'OrderDetail');
     res.send(order);
 
 });
@@ -361,9 +371,9 @@ var message = {
 //     score: '850',
 //     time: '2:45'
 //   },
-      data :{
-          id: pageid,
-          type: page
+      data : {
+          id: JSON.stringify(pageid),
+          type: JSON.stringify(page)
       },
   token: usertoken
 };
