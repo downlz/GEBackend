@@ -137,6 +137,8 @@ router.put('/:id', [auth], async (req, res) => {
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
   'isEmpL0', 'isEmpL1', 'isTransporter','isAgent','isNbfc','isBank','vendorCode','isactive','devicedtl','fcmkey','devspecs']);
   
+  userfcm = await User.updateOne({fcmkey : req.body.fcmkey},{fcmkey:null});
+
   user = await User.findByIdAndUpdate(req.params.id, userObj, {
     new: true
   });
