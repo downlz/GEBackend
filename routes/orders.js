@@ -373,7 +373,8 @@ var message = {
 //   },
       data : {
           id: JSON.stringify(pageid),
-          type: JSON.stringify(page)
+          type: JSON.stringify(page),
+          click_action: 'FLUTTER_NOTIFICATION_CLICK'
       },
   token: usertoken
 };
