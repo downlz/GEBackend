@@ -76,30 +76,33 @@ router.post('/', [auth], async (req, res) => {
     let bargain = new Bargain(bargainObj);
     bargain = await bargain.save();
 
-    sendAppNotifications(sellerid.fcmkey,
-      'Bargain Request raised for ' + bargainObj.item.sampleNo,
-      'A bargain trade has been placed by buyer.Click to negiotate the trade',
-      bargain._id,
-      'BargainDetail');
-  //   var message = {
-  //     notification: {
-  //         title: 'Bargain Request raised for ' + bargainObj.item.sampleNo,
-  //         body: 'A bargain trade has been placed by buyer.Click to negiotate the trade',
-            
-  //       },
-  // //   data: {
-  // //     score: '850',
-  // //     time: '2:45'
-  // //   },
-  //       data : {
-  //           id: JSON.stringify(bargain._id),
-  //           type: 'BargainDetail'
-  //       },
-  //   token: sellerid.fcmkey
-  // };
-  // sendNotifications(message);
-  }
+  //   sendAppNotifications(sellerid.fcmkey,
+  //     'Bargain Request raised for ' + bargainObj.item.sampleNo,
+  //     'A bargain trade has been placed by buyer.Click to negiotate the trade',
+  //     bargain._id,
+  //     'BargainDetail');
+  // }
 
+  var message = {
+    notification: {
+        title: JSON.stringify('Bargain Request raised for' + bargainObj.item.sampleNo),
+        body: 'A bargain trade has been placed by buyer.Click to negiotate the trade',
+        image: "https://ibin.co/2t1lLdpfS06F.png",
+      },
+      data : {
+          id: JSON.stringify(bargain._id),
+          type: 'BargainDetail',
+          click_action: 'FLUTTER_NOTIFICATION_CLICK',
+          title: JSON.stringify('Bargain Request raised for' + bargainObj.item.sampleNo),
+          body: 'A bargain trade has been placed by buyer.Click to negiotate the trade',
+          //  "status": "done",
+          image: "https://ibin.co/2t1lLdpfS06F.png",
+      },
+  token: sellerid.fcmkey
+  };
+
+  sendNotifications(message);
+  }
   res.send(activebargain);
 
 });
@@ -186,11 +189,32 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
         //Do Nothing
     }
     // Send Notification to Seller
-    sendAppNotifications(bargain.seller.fcmkey,
-      'Bargain Request raised for ' + bargain.item.sampleNo,
-      'Buyer responded to your bargain request',
-      bargain._id,
-      'BargainDetail');
+    // sendAppNotifications(bargain.seller.fcmkey,
+    //   'Bargain Request raised for ' + bargain.item.sampleNo,
+    //   'Buyer responded to your bargain request',
+    //   bargain._id,
+    //   'BargainDetail');
+
+    var message = {
+      notification: {
+          title: JSON.stringify('Bargain Request raised for ' + bargain.item.sampleNo),
+          body: 'Buyer responded to your bargain request',
+          image: "https://ibin.co/2t1lLdpfS06F.png",
+        },
+        data : {
+            id: JSON.stringify(bargain._id),
+            type: 'BargainDetail',
+            click_action: 'FLUTTER_NOTIFICATION_CLICK',
+            title: JSON.stringify('Bargain Request raised for ' + bargain.item.sampleNo),
+            body: 'Buyer responded to your bargain request',
+            //  "status": "done",
+            image: "https://ibin.co/2t1lLdpfS06F.png",
+        },
+    token: bargain.seller.fcmkey
+    };
+  
+    sendNotifications(message);
+
   } else if (req.body.sellerquote) {
     switch (bargain.bargaincounter) {
       case 1:
@@ -302,11 +326,31 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
     }
 
     // Send Notification to Buyer
-    sendAppNotifications(bargain.buyer.fcmkey,
-      'Bargain Request raised for ' + bargain.item.sampleNo,
-      'Seller responded to your bargain request',
-      bargain._id,
-      'BargainDetail');
+    // sendAppNotifications(bargain.buyer.fcmkey,
+    //   'Bargain Request raised for ' + bargain.item.sampleNo,
+    //   'Seller responded to your bargain request',
+    //   bargain._id,
+    //   'BargainDetail');
+
+    var message = {
+      notification: {
+          title: JSON.stringify('Bargain Request raised for ' + bargain.item.sampleNo),
+          body: 'Seller responded to your bargain request',
+          image: "https://ibin.co/2t1lLdpfS06F.png",
+        },
+        data : {
+            id: JSON.stringify(bargain._id),
+            type: 'BargainDetail',
+            click_action: 'FLUTTER_NOTIFICATION_CLICK',
+            title: JSON.stringify('Bargain Request raised for ' + bargain.item.sampleNo),
+            body: 'Seller responded to your bargain request',
+            //  "status": "done",
+            image: "https://ibin.co/2t1lLdpfS06F.png",
+        },
+    token: bargain.buyer.fcmkey
+    };
+  
+    sendNotifications(message);
 
     // strikeprice = req.body.sellerquote
   } else {
