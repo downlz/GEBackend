@@ -85,16 +85,16 @@ router.post('/', [auth], async (req, res) => {
 
   var message = {
     notification: {
-        title: JSON.stringify('Bargain Request raised for' + bargainObj.item.sampleNo),
-        body: 'A bargain trade has been placed by buyer.Click to negiotate the trade',
-        image: "https://ibin.co/2t1lLdpfS06F.png",
+        title: JSON.stringify('Bargain Request raised for ' + bargainObj.item.sampleNo),
+        body: 'A bargain trade has been placed by buyer.Click to negotiate the trade',
+        // image: "https://ibin.co/2t1lLdpfS06F.png",
       },
       data : {
           id: JSON.stringify(bargain._id),
           type: 'BargainDetail',
           click_action: 'FLUTTER_NOTIFICATION_CLICK',
           title: JSON.stringify('Bargain Request raised for' + bargainObj.item.sampleNo),
-          body: 'A bargain trade has been placed by buyer.Click to negiotate the trade',
+          body: 'A bargain trade has been placed by buyer.Click view to negotiate the trade',
           //  "status": "done",
           image: "https://ibin.co/2t1lLdpfS06F.png",
       },
@@ -199,14 +199,14 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
       notification: {
           title: JSON.stringify('Bargain Request raised for ' + bargain.item.sampleNo),
           body: 'Buyer responded to your bargain request',
-          image: "https://ibin.co/2t1lLdpfS06F.png",
+          // image: "https://ibin.co/2t1lLdpfS06F.png",
         },
         data : {
             id: JSON.stringify(bargain._id),
             type: 'BargainDetail',
             click_action: 'FLUTTER_NOTIFICATION_CLICK',
             title: JSON.stringify('Bargain Request raised for ' + bargain.item.sampleNo),
-            body: 'Buyer responded to your bargain request',
+            body: 'Buyer responded to your bargain request.Click view to check quote',
             //  "status": "done",
             image: "https://ibin.co/2t1lLdpfS06F.png",
         },
@@ -336,14 +336,14 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
       notification: {
           title: JSON.stringify('Bargain Request raised for ' + bargain.item.sampleNo),
           body: 'Seller responded to your bargain request',
-          image: "https://ibin.co/2t1lLdpfS06F.png",
+          // image: "https://ibin.co/2t1lLdpfS06F.png",
         },
         data : {
             id: JSON.stringify(bargain._id),
             type: 'BargainDetail',
             click_action: 'FLUTTER_NOTIFICATION_CLICK',
             title: JSON.stringify('Bargain Request raised for ' + bargain.item.sampleNo),
-            body: 'Seller responded to your bargain request',
+            body: 'Seller responded to your bargain request.Click view to check quote',
             //  "status": "done",
             image: "https://ibin.co/2t1lLdpfS06F.png",
         },
