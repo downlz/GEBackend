@@ -41,7 +41,7 @@ var message = {
   notification: {
       title: 'Text Message',
       body: 'I am testing FCM Notifications',
-      image: "https://ibin.co/2t1lLdpfS06F.png",
+      // image: "https://ibin.co/2t1lLdpfS06F.png",
     },
     data : {
         id: '1',

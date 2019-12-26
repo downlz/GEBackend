@@ -158,11 +158,32 @@ async function placeOrder(obj, req, res) {
     }
 
     sendEmail(order.buyer.email, process.env.EMAILCCUSER, process.env.EMAILBCCUSER,emailsubject, message);
-    sendAppNotifications(order.buyer.fcmkey,
-        'Order Placed',
-        'Thank you for booking your order.The order is placed successfully and you will be notified soon.',
-        order._id,
-        'OrderDetail');
+    // sendAppNotifications(order.buyer.fcmkey,
+    //     'Order Placed',
+    //     'Thank you for booking your order.The order is placed successfully and you will be notified soon.',
+    //     order._id,
+    //     'OrderDetail');
+
+    var appmessage = {
+        notification: {
+            title: 'Order Placed',
+            body: 'Thank you for booking your order.The order is placed successfully and you will be notified soon.',
+            // image: "https://ibin.co/2t1lLdpfS06F.png",
+          },
+          data : {
+              id: JSON.stringify(order._id),
+              type: 'OrderDetail',
+              click_action: 'FLUTTER_NOTIFICATION_CLICK',
+              title: 'Order Placed',
+              body: 'Thank you for booking your order.The order is placed successfully and you will be notified soon.',
+              //  "status": "done",
+              image: "https://ibin.co/2t1lLdpfS06F.png",
+          },
+      token: order.buyer.fcmkey
+      };
+    
+      sendNotifications(appmessage);
+
     res.send(order);
     return order;
 }
@@ -254,11 +275,32 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
     }
     
     sendEmail(order.buyer.email, process.env.EMAILCCUSER,process.env.EMAILBCCUSER, emailsubject, message);
-    sendAppNotifications(order.buyer.fcmkey,
-        emailsubject,
-        messageorderstatus.slice(3,-4),
-        order._id,
-        'OrderDetail');
+    // sendAppNotifications(order.buyer.fcmkey,
+    //     emailsubject,
+    //     messageorderstatus.slice(3,-4),
+    //     order._id,
+    //     'OrderDetail');
+
+        var appmessage = {
+            notification: {
+                title: JSON.stringify(emailsubject),
+                body: JSON.stringify(messageorderstatus.slice(3,-4)),
+                // image: "https://ibin.co/2t1lLdpfS06F.png",
+              },
+              data : {
+                  id: JSON.stringify(order._id),
+                  type: 'OrderDetail',
+                  click_action: 'FLUTTER_NOTIFICATION_CLICK',
+                  title: JSON.stringify(emailsubject),
+                  body: JSON.stringify(messageorderstatus.slice(3,-4)),
+                  //  "status": "done",
+                  image: "https://ibin.co/2t1lLdpfS06F.png",
+              },
+          token: order.buyer.fcmkey
+          };
+        
+          sendNotifications(appmessage);
+
     res.send(order);
 
 });
