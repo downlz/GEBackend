@@ -364,8 +364,8 @@ async function sendAppNotifications(usertoken,msgtitle,msgbody,pageid,page) {
 
 var message = {
     notification: {
-        title: msgtitle,
-        body: msgbody
+        title: JSON.stringify(msgtitle),
+        body: JSON.stringify(msgbody)
       },
 //   data: {
 //     score: '850',
