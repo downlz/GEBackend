@@ -374,10 +374,33 @@ var message = {
       data : {
           id: JSON.stringify(pageid),
           type: JSON.stringify(page),
-          click_action: 'FLUTTER_NOTIFICATION_CLICK'
+          click_action: 'FLUTTER_NOTIFICATION_CLICK',
+          title: JSON.stringify(msgtitle),
+           body: JSON.stringify(msgbody),
+          image: "https://ibin.co/2t1lLdpfS06F.png",
       },
   token: usertoken
 };
+
+// var message = {
+//     notification: {
+//         title: 'Text Message',
+//         body: 'I am testing FCM Notifications',
+//         image: "https://ibin.co/2t1lLdpfS06F.png",
+//       },
+//       data : {
+//           id: '1',
+//           type: 'BargainDetail',
+//           click_action: 'FLUTTER_NOTIFICATION_CLICK',
+//           title: JSON.stringify(req.body.title),
+//           body: JSON.stringify(req.body.body),
+//           //  "status": "done",
+//           image: "https://ibin.co/2t1lLdpfS06F.png",
+//       },
+//   token: userid.fcmkey
+//   };
+
+
 sendNotifications(message);
     return message;
 }
