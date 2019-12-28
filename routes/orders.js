@@ -26,8 +26,16 @@ function dropIfDNE(Obj, arr) {
     }
   }
 
-router.get('/', async (req, res) => {
-    const order = await Order.find().sort({'placedTime':-1});
+router.get('/', [auth], async (req, res) => {
+    // const order = await Order.find().sort({'placedTime':-1});            // Old order query pulling all records
+    if (req.query.pageid) {
+        recordtoskip = (req.query.pageid - 1) * 15;
+        rowslimit = 15;  
+    } else {
+        recordtoskip = 0;
+        rowslimit = 0;
+    }
+    const order = await Order.find().sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);
     res.send(order);
 });
 
