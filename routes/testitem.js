@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const cloudinary = require('cloudinary');
 const crypt = require('../middleware/crypt.js');
+const {Order, validate} = require('../models/order');
 // const nodemailer = require('nodemailer');
 const sendEmail = require('../middleware/sendemail');
 const bodyParser = require('body-parser');
@@ -117,6 +118,7 @@ router.post('/cbwhatsapp', async (req, res) => {
   res.sendStatus(200);
 });
 
+
 router.post('/sendwhatsapp', async (req, res) => {
 
    const accountSid = 'ACeca183e1cc9f3f9f5ac242f9a0c27ecf';
@@ -139,5 +141,19 @@ router.post('/sendwhatsapp', async (req, res) => {
     // })
 
   });
+
+router.get('/orders', async (req, res) => {
+    if (req.query.pageid) {
+        recordtoskip = (req.query.pageid - 1) * 15;
+        rowslimit = 15;  
+    } else {
+      recordtoskip = 0;
+      rowslimit = 0;
+    }
+    // rowslimit = recordtoskip;
+    // const order = await Order.find({},{orderno:1}).sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);
+    const order = await Order.find().sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);
+    res.send(order);
+});
 
 module.exports = router;
