@@ -343,11 +343,17 @@ router.get('/user/:id', [auth], async (req, res) => {
     // order = await Order.find({buyer: customer}).sort({'placedTime': -1});
 
     // Due to role policy first check if buyer id is same as seller/agent if yes fetch the details else pull seller details
-    
-    if (customer.isSeller) {
-        order = await Order.find({'seller._id': customer._id}).sort({'placedTime': -1});
+    if (req.query.pageid) {
+        recordtoskip = (req.query.pageid - 1) * 15;
+        rowslimit = 15;  
     } else {
-        order = await Order.find({'buyer._id': customer._id}).sort({'placedTime': -1});
+        recordtoskip = 0;
+        rowslimit = 0;
+    }
+    if (customer.isSeller) {
+        order = await Order.find({'seller._id': customer._id}).sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);
+    } else {
+        order = await Order.find({'buyer._id': customer._id}).sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);;
     }    
     if (!order) return res.status(404).send('The item with the given ID was not found.');
     
@@ -362,9 +368,16 @@ router.get('/agent/:id', [auth], async (req, res) => {
     if (!customer) return res.status(400).send('Invalid buyer or seller');
     let order = null;
 
+    if (req.query.pageid) {
+        recordtoskip = (req.query.pageid - 1) * 15;
+        rowslimit = 15;  
+    } else {
+        recordtoskip = 0;
+        rowslimit = 0;
+    }
     // Due to role policy first check if buyer id is same as seller/agent if yes fetch the details else pull seller details
     
-    order = await Order.find({buyer: customer}).sort({'placedTime': -1});
+    order = await Order.find({buyer: customer}).sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);;
 
     if (!order) return res.status(404).send('The item with the given ID was not found.');
     
