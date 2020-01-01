@@ -14,6 +14,7 @@ const {User} = require('../models/user');
 const {State} = require('../models/state');
 const {City} = require('../models/city');
 const {Address, validateAddress} = require('../models/address');
+const {AgentBuyer} = require('../models/agentbuyer');
 const mongoose = require('mongoose');
 // const {ObjectId} = require('mongodb');
 const express = require('express');
@@ -66,10 +67,10 @@ async function placeOrder(obj, req, res) {
     // }
 
     let orderObj = _.pick(obj, [ 'quantity', 'unit','address',
-        'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'paymentterms','price','isshippingbillingdiff','isExistingAddr']);
+        'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'paymentterms','price','isshippingbillingdiff','isExistingAddr','remarks']);
     
     await dropIfDNE(orderObj,['quantity', 'unit','address',
-    'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'paymentterms','price','isshippingbillingdiff','isExistingAddr']);
+    'cost', 'placedTime', 'paymentMode', 'status', 'ordertype', 'paymentterms','price','isshippingbillingdiff','isExistingAddr','remarks']);
 
     orderObj.orderno = parseInt(ordno[0].orderno) + 1
     // console.log(orderObj.orderno)
@@ -106,13 +107,25 @@ async function placeOrder(obj, req, res) {
         //     addressObj.city = city;
         // }
         if (req.body.isExistingAddr == false) {
-            address = new Address(addressObj);
-            savedaddr = await address.save();    
-            orderObj.shippingaddress = savedaddr;
+            if (req.body.ordertype == 'agentorder') {
+                delete addressObj.addresstype
+                agentbuyer = new AgentBuyer(addressObj);
+                savedaddr = await agentbuyer.save();    
+                orderObj.shippingaddress = savedaddr;
+            } else {
+                address = new Address(addressObj);
+                savedaddr = await address.save();    
+                orderObj.shippingaddress = savedaddr;
+            }
         } 
         else {
-            const deliveryaddress = await Address.findById(obj.addressreference);
-            orderObj.shippingaddress = deliveryaddress;
+            if (req.body.ordertype == 'agentorder') {
+                const deliveryaddress = await Address.findById(obj.addressreference);
+                orderObj.shippingaddress = deliveryaddress;
+            } else {
+                const deliveryaddress = await AgentBuyer.findById(obj.addressreference);
+                orderObj.shippingaddress = deliveryaddress;
+            }
         }
     } else if (req.body.isshippingbillingdiff == false){
         // logger.info(typeof(obj.addressreference));
@@ -189,8 +202,10 @@ async function placeOrder(obj, req, res) {
           },
       token: order.buyer.fcmkey
       };
-    
-      sendNotifications(appmessage);
+      
+      if (order.buyer.fcmkey) {
+        sendNotifications(appmessage);
+      }
 
     res.send(order);
     return order;
@@ -306,8 +321,11 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
               },
           token: order.buyer.fcmkey
           };
-        
-          sendNotifications(appmessage);
+          
+          if (order.buyer.fcmkey) {
+            sendNotifications(appmessage);
+          }
+          
 
     res.send(order);
 

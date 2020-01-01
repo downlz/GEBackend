@@ -35,6 +35,7 @@ router.post('/', [auth], async (req, res) => {
     gstin: agentbuyerObj.addressbasicdtl.gstin 
   }
 
+  agentbuyerObj.phone = '+91'+agentbuyerObj.phone;
   agentbuyerObj.city =  city;
   agentbuyerObj.state = state;
   agentbuyerObj.addedby = req.body.addedby;
@@ -63,7 +64,7 @@ router.put('/:id', [auth], async (req, res) => {
     state: state,
     pin: req.body.pin,
     addresstype: req.body.addresstype,
-    phone: req.body.phone,
+    phone: '+91'+req.body.phone,
     addedby: req.body.addedby
    }, {
     new: true
