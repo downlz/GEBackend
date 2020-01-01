@@ -24,7 +24,14 @@ const router = express.Router();
 const _ = require('lodash');
 
 router.get('/', async (req, res) => {
-  const bargain = await Bargain.find().sort({'lastupdated':-1});
+      if (req.query.pageid) {
+        recordtoskip = (req.query.pageid - 1) * 15;
+        rowslimit = 15;  
+    } else {
+        recordtoskip = 0;
+        rowslimit = 0;
+    }
+  const bargain = await Bargain.find().sort({'lastupdated':-1}).skip(recordtoskip).limit(rowslimit);
   res.send(bargain);
 });
 
@@ -100,8 +107,9 @@ router.post('/', [auth], async (req, res) => {
       },
   token: sellerid.fcmkey
   };
-
+  if (sellerid.fcmkey) {
   sendNotifications(message);
+  }
   }
   res.send(activebargain);
 
@@ -213,7 +221,9 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
     token: bargain.seller.fcmkey
     };
   
-    sendNotifications(message);
+    if (bargain.seller.fcmkey) {
+      sendNotifications(message);
+      }
 
   } else if (req.body.sellerquote) {
     switch (bargain.bargaincounter) {
@@ -350,7 +360,9 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
     token: bargain.buyer.fcmkey
     };
   
-    sendNotifications(message);
+    if (bargain.buyer.fcmkey) {
+      sendNotifications(message);
+    }
 
     // strikeprice = req.body.sellerquote
   } else {
@@ -414,7 +426,15 @@ router.get('/:id', async (req, res) => {
 
 router.get('/buyer/:buyerid', async (req, res) => {
 
-  const bargain = await Bargain.find({'buyer._id': req.params.buyerid}).sort({'lastupdated':-1});
+      if (req.query.pageid) {
+        recordtoskip = (req.query.pageid - 1) * 15;
+        rowslimit = 15;  
+    } else {
+        recordtoskip = 0;
+        rowslimit = 0;
+    }
+
+  const bargain = await Bargain.find({'buyer._id': req.params.buyerid}).sort({'lastupdated':-1}).skip(recordtoskip).limit(rowslimit);
 
   if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
@@ -423,7 +443,15 @@ router.get('/buyer/:buyerid', async (req, res) => {
 
 router.get('/seller/:sellerid', async (req, res) => {
 
-  const bargain = await Bargain.find({'seller._id': req.params.sellerid}).sort({'lastupdated':-1});
+      if (req.query.pageid) {
+        recordtoskip = (req.query.pageid - 1) * 15;
+        rowslimit = 15;  
+    } else {
+        recordtoskip = 0;
+        rowslimit = 0;
+    }
+
+  const bargain = await Bargain.find({'seller._id': req.params.sellerid}).sort({'lastupdated':-1}).skip(recordtoskip).limit(rowslimit);
 
   if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
@@ -449,7 +477,7 @@ router.post('/squareoff', async (req, res) => {
 
   const bargain = await Bargain.updateMany({
     $and: [{
-      'lastupdated': { $lte: Date.now() - 60*60*1000*24*2}
+      'lastupdated': { $lte: Date.now() - 60*60*1000*24*1}
     },
     {
       bargainstatus: {
@@ -462,6 +490,22 @@ router.post('/squareoff', async (req, res) => {
 
   res.send(bargain);
 });
+
+// router.get('/test', async (req, res) => {
+//   const bargain = await Bargain.find({
+//     $and: [{
+//       'lastupdated': { $lte: Date.now() - 60*60*1000*24*1}
+//     },
+//     {
+//       bargainstatus: {
+//         $in: ['negotiation', 'placed', 'paused','lastbestprice']
+//       }
+//     }]},{'bargaincounter':1}).sort({'lastupdated':-1});
+  
+//   if (!bargain) return res.status(404).send('Couldnot find bargains to square off.');
+
+//   res.send(bargain);
+// });
 
 router.put('/pause/:id', async (req, res) => {
   const bargain = await Bargain.findByIdAndUpdate(req.params.id, { 

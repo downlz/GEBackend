@@ -2,7 +2,7 @@ const Joi = require('joi');
 const mongoose = require('mongoose');
 const user = require('./user');
 const item = require('./item');
-const order = require('./order');
+// const order = require('./order');
 
 const pricerequestSchema = new mongoose.Schema({
   requestedon: {
