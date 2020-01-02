@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const appPrefSchema = new mongoose.Schema({
   appversion: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   appupdaterequired : {
     type: Boolean,
@@ -22,6 +23,18 @@ const appPrefSchema = new mongoose.Schema({
   showseller : {
     type : Boolean,          
     required : false
+  },
+  packagename :{
+    type : String,
+    required : false
+  },
+  appname :{
+    type : String,
+    required : false
+  },
+  buildnumber :{
+    type : String,
+    required : false
   }
 });
 
@@ -34,6 +47,9 @@ function validateAppref(apppref) {
     releasedate: Joi.date().optional(),
     showbuyer: Joi.boolean().required(),
     showseller: Joi.boolean().optional(),
+    packagename: Joi.string().optional(),
+    appname: Joi.string().optional(),
+    buildnumber: Joi.string().optional(),
   };
 
   return Joi.validate(apppref, schema);

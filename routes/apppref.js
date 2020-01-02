@@ -15,7 +15,7 @@ router.post('/', [auth, permit('admin')], async (req, res) => {
   const { error } = validate(req.body); 
   if (error) return res.status(400).send(error.details[0].message);
 
-  let appprefObj = _.pick(req.body, ['appversion','releasedate','showbuyer','showseller']);
+  let appprefObj = _.pick(req.body, ['appversion','releasedate','showbuyer','showseller','appname','packagename','buildnumber']);
   appprefObj.releasedate = Date.now();
   let apppref = new Apppref(appprefObj);
   apppref = await apppref.save();
@@ -26,7 +26,7 @@ router.post('/', [auth, permit('admin')], async (req, res) => {
 router.put('/:id', [auth, permit('admin')], async (req, res) => {
   const { error } = validate(req.body); 
   if (error) return res.status(400).send(error.details[0].message);
-  let appprefObj = _.pick(req.body, ['appversion','showbuyer','showseller']);
+  let appprefObj = _.pick(req.body, ['appversion','showbuyer','showseller','appname','packagename','buildnumber']);
   appprefObj.releasedate = Date.now();
   const apppref = await Apppref.findByIdAndUpdate(req.params.id, appprefObj, {
     new: true
@@ -47,6 +47,14 @@ router.delete('/:id', [auth, permit('admin')], async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   const apppref = await Apppref.findById(req.params.id);
+
+  if (!apppref) return res.status(404).send('The genre with the given ID was not found.');
+
+  res.send(apppref);
+});
+
+router.get('/version/:version', async (req, res) => {
+  const apppref = await Apppref.find({appversion:req.params.version});
 
   if (!apppref) return res.status(404).send('The genre with the given ID was not found.');
 
