@@ -3,6 +3,7 @@ const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const sendNotifications = require('../middleware/fcm');
 const {sendAppNotifications} = require('./orders');
+const moment = require('moment');
 const {
   Bargain,
   validate
@@ -531,15 +532,12 @@ router.get('/lapsetime/:id', [auth], async (req, res) => {
   const bargain = await Bargain.findById(req.params.id);
   if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
-  // var epochdate = new Date(bargain.firstquote.requestedon)
-  // lapsedate = epochdate.setHours(epochdate.getHours()+18); 
-  // var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
-  // d.setUTCSeconds(lapsedate);
-  // Math.floor(new Date(bargain.firstquote.requestedon) / 1000)
+  newdate = new Date(moment(bargain.firstquote.requestedon).format('YYYY-MM-DD'))
+  finaldate = new Date(moment(newdate).add(20, 'hours'));
   
-
   res.send({
-    "bargainlapse" : new Date(bargain.firstquote.requestedon.getTime() + 1000 * 3600 * 24 * 1)
+    // "bargainlapse" : new Date(bargain.firstquote.requestedon.getTime() + 1000 * 3600 * 24 * 1)
+    "bargainlapse" : finaldate
   });
 });
 
