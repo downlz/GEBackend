@@ -3,6 +3,7 @@ const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const sendNotifications = require('../middleware/fcm');
 const {sendAppNotifications} = require('./orders');
+const sendEmail = require('../middleware/sendemail');
 const moment = require('moment');
 const {
   Bargain,
@@ -94,23 +95,43 @@ router.post('/', [auth], async (req, res) => {
   var message = {
     notification: {
         title: JSON.stringify('Bargain Request raised for ' + bargainObj.item.sampleNo),
-        body: 'A bargain trade has been placed by buyer.Click to negotiate the trade',
+        body: 'A bargain request has been placed by buyer.Click to negotiate the trade',
         // image: "https://ibin.co/2t1lLdpfS06F.png",
       },
       data : {
           id: JSON.stringify(bargain._id),
           type: 'BargainDetail',
           click_action: 'FLUTTER_NOTIFICATION_CLICK',
-          title: JSON.stringify('Bargain Request raised for' + bargainObj.item.sampleNo),
-          body: 'A bargain trade has been placed by buyer.Click view to negotiate the trade',
+          title: JSON.stringify('Bargain Request raised for ' + bargainObj.item.sampleNo),
+          body: 'A bargain request has been placed by buyer.Click view to negotiate the trade',
           //  "status": "done",
           image: "https://ibin.co/2t1lLdpfS06F.png",
       },
   token: sellerid.fcmkey
   };
   if (sellerid.fcmkey) {
-  sendNotifications(message);
+    sendNotifications(message);
   }
+
+  // Also send email
+
+  var message = `<p>Dear User,</p>
+        <p>Thank you for using GrainEasy.<br>
+        A bargain request is placed by buyer. To negotiate the trade please use the mobile application or website to place your quote
+        The bargain request is valid till 8:00 PM today. You can counter quote a offer made by buyer a maximum of 3 times or 
+        accept the quote by buyer to book an order or reject the buyer quote.<br>
+        To connect with graineasy team you can text us at <a href="https://api.whatsapp.com/send?phone=919007555357">Whatsapp</a><br>
+
+        <a href="https://graineasy.com/bargainRequest">See All Bargain Request</a><br>
+        Please feel free to reach out to us on trade@graineasy.com for any clarification about bargain process
+
+        <br><br>
+        Regards,<br>
+        Graineasy
+        </p>`
+    var emailsubject = 'Bargain Request raised for ' + bargainObj.item.sampleNo
+    
+    sendEmail(sellerid.email, process.env.EMAILCCUSER, process.env.EMAILBCCUSER,emailsubject, message);
   }
   res.send(activebargain);
 
@@ -225,6 +246,24 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
     if (bargain.seller.fcmkey) {
       sendNotifications(message);
       }
+
+      var message = `<p>Dear User,</p>
+      <p><br>
+      Buyer responded to your bargain request. To negotiate the trade please use the mobile application or website to place your quote
+      The bargain request is valid till 8:00 PM today. You can counter quote a offer made by buyer a maximum of 3 times or 
+      accept the quote by buyer to book an order or reject the buyer quote.<br>
+      To connect with graineasy team you can text us at <a href="https://api.whatsapp.com/send?phone=919007555357">Whatsapp</a><br>
+
+      <a href="https://graineasy.com/bargainRequest">See All Bargain Request</a><br>
+      Please feel free to reach out to us on trade@graineasy.com for any clarification about bargain process
+
+      <br><br>
+      Regards,<br>
+      Graineasy
+      </p>`
+  var emailsubject = 'Bargain Request raised for ' + bargain.item.sampleNo
+  
+  sendEmail(bargain.seller.email, process.env.EMAILCCUSER, process.env.EMAILBCCUSER,emailsubject, message);   
 
   } else if (req.body.sellerquote) {
     switch (bargain.bargaincounter) {
@@ -364,6 +403,24 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
     if (bargain.buyer.fcmkey) {
       sendNotifications(message);
     }
+
+    var message = `<p>Dear User,</p>
+      <p><br>
+      Seller responded to your bargain request. To negotiate the trade please use the mobile application or website to place your quote
+      The bargain request is valid till 8:00 PM today. You can counter quote a offer made by seller a maximum of 3 times or 
+      accept the quote by seller to book an order or reject the seller quote.<br>
+      To connect with graineasy team you can text us at <a href="https://api.whatsapp.com/send?phone=919007555357">Whatsapp</a><br>
+      
+      <a href="https://graineasy.com/bargainRequest">See All Bargain Request</a><br>
+      Please feel free to reach out to us on trade@graineasy.com for any clarification about bargain process
+
+      <br><br>
+      Regards,<br>
+      Graineasy
+      </p>`
+    var emailsubject = 'Bargain Request raised for ' + bargain.item.sampleNo
+    
+    sendEmail(bargain.buyer.email, process.env.EMAILCCUSER, process.env.EMAILBCCUSER,emailsubject, message);  
 
     // strikeprice = req.body.sellerquote
   } else {

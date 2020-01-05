@@ -203,9 +203,9 @@ async function placeOrder(obj, req, res) {
       token: order.buyer.fcmkey
       };
       
-      if (order.buyer.fcmkey) {
-        sendNotifications(appmessage);
-      }
+    //   if (order.buyer.fcmkey) {
+    //     sendNotifications(appmessage);
+    //   }
 
     res.send(order);
     return order;
@@ -266,7 +266,7 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
     switch(req.body.status) {
         case 'confirmed':
             orderObj.confirmedTime = Date(); 
-            messageorderstatus = `<p>Your order-`+ order.orderno + ` has been accepted by the seller and confirmed by the admin.</p>`
+            messageorderstatus = `<p>Your order-`+ order.orderno + ` has been accepted by the seller and confirmed by admin.</p>`
             break;
         case 'ready':
             orderObj.readyTime = Date();   
