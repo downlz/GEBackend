@@ -120,10 +120,10 @@ async function placeOrder(obj, req, res) {
         } 
         else {
             if (req.body.ordertype == 'agentorder') {
-                const deliveryaddress = await Address.findById(obj.addressreference);
+                const deliveryaddress = await AgentBuyer.findById(obj.addressreference);
                 orderObj.shippingaddress = deliveryaddress;
             } else {
-                const deliveryaddress = await AgentBuyer.findById(obj.addressreference);
+                const deliveryaddress = await Address.findById(obj.addressreference);
                 orderObj.shippingaddress = deliveryaddress;
             }
         }
