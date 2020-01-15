@@ -5,6 +5,7 @@ const category = require('./category');
 const item = require('./item');
 const unit = require('./unit');
 const user = require('./user');
+const state = require('./state');
 const itemname = require('./itemname');
 
 const auctionSchema = new mongoose.Schema({
