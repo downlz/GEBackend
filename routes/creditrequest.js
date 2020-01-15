@@ -20,10 +20,10 @@ router.get('/', [auth,permit('admin','buyer','seller','agent','transporter')], a
 });
 
 router.post('/', [auth], async (req, res) => {
-  
+  lastturnoverdtl = 'Not provided';
   // try {
   const { error } = validate(req.body);
-  // console.log(error)
+  console.log(error)
   if (error) return res.status(400).send(error.details[0].message);
 
   const user = await User.findById(req.body.user);
@@ -36,14 +36,20 @@ router.post('/', [auth], async (req, res) => {
 
   let creditrequest = new CreditRequest(creditrequestObj);
   creditrequest = await creditrequest.save();
-
+  if (creditrequestObj.lastthreeturnovr) {
+    lastturnoverdtl = creditrequestObj.lastthreeturnovr
+  }
   var message = `<p>Dear User,</p>
         <p>Thank you for showing your interest in availing credit services from Graineasy.<br>
 
         We have received your request successfully.We will perform eligibility check based on details shared with us with our partnering banks.
         This process is going to take some time and we will connect with you for additional information if required to proceed with your application.
-        Please feel free to reach out to us on trade@graineasy.com to know more about credit service offered by graineasy.
-
+        Please feel free to reach out to us on trade@graineasy.com to know more about credit service offered by Graineasy.
+        <br>
+        ` + 'Current Year Annual Turnover: Rs.' + creditrequestObj.annualturnover + 
+        '<br>Last 3 yrs average turnover: Rs.' + lastturnoverdtl  +
+        '<br>Trade Items: ' + creditrequestObj.tradeitems +
+        `
         <br><br>
         Regards,<br>
         Graineasy <br>

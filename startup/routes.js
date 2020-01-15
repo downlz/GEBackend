@@ -39,6 +39,7 @@ const agentbuyer = require('../routes/agentbuyer');
 const apppref = require('../routes/apppref');
 const errortrace = require('../routes/errortrace');
 const creditrequest = require('../routes/creditrequest');
+const statusref = require('../routes/statusref');
 
 var corsOptions = {
   origin: '*',
@@ -84,5 +85,6 @@ module.exports = function(app) {
   app.use('/api/apppref',apppref);
   app.use('/api/errortrace',errortrace);
   app.use('/api/creditrequest',creditrequest);
+  app.use('/api/statusref',statusref);
   app.use(error);
 }

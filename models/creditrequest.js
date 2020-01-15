@@ -43,7 +43,8 @@ const creditRequestSchema = new mongoose.Schema({
   status : {
     type : String,
     required : false,
-    enum : ['submitted','proposed','accepted','rejected','pending','awaiting','withdrawn','cancelled']
+    enum : ['submitted','proposed','accepted','rejected','pending','awaiting','withdrawn','cancelled',
+          'drawdownrequest','cmvist','warehousereceipt','drawdownapproved','fundstransfer']
   },
   remarks :{
     type : String
