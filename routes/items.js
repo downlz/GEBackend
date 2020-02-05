@@ -45,12 +45,15 @@ router.get('/', async (req, res) => {
   if (mnfId) {
     filter['manufacturer._id'] = mnfId;
   }
-  if (!price || price == 'asc') {
+  if (price == 'asc') {
     const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort('price');
     res.send(item);
   }
-  else {
+  else if (price == 'desc'){
     const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort({'price':-1}); 
+    res.send(item);
+  } else {
+    const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort({'updatedon':1}); 
     res.send(item);
   }
   // console.log(item);

@@ -120,7 +120,7 @@ router.post('/', [auth], async (req, res) => {
         A bargain request is placed by buyer. To negotiate the trade please use the mobile application or website to place your quote
         The bargain request is valid till 8:00 PM today. You can counter quote a offer made by buyer a maximum of 3 times or 
         accept the quote by buyer to book an order or reject the buyer quote.<br>
-        To connect with graineasy team you can text us at <a href="https://api.whatsapp.com/send?phone=919007555357">Whatsapp</a><br>
+        To connect with graineasy team you can text us at <a href="https://api.whatsapp.com/send?phone=919007555357">Send Message</a><br>
 
         <a href="https://graineasy.com/bargainRequest">See All Bargain Request</a><br>
         Please feel free to reach out to us on trade@graineasy.com for any clarification about bargain process
@@ -252,7 +252,7 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
       Buyer responded to your bargain request. To negotiate the trade please use the mobile application or website to place your quote
       The bargain request is valid till 8:00 PM today. You can counter quote a offer made by buyer a maximum of 3 times or 
       accept the quote by buyer to book an order or reject the buyer quote.<br>
-      To connect with graineasy team you can text us at <a href="https://api.whatsapp.com/send?phone=919007555357">Whatsapp</a><br>
+      To connect with graineasy team you can text us at <a href="https://api.whatsapp.com/send?phone=919007555357">Send Message</a><br>
 
       <a href="https://graineasy.com/bargainRequest">See All Bargain Request</a><br>
       Please feel free to reach out to us on trade@graineasy.com for any clarification about bargain process
@@ -409,7 +409,7 @@ router.put('/:id', [auth, permit('admin', 'buyer', 'seller')], async (req, res) 
       Seller responded to your bargain request. To negotiate the trade please use the mobile application or website to place your quote
       The bargain request is valid till 8:00 PM today. You can counter quote a offer made by seller a maximum of 3 times or 
       accept the quote by seller to book an order or reject the seller quote.<br>
-      To connect with graineasy team you can text us at <a href="https://api.whatsapp.com/send?phone=919007555357">Whatsapp</a><br>
+      To connect with graineasy team you can text us at <a href="https://api.whatsapp.com/send?phone=919007555357">Send Message</a><br>
       
       <a href="https://graineasy.com/bargainRequest">See All Bargain Request</a><br>
       Please feel free to reach out to us on trade@graineasy.com for any clarification about bargain process
