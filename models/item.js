@@ -120,6 +120,18 @@ const itemSchema = new mongoose.Schema({
   remarks :{
     type : String,
     required: false
+  },
+  showaddedbyname : {
+    type : Boolean,
+    default : false
+  },
+  showseller : {
+    type : Boolean,
+    default : true
+  },
+  brokerage : {
+    type : Boolean,
+    default : false
   }
   // },
   // saletype: {
@@ -155,7 +167,10 @@ function validateItem(item) {
     specs: Joi.object().optional(),
     manufacturerId: Joi.objectId().required(),
     updatedon : Joi.string().optional(),
-    remarks : Joi.string().optional()
+    remarks : Joi.string().optional(),
+    showaddedbyname : Joi.boolean(),
+    showseller : Joi.boolean(),
+    brokerage : Joi.boolean()
   };
 
   return Joi.validate(item, schema);
