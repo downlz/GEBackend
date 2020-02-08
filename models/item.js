@@ -132,6 +132,9 @@ const itemSchema = new mongoose.Schema({
   brokerage : {
     type : Boolean,
     default : false
+  },
+  brokeragerate : {
+    type : String
   }
   // },
   // saletype: {
@@ -170,7 +173,8 @@ function validateItem(item) {
     remarks : Joi.string().optional(),
     showaddedbyname : Joi.boolean(),
     showseller : Joi.boolean(),
-    brokerage : Joi.boolean()
+    brokerage : Joi.boolean(),
+    brokeragerate : Joi.string()
   };
 
   return Joi.validate(item, schema);
