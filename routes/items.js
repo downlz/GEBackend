@@ -53,7 +53,7 @@ router.get('/', async (req, res) => {
     const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort({'price':-1}); 
     res.send(item);
   } else {
-    const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort({'updatedon':1}); 
+    const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort({'updatedon':-1}); 
     res.send(item);
   }
   // console.log(item);
@@ -139,12 +139,13 @@ router.post('/nearme/',[auth], async (req, res) => {
 });
 
 router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) => {
-
+  
     let itemObj = _.pick(req.body, ['image',
-        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs']);
+        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs','remarks']);
     dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs','remarks']);
    
   const { error } = validate(req.body);
+  
   if (error) return res.status(400).send(error.details[0].message);
 
   const category = await Category.findById(req.body.categoryId);
@@ -220,7 +221,7 @@ router.put('/:id', [auth], async (req, res) => {
     // if (error) return res.status(400).send(error.details[0].message);
     
     let itemObj = _.pick(req.body, ['image',
-        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs','bargainenabled','bargaintrgqty']);
+        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs','bargainenabled','bargaintrgqty','remarks']);
     dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs','bargainenabled','bargaintrgqty','remarks']);
 
     // const category = await Category.findOne({name: req.body.categoryId});
