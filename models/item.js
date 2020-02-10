@@ -117,7 +117,7 @@ const itemSchema = new mongoose.Schema({
     type : Date,
     required : false
   },
-  remarks :{
+  remarks : {
     type : String,
     required: false
   },
