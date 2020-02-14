@@ -29,6 +29,16 @@ router.get('/', async (req, res) => {
   const price = req.query.price;
   const mnfId = req.query.mnf;
 
+
+  if (req.query.pageid) {
+    recordtoskip = (req.query.pageid - 1) * 10;
+    rowslimit = 10;  
+  } else {
+    recordtoskip = 0;
+    rowslimit = 0;
+  }
+
+
   filter = {};
   if (itemnameId) {
     filter['name._id'] = itemnameId;
@@ -46,14 +56,14 @@ router.get('/', async (req, res) => {
     filter['manufacturer._id'] = mnfId;
   }
   if (price == 'asc') {
-    const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort('price');
+    const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort('price').skip(recordtoskip).limit(rowslimit);
     res.send(item);
   }
   else if (price == 'desc'){
-    const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort({'price':-1}); 
+    const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort({'price':-1}).skip(recordtoskip).limit(rowslimit);
     res.send(item);
   } else {
-    const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort({'updatedon':-1}); 
+    const item = await Item.find({ $and :[filter,{'isLive': true}]}).sort({'updatedon':-1}).skip(recordtoskip).limit(rowslimit);
     res.send(item);
   }
   // console.log(item);
@@ -63,10 +73,17 @@ router.get('/', async (req, res) => {
  * Api to get listings by category id
  */
 router.get('/byCategory/:category', async (req, res) => {
+  if (req.query.pageid) {
+    recordtoskip = (req.query.pageid - 1) * 10;
+    rowslimit = 10;  
+  } else {
+    recordtoskip = 0;
+    rowslimit = 0;
+  }
     const state = await Item.find({
         $and : [{'category._id': req.params.category},
         {'isLive': true}]
-    }).sort('name.name');
+    }).sort('name.name').skip(recordtoskip).limit(rowslimit);
     res.send(state);
 });
 
@@ -74,10 +91,18 @@ router.get('/byCategory/:category', async (req, res) => {
  * Api to get listings by itemname
  */
 router.get('/byItemname/:itemname', async (req, res) => {
+  if (req.query.pageid) {
+    recordtoskip = (req.query.pageid - 1) * 10;
+    rowslimit = 10;  
+  } else {
+    recordtoskip = 0;
+    rowslimit = 0;
+  }
+
   const state = await Item.find({
       $and : [{'name._id': req.params.itemname},
       {'isLive': true}]
-  }).sort('name.name');
+  }).sort('name.name').skip(recordtoskip).limit(rowslimit);
   res.send(state);
 });
 
@@ -284,6 +309,15 @@ router.get('/sampleno/:id', [auth], async (req, res) => {
     if (!item) return res.status(404).send('The item with the given sample was not found.');
 
     res.send(item);
+});
+
+router.get('/grade/:grade', [auth], async (req, res) => {
+  console.log('printing data');
+  const item = await Item.find({grade: req.params.grade});
+
+  if (!item) return res.status(404).send('items with the given grade were not found.');
+
+  res.send(item);
 });
 
 router.get('/search/:text', [auth], async (req, res) => {         // Improve Search technique

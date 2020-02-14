@@ -264,6 +264,10 @@ router.put('/:id', [auth, permit('buyer', 'admin','seller','agent')], async (req
                         </p>`
 
     switch(req.body.status) {
+        case 'new':
+            // orderObj.confirmedTime = Date(); 
+            messageorderstatus = `<p>Your order-`+ order.orderno + ` has been placed successfully and is being reviewed.</p>`
+            break;
         case 'confirmed':
             orderObj.confirmedTime = Date(); 
             messageorderstatus = `<p>Your order-`+ order.orderno + ` has been accepted by the seller and confirmed by admin.</p>`
