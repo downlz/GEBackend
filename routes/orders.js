@@ -15,6 +15,7 @@ const {State} = require('../models/state');
 const {City} = require('../models/city');
 const {Address, validateAddress} = require('../models/address');
 const {AgentBuyer} = require('../models/agentbuyer');
+const {Paymentdtl}  = require('../models/paymentdtl');
 const mongoose = require('mongoose');
 // const {ObjectId} = require('mongodb');
 const express = require('express');
@@ -162,6 +163,19 @@ async function placeOrder(obj, req, res) {
 
     let order = new Order(orderObj);
     order = await order.save();
+
+    /* Adding payment detail for the time being with minimal inputs */
+    
+    paymentmodeObj = {
+        orderid: order._id,
+        orderno: orderObj.orderno,
+        mode: req.body.payeeacc,
+        requestedon: Date() 
+    }
+
+    let payeedtl = new Paymentdtl(paymentmodeObj);
+    payeedtl = await payeedtl.save();
+
     var message = `<p>Dear User,</p>
         <p>Thank you for using GrainEasy.<br>
         Your order has been placed successfully.The order is being reviewed and you would
