@@ -49,7 +49,11 @@ router.post('/', async (req, res) => {
   // logger.error(error);
   // console.log(error);
   let user = await User.findOne({ phone: req.body.phone });
-  if (user) return res.status(400).send('User already registered.');
+  if (user) return res.status(400).send({
+      message :"User already registered.",
+      code: 202
+    });
+  // res.status(202).send('User already registered.');
   
   const city = await City.findById(req.body.cityId);
   if (!city) return res.status(400).send('Invalid city.');
@@ -95,13 +99,21 @@ router.post('/', async (req, res) => {
   user.buyerFinePerKg = 0;
   user.isSeller = false;
 
-  await user.save();
+  // const userchecks = await User.find({$or : [{email:userObj.email},{phone:userObj.phone}]});
+  // if (userchecks[0]){
+  //   res.status(202).send({
+  //     message :"User exists with given email and phone no. combination"
+  //   });
 
+  // } else {
+
+  await user.save();
   await address.save();   //Save address once user profile is saved
 
   const token = user.generateAuthToken();
   res.header('x-auth-token', token).send(_.pick(user, ['_id', 'name', 'email', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'role']));
+  // }
 });
 
 router.post('/resetpassword', async (req, res) => {

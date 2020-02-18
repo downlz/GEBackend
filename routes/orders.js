@@ -165,11 +165,15 @@ async function placeOrder(obj, req, res) {
     order = await order.save();
 
     /* Adding payment detail for the time being with minimal inputs */
-    
+    if (!req.body.payeeacc) {
+        payeeaccval = 'default'
+    } else {
+        payeeaccval = req.body.payeeacc
+    }
     paymentmodeObj = {
         orderid: order._id,
         orderno: orderObj.orderno,
-        mode: req.body.payeeacc,
+        mode: payeeaccval,
         requestedon: Date() 
     }
 
