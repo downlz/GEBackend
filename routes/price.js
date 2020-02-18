@@ -17,7 +17,6 @@ router.post('/', [auth],  async (req, res) => {
   if (!seller) return res.status(400).send('Invalid seller.');
 
   const quantity = req.body.qty;
-
   // price calculation engine 
   let sellingPrice = item.price;
   let tax = item.name.tax ? (item.name.tax/100) : 0;
