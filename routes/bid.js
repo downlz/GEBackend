@@ -1,6 +1,7 @@
 const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const {Bid, validate} = require('../models/bid');
+const {AgentBid} = require('../models/agentbid');
 const {Order} = require('../models/order');
 const {BidHistory} = require('../models/bidhistory');
 const {Address} = require('../models/address');
@@ -68,7 +69,18 @@ router.post('/', [auth, permit('buyer', 'seller')], async (req, res) => {
             bidHistoryItem.save();
             alreadyPlacedBid.delete();
         }
+
         await bid.save();
+        if (req.body.onbehalfofbuyer != null) {
+            const partydtlObj = {
+                bid : bid._id,
+                partyname: req.body.onbehalfofbuyer,
+                partyphone: req.body.partyphone,
+                createdAt : Date()
+            };
+        let partydtl = new AgentBid(partydtlObj);
+        partydtl = await partydtl.save();
+        }
         return res.status(200).send(bid);
     } catch (e) {
         return res.status(500).send(e.message);
