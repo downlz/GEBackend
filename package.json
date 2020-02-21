@@ -1,7 +1,7 @@
 {
   "name": "graineasy",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "Graineasy core backend app",
   "main": "index.js",
   "scripts": {
     "dev": "export DBCONN=mongodb://localhost:27017/graineasy-dev && node index",
