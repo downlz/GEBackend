@@ -13,13 +13,13 @@ const router = express.Router();
 const _ = require('lodash');
 var ObjectID = require("mongodb").ObjectID;
 const {placeOrder} = require('./orders');
-router.get('/', [auth, permit('seller', 'admin')], async (req, res) => {
+router.get('/', [auth, permit('seller', 'admin','buyer','agent')], async (req, res) => {
     const state = await Bid.find().populate(["auction", "user"]);
     return res.status(200).send(state);
 });
 
 
-router.get('/current', [auth, permit('seller', 'buyer')], async (req, res) => {
+router.get('/current', [auth, permit('seller', 'buyer', 'agent')], async (req, res) => {
     const state = await Bid.find({
         "createdBy": req.user._id
     }).sort({createdAt:-1}).populate({
@@ -46,12 +46,15 @@ router.get('/current', [auth, permit('seller', 'buyer')], async (req, res) => {
 });
 
 
-router.post('/', [auth, permit('buyer', 'seller')], async (req, res) => {
+router.post('/', [auth, permit('buyer', 'seller','agent')], async (req, res) => {
     try {
-        const {error} = validate(req.body);
-        if (error) return res.status(400).send(error.details[0].message);
+        // const {error} = validate(req.body);      // Disabling because of addition of onbehalf of buyer
+        // console.log(error);
+        // if (error) return res.status(400).send(error.details[0].message);
+        console.log(req.body);
         const auction = await Auction.findById(req.body.auction);
         if (!auction) return res.status(400).send('InvalidAuction');
+
         let bid = new Bid({
             ...req.body
         });
@@ -75,7 +78,7 @@ router.post('/', [auth, permit('buyer', 'seller')], async (req, res) => {
             const partydtlObj = {
                 bid : bid._id,
                 partyname: req.body.onbehalfofbuyer,
-                partyphone: req.body.partyphone,
+                partyphone: req.body.phoneno,
                 createdAt : Date()
             };
         let partydtl = new AgentBid(partydtlObj);
@@ -214,6 +217,14 @@ router.post('/confirmOrder/:id', [auth], async (req, res) => {
         console.log(e);
         return res.status(500).send(e.message);
     }
+});
+
+router.get('/agentbid/:id', [auth, permit('seller', 'buyer', 'agent')], async (req, res) => {
+    const agentbiddtl = await AgentBid.find({'bid':req.params.id});
+
+    if (!agentbiddtl) return res.status(404).send('The agent buyer details for requested bid was not found.');
+
+    res.send(agentbiddtl);
 });
 
 module.exports = router;
