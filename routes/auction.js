@@ -103,7 +103,7 @@ router.delete('/:id', [auth, permit('admin')], async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     let auction = await Auction.findById(req.params.id).populate(["sampleNo", "user", "unit", "state","createdBy"]);
-    console.log(auction);
+    // console.log(auction);
     if (!auction) return res.status(404).send('The genre with the given ID was not found.');
     const bids = await Bid.find({
         auction: req.params.id
@@ -126,7 +126,7 @@ router.get('/:id', async (req, res) => {
             return item1.price - item2.price
         })
     }
-    console.log(auction)
+    // console.log(auction)
     res.send(auction);
 });
 

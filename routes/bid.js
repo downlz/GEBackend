@@ -46,12 +46,12 @@ router.get('/current', [auth, permit('seller', 'buyer', 'agent')], async (req, r
 });
 
 
-router.post('/', [auth, permit('buyer', 'seller','agent')], async (req, res) => {
+router.post('/', [auth, permit('admin','buyer', 'seller','agent')], async (req, res) => {
     try {
         // const {error} = validate(req.body);      // Disabling because of addition of onbehalf of buyer
         // console.log(error);
         // if (error) return res.status(400).send(error.details[0].message);
-        console.log(req.body);
+        // console.log(req.body);
         const auction = await Auction.findById(req.body.auction);
         if (!auction) return res.status(400).send('InvalidAuction');
 
@@ -101,7 +101,7 @@ router.post('/', [auth, permit('buyer', 'seller','agent')], async (req, res) => 
 //     res.send(bid);
 // });
 
-router.delete('/:id', [auth, permit('buyer', 'seller')], async (req, res) => {
+router.delete('/:id', [auth, permit('admin','buyer', 'seller')], async (req, res) => {
     const bid = await Bid.findByIdAndRemove(req.params.id);
 
     if (!bid) return res.status(404).send('The bid with the given ID was not found.');
@@ -122,7 +122,7 @@ router.get('/bestbid/:id/type/:type', async (req, res) => {
         const bid = await Bid.find({'auction':req.params.id}).sort({price:-1}).limit(1);
         res.send(bid);                                      // Improve coding standards
     } else if (req.params.type == 'buyer') {
-        console.log('here')
+        // console.log('here')
         var auctionid = new ObjectID(req.params.id);
         const bid = await Bid.aggregate([{ $match: { 'auction' : auctionid }},
               { $project : 
@@ -190,7 +190,7 @@ router.post('/confirmOrder/:id', [auth], async (req, res) => {
         // order.statedtl = statename;
         order.ordertype = 'auction';
         order.referenceAuctionId = bid.auction._id.toString();
-        console.log(bid.createdBy.phone);
+        // console.log(bid.createdBy.phone);
         if (bid.auction.auctionType == 'seller') {
             order.buyerId = bid.createdBy._id.toString();
             order.sellerId = bid.auction.user._id.toString();
@@ -219,7 +219,7 @@ router.post('/confirmOrder/:id', [auth], async (req, res) => {
     }
 });
 
-router.get('/agentbid/:id', [auth, permit('seller', 'buyer', 'agent')], async (req, res) => {
+router.get('/agentbid/:id', [auth, permit('seller', 'buyer', 'agent','admin')], async (req, res) => {
     const agentbiddtl = await AgentBid.find({'bid':req.params.id});
 
     if (!agentbiddtl) return res.status(404).send('The agent buyer details for requested bid was not found.');
