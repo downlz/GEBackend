@@ -94,7 +94,7 @@ router.get('/:id',[auth], async (req, res) => {
 // Fetch all buyers added by agent
 router.get('/byuser/:id',[auth], async (req, res) => {
   const agentbuyer = await AgentBuyer.find({ addedby : req.params.id}).sort('_id');
-
+  
   if (!agentbuyer) return res.status(404).send('The genre with the given ID was not found.');
 
   res.send(agentbuyer);
