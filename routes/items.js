@@ -312,7 +312,7 @@ router.get('/sampleno/:id', [auth], async (req, res) => {
 });
 
 router.get('/grade/:grade', [auth], async (req, res) => {
-  console.log('printing data');
+  // console.log('printing data');
   const item = await Item.find({grade: req.params.grade});
 
   if (!item) return res.status(404).send('items with the given grade were not found.');

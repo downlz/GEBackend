@@ -40,6 +40,7 @@ const apppref = require('../routes/apppref');
 const errortrace = require('../routes/errortrace');
 const creditrequest = require('../routes/creditrequest');
 const statusref = require('../routes/statusref');
+const variableprice = require('../routes/variableprice');
 
 var corsOptions = {
   origin: '*',
@@ -86,5 +87,6 @@ module.exports = function(app) {
   app.use('/api/errortrace',errortrace);
   app.use('/api/creditrequest',creditrequest);
   app.use('/api/statusref',statusref);
+  app.use('/api/variableprice',variableprice);
   app.use(error);
 }
