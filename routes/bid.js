@@ -14,15 +14,15 @@ const _ = require('lodash');
 var ObjectID = require("mongodb").ObjectID;
 const {placeOrder} = require('./orders');
 router.get('/', [auth, permit('seller', 'admin','buyer','agent')], async (req, res) => {
-    const state = await Bid.find().populate(["auction", "user"]);
+    const state = await Bid.find().populate(["auction", "user","agentbid"]);
     return res.status(200).send(state);
 });
 
 
 router.get('/current', [auth, permit('seller', 'buyer', 'agent')], async (req, res) => {
-    const state = await Bid.find({
+    const bid = await Bid.find({
         "createdBy": req.user._id
-    }).sort({createdAt:-1}).populate({
+    }).sort({createdAt:-1}).populate(["agentbid",{
         path: 'auction',
         model: 'Auction',
         populate: [
@@ -41,8 +41,13 @@ router.get('/current', [auth, permit('seller', 'buyer', 'agent')], async (req, r
             }
 
         ]
-    });
-    res.send(state);
+    }]);
+
+    // const agentbiddtl = await AgentBid.find({'bid':bid._id});
+    // console.log(agentbiddtl);
+    // if (!agentbiddtl) return res.status(404).send('The agent buyer details for requested bid was not found.');
+
+    res.send(bid);
 });
 
 
@@ -51,7 +56,7 @@ router.post('/', [auth, permit('admin','buyer', 'seller','agent')], async (req, 
         // const {error} = validate(req.body);      // Disabling because of addition of onbehalf of buyer
         // console.log(error);
         // if (error) return res.status(400).send(error.details[0].message);
-        // console.log(req.body);
+        console.log(req.body);
         const auction = await Auction.findById(req.body.auction);
         if (!auction) return res.status(400).send('InvalidAuction');
 
@@ -65,25 +70,31 @@ router.post('/', [auth, permit('admin','buyer', 'seller','agent')], async (req, 
             auction: req.body.auction
         });
 
-        if (alreadyPlacedBid != null) {
+        if (alreadyPlacedBid != null && req.body.placedby != 'agent') { //Accepting multiple reqeust when agent is placing bid request instead of pushing it to bid history
             const bidHistoryItem = new BidHistory({
                 ...alreadyPlacedBid.toJSON()
             });
             bidHistoryItem.save();
             alreadyPlacedBid.delete();
         }
-
-        await bid.save();
+        
         if (req.body.onbehalfofbuyer != null) {
             const partydtlObj = {
-                bid : bid._id,
+                // bid : bid._id,
                 partyname: req.body.onbehalfofbuyer,
                 partyphone: req.body.phoneno,
                 createdAt : Date()
             };
         let partydtl = new AgentBid(partydtlObj);
         partydtl = await partydtl.save();
+        bid.agentbid = partydtl._id;
         }
+        // if (partydtl) {
+        //     bid.agentbid = partydtl._id;
+        // }
+        
+        await bid.save();
+        
         return res.status(200).send(bid);
     } catch (e) {
         return res.status(500).send(e.message);
@@ -110,7 +121,30 @@ router.delete('/:id', [auth, permit('admin','buyer', 'seller')], async (req, res
 });
 
 router.get('/:id', async (req, res) => {
-    const bid = await Bid.findById(req.params.id).populate(["auction", "user"]);
+    // const bid = await Bid.findById(req.params.id).populate(["auction", "user"]);
+
+    const bid = await Bid.findById(
+        req.params.id
+    ).sort({createdAt:-1}).populate(["agentbid",{
+        path: 'auction',
+        model: 'Auction',
+        populate: [
+            {
+                path: 'unit',
+                model: 'Unit'
+            },
+
+            {
+                path: 'user',
+                model: 'User'
+            },
+            {
+                path: 'sampleNo',
+                model: 'Item'
+            }
+
+        ]
+    }]);
 
     if (!bid) return res.status(404).send('The bid with the given ID was not found.');
 

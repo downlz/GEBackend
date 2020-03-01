@@ -2,9 +2,9 @@ const Joi = require("joi");
 const mongoose = require("mongoose");
 
 const agentbidSchema = new mongoose.Schema({
-    bid: {
-        type: mongoose.Schema.Types.ObjectId, ref: 'Bid', required: true
-    },
+    // bid: {
+    //     type: mongoose.Schema.Types.ObjectId, ref: 'Bid', required: true
+    // },
     partyname: {
         type: String,
         required: false
@@ -41,7 +41,7 @@ function validateAgentBid(agentbid) {
     const schema = {
         partyname: Joi.string().optional(),
         partyphone: Joi.string().optional(),
-        bid: Joi.objectId(),
+        // bid: Joi.objectId(),
     };
 
     return Joi.validate(agentbid, schema);
