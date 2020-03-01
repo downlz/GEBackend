@@ -32,6 +32,9 @@ const bidSchema = new mongoose.Schema({
         type: Boolean,
         required: false,
         default: false
+    },
+    agentbid: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'AgentBid', default: null
     }
 });
 
