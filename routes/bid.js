@@ -44,7 +44,7 @@ router.get('/current', [auth, permit('seller', 'buyer', 'agent')], async (req, r
     }]);
 
     // const agentbiddtl = await AgentBid.find({'bid':bid._id});
-    // console.log(agentbiddtl);
+    
     // if (!agentbiddtl) return res.status(404).send('The agent buyer details for requested bid was not found.');
 
     res.send(bid);
@@ -147,7 +147,7 @@ router.get('/:id', async (req, res) => {
     }]);
 
     if (!bid) return res.status(404).send('The bid with the given ID was not found.');
-
+    
     res.send(bid);
 });
 

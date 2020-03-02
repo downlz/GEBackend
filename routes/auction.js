@@ -107,7 +107,7 @@ router.get('/:id', async (req, res) => {
     if (!auction) return res.status(404).send('The genre with the given ID was not found.');
     const bids = await Bid.find({
         auction: req.params.id
-    }).populate("createdBy");
+    }).populate(["createdBy","agentbid"]);
     auction = auction.toJSON();
     let modifiedAuction = {
         ...auction
