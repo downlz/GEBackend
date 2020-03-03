@@ -7,6 +7,7 @@ const {BidHistory} = require('../models/bidhistory');
 const {Address} = require('../models/address');
 const {State} = require('../models/state');
 const {Auction} = require('../models/auction');
+const {dropIfDNE} = require('./orders');
 const uuid = require('uuid')
 const express = require('express');
 const router = express.Router();
@@ -44,7 +45,7 @@ router.get('/current', [auth, permit('seller', 'buyer', 'agent')], async (req, r
     }]);
 
     // const agentbiddtl = await AgentBid.find({'bid':bid._id});
-    // console.log(agentbiddtl);
+    
     // if (!agentbiddtl) return res.status(404).send('The agent buyer details for requested bid was not found.');
 
     res.send(bid);
@@ -56,7 +57,7 @@ router.post('/', [auth, permit('admin','buyer', 'seller','agent')], async (req, 
         // const {error} = validate(req.body);      // Disabling because of addition of onbehalf of buyer
         // console.log(error);
         // if (error) return res.status(400).send(error.details[0].message);
-        console.log(req.body);
+        // console.log(req.body);
         const auction = await Auction.findById(req.body.auction);
         if (!auction) return res.status(400).send('InvalidAuction');
 
@@ -101,16 +102,19 @@ router.post('/', [auth, permit('admin','buyer', 'seller','agent')], async (req, 
     }
 });
 
-// router.put('/:id', [auth, permit('buyer', 'seller')], async (req, res) => {
-//
-//     const bid = await Bid.findByIdAndUpdate(req.params.id, {...req.body}, {
-//         new: true
-//     }).populate(["auction"]);
-//
-//     if (!bid) return res.status(404).send('The bid with the given ID was not found.');
-//
-//     res.send(bid);
-// });
+router.put('/:id', [auth, permit('admin', 'agent')], async (req, res) => {
+
+    let bidObj = _.pick(req.body, ['price', 'quantity']);
+    dropIfDNE(bidObj, ['price', 'quantity']);
+    bidObj.createdAt = Date();
+    const bid = await Bid.findByIdAndUpdate(req.params.id, {...bidObj}, {
+        new: true
+    }).populate(["auction","agentbid"]);
+
+    if (!bid) return res.status(404).send('The bid with the given ID was not found.');
+
+    res.send(bid);
+});
 
 router.delete('/:id', [auth, permit('admin','buyer', 'seller')], async (req, res) => {
     const bid = await Bid.findByIdAndRemove(req.params.id);
@@ -147,7 +151,7 @@ router.get('/:id', async (req, res) => {
     }]);
 
     if (!bid) return res.status(404).send('The bid with the given ID was not found.');
-
+    
     res.send(bid);
 });
 
