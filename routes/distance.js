@@ -14,7 +14,7 @@ router.get('/from/:fromId/to/:toId', async (req, res) => {                      
   // console.log(allocId);
 
   const distance = await Distance.findOne({ "from._id" : fromId, "to._id" : toId });
-  console.log(distance.distance);
+  // console.log(distance.distance);
 
   res.send(distance);
 });
