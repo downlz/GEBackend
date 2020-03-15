@@ -244,7 +244,7 @@ router.put('/:id', [auth], async (req, res) => {
     // const {error} = validate(req.body);
     // console.log(error);
     // if (error) return res.status(400).send(error.details[0].message);
-    
+    // Update payment and lift date
     let itemObj = _.pick(req.body, ['image',
         'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs','bargainenabled','bargaintrgqty','remarks']);
     dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs','bargainenabled','bargaintrgqty','remarks']);
