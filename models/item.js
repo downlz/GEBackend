@@ -135,6 +135,16 @@ const itemSchema = new mongoose.Schema({
   },
   brokeragerate : {
     type : String
+  },
+  paymentdate : {
+    type : Date,
+    default : null,
+    required : false
+  },
+  liftdate : {
+    type : Date,
+    default :null,
+    required : false
   }
   // },
   // saletype: {
@@ -174,7 +184,9 @@ function validateItem(item) {
     showaddedbyname : Joi.boolean(),
     showseller : Joi.boolean(),
     brokerage : Joi.boolean(),
-    brokeragerate : Joi.string()
+    brokeragerate : Joi.string(),
+    paymentdate: Joi.string().optional(),
+    liftdate: Joi.string().optional()
   };
 
   return Joi.validate(item, schema);

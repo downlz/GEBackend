@@ -166,12 +166,12 @@ router.post('/nearme/',[auth], async (req, res) => {
 router.post('/', [auth, permit('seller', 'admin', 'agent')], async (req, res) => {
   
     let itemObj = _.pick(req.body, ['image',
-        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs','remarks']);
-    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs','remarks']);
+        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs','remarks','paymentdate','liftdate']);
+    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs','remarks','paymentdate','liftdate']);
    
-  const { error } = validate(req.body);
-  
-  if (error) return res.status(400).send(error.details[0].message);
+  // const { error } = validate(req.body);        // Disabled on 15-Mar-20 upon payment and lift date addition
+  // console.log(error);
+  // if (error) return res.status(400).send(error.details[0].message);
 
   const category = await Category.findById(req.body.categoryId);
   if (!category) return res.status(400).send('Invalid customer.');
@@ -242,12 +242,12 @@ router.put('/activate/:id', [auth], async (req, res) => {
 
 router.put('/:id', [auth], async (req, res) => {
     // const {error} = validate(req.body);
-    // console.log(error);
+    // console.log(req.body);
     // if (error) return res.status(400).send(error.details[0].message);
     
     let itemObj = _.pick(req.body, ['image',
-        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs','bargainenabled','bargaintrgqty','remarks']);
-    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs','bargainenabled','bargaintrgqty','remarks']);
+        'qty', 'price', 'moisture', 'grainCount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable', 'specs','bargainenabled','bargaintrgqty','remarks','paymentdate','liftdate']);
+    dropIfDNE(itemObj, ['image', 'qty', 'price', 'moisture', 'graincount', 'grade', 'sampleNo', 'origin', 'isLive', 'isTaxable','specs','bargainenabled','bargaintrgqty','remarks','paymentdate','liftdate']);
 
     // const category = await Category.findOne({name: req.body.categoryId});
     // if (!category) return res.status(400).send('Invalid customer.');
