@@ -39,6 +39,9 @@ router.get('/me', [auth], async (req, res) => {
 
 router.post('/', async (req, res) => {
 
+  if (req.body.GST == '') {
+    req.body.GST = '123451234512345'              // Settings default GSTIN
+  }
   userObj = _.pick(req.body, ['name', 'email', 'password', 'phone',
   'pan', 'GST', 'PocName', 'PocPhone', 'PocEmail', 'isSeller', 'isBuyer',
   'isEmpL0', 'isEmpL1', 'isTransporter','isAgent', 'isNbfc', 'isBank']);
