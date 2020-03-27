@@ -93,7 +93,7 @@ router.get('/byItemname/:itemname', async (req, res) => {
 /**
  * Api to get current  user listings
  */
-router.get('/current/', [auth], async (req, res) => {
+router.get('/current', [auth], async (req, res) => {
     const state = await Item.find({ $or : [{'seller._id': req.user._id},{'addedby._id': req.user._id}]
     }).sort('name.name');
     res.send(state);
@@ -102,7 +102,7 @@ router.get('/current/', [auth], async (req, res) => {
 /**
  * Api to get all listings
  */
-router.get('/all/', [auth,permit('seller', 'admin', 'agent','buyer')], async (req, res) => {
+router.get('/all', [auth,permit('seller', 'admin', 'agent','buyer')], async (req, res) => {
   const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
 
   const item = await Item.find({}).sort('sampleNo').skip(recordtoskip).limit(rowslimit);
@@ -113,12 +113,12 @@ router.get('/all/', [auth,permit('seller', 'admin', 'agent','buyer')], async (re
  *  Api to get newly added items
  */
 
-router.get('/recent/', async (req, res) => {
+router.get('/recent', async (req, res) => {
   const recentitem = await Item.find({}).sort({'updatedon': -1}).limit(6);
   res.send(recentitem);
 });
 
-router.get('/ordered/', async (req, res) => {
+router.get('/ordered', async (req, res) => {
   const recentlyordered = await Order.find({},{item:1}).sort({'placedTime': -1}).limit(6);
   // const recentlyordered = await Order.distinct('item').sort({'placedTime': -1}).limit(4);
   // const recentlyordered = await Order.aggregate( [ { $project : { 'item': 0 } } ] ).sort({'placedTime': -1}).limit(4);
@@ -129,7 +129,7 @@ router.get('/ordered/', async (req, res) => {
 * Api to select nearby items
 */
 
-router.post('/nearme/',[auth], async (req, res) => {
+router.post('/nearme',[auth], async (req, res) => {
   // Ideally should be done based on user location 
   nearbyCities = [];
   const user = await User.findById(req.user._id).select('-password');
