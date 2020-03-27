@@ -9,6 +9,7 @@ const {Unit} = require('../models/unit');
 const {Order} = require('../models/order');
 const {Manufacturer} = require('../models/manufacturer');
 const {Address, validateAddress} = require('../models/address');
+const getRec = require('../middleware/functions');
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
@@ -22,6 +23,7 @@ function dropIfDNE(Obj, arr) {
 }
 
 router.get('/', async (req, res) => {
+  // Lists only active items
   const itemnameId = req.query.name;
   const catId = req.query.cat;
   const cityId = req.query.origin;
@@ -29,15 +31,7 @@ router.get('/', async (req, res) => {
   const price = req.query.price;
   const mnfId = req.query.mnf;
 
-
-  if (req.query.pageid) {
-    recordtoskip = (req.query.pageid - 1) * 10;
-    rowslimit = 10;  
-  } else {
-    recordtoskip = 0;
-    rowslimit = 0;
-  }
-
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
 
   filter = {};
   if (itemnameId) {
@@ -73,13 +67,8 @@ router.get('/', async (req, res) => {
  * Api to get listings by category id
  */
 router.get('/byCategory/:category', async (req, res) => {
-  if (req.query.pageid) {
-    recordtoskip = (req.query.pageid - 1) * 10;
-    rowslimit = 10;  
-  } else {
-    recordtoskip = 0;
-    rowslimit = 0;
-  }
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
+
     const state = await Item.find({
         $and : [{'category._id': req.params.category},
         {'isLive': true}]
@@ -91,13 +80,7 @@ router.get('/byCategory/:category', async (req, res) => {
  * Api to get listings by itemname
  */
 router.get('/byItemname/:itemname', async (req, res) => {
-  if (req.query.pageid) {
-    recordtoskip = (req.query.pageid - 1) * 10;
-    rowslimit = 10;  
-  } else {
-    recordtoskip = 0;
-    rowslimit = 0;
-  }
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
 
   const state = await Item.find({
       $and : [{'name._id': req.params.itemname},
@@ -120,7 +103,9 @@ router.get('/current/', [auth], async (req, res) => {
  * Api to get all listings
  */
 router.get('/all/', [auth,permit('seller', 'admin', 'agent','buyer')], async (req, res) => {
-  const item = await Item.find({}).sort('sampleNo');
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
+
+  const item = await Item.find({}).sort('sampleNo').skip(recordtoskip).limit(rowslimit);
   res.send(item);
 });
 

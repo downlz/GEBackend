@@ -3,6 +3,7 @@ const auth = require('../middleware/auth');
 const permit = require('../middleware/permissions');
 const sendEmail = require('../middleware/sendemail');
 const sendNotifications = require('../middleware/fcm');
+const getRec = require('../middleware/functions');
 const {Order, validate} = require('../models/order');
 const {Taxrate} = require('../models/taxrates');
 const {Item} = require('../models/item');
@@ -30,13 +31,7 @@ function dropIfDNE(Obj, arr) {
 
 router.get('/', [auth], async (req, res) => {
     // const order = await Order.find().sort({'placedTime':-1});            // Old order query pulling all records
-    if (req.query.pageid) {
-        recordtoskip = (req.query.pageid - 1) * 15;
-        rowslimit = 15;  
-    } else {
-        recordtoskip = 0;
-        rowslimit = 0;
-    }
+    const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
     const order = await Order.find().sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);
     res.send(order);
 });
@@ -383,13 +378,7 @@ router.get('/user/:id', [auth], async (req, res) => {
     // order = await Order.find({buyer: customer}).sort({'placedTime': -1});
 
     // Due to role policy first check if buyer id is same as seller/agent if yes fetch the details else pull seller details
-    if (req.query.pageid) {
-        recordtoskip = (req.query.pageid - 1) * 15;
-        rowslimit = 15;  
-    } else {
-        recordtoskip = 0;
-        rowslimit = 0;
-    }
+    const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
     if (customer.isSeller) {
         order = await Order.find({'seller._id': customer._id}).sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);
     } else {
@@ -408,13 +397,7 @@ router.get('/agent/:id', [auth], async (req, res) => {
     if (!customer) return res.status(400).send('Invalid buyer or seller');
     let order = null;
 
-    if (req.query.pageid) {
-        recordtoskip = (req.query.pageid - 1) * 15;
-        rowslimit = 15;  
-    } else {
-        recordtoskip = 0;
-        rowslimit = 0;
-    }
+    const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
     // Due to role policy first check if buyer id is same as seller/agent if yes fetch the details else pull seller details
     
     order = await Order.find({buyer: customer}).sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);;
