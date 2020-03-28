@@ -103,10 +103,20 @@ router.get('/current', [auth], async (req, res) => {
  * Api to get all listings
  */
 router.get('/all', [auth,permit('seller', 'admin', 'agent','buyer')], async (req, res) => {
+
+
   const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
 
+  const total = await Item.countDocuments(); // Removing await as this is super fast usually 
   const item = await Item.find({}).sort('sampleNo').skip(recordtoskip).limit(rowslimit);
-  res.send(item);
+
+  output = {
+    totalRecords : total,
+    pageId : recordtoskip,
+    pageSize : rowslimit,
+    _embedded : {items : item}
+  }
+  res.send(output);
 });
 
 /**
@@ -307,14 +317,13 @@ router.get('/grade/:grade', [auth], async (req, res) => {
 
 router.get('/search/:text', [auth], async (req, res) => {         // Improve Search technique
   searchtext=req.params.text;
-  // var searchtext=req.query.text;
   const item = await Item.find({
 
     $or :
-        [{sampleNo: {
-      $regex: new RegExp(searchtext),
-      $options: 'i'
-    } },
+          [{sampleNo: {
+            $regex: new RegExp(searchtext),
+            $options: 'i'
+          }},
           {origin: {
             $regex: new RegExp(searchtext),
             $options: 'i'
@@ -382,10 +391,13 @@ router.get('/search/:text', [auth], async (req, res) => {         // Improve Sea
 //   //           "$search": req.params.text
 //   //   }
 //   // });
-
+output = {
+  totalRecords : item.length,
+  _embedded : {items : item}
+}
   if (!item) return res.status(404).send('The item with the given sample was not found.');
 
-  res.send(item);
+  res.send(output);
 });
 
 module.exports = router;

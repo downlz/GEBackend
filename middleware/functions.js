@@ -6,12 +6,12 @@ function dropIfDNE(Obj, arr) {
 
 module.exports = function getRec(page,pageSize) {
     if (page) {
-      recordtoskip = (page - 1) * 10;
-      if (pageSize){
+      if (pageSize) {
         rowslimit = parseInt(pageSize)
       } else {
-      rowslimit = 10;  
+        rowslimit = 15;  
       }
+      recordtoskip = (page - 1) * rowslimit;
     } else {
       recordtoskip = 0;
       rowslimit = 0;
