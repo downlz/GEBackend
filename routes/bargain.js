@@ -4,7 +4,9 @@ const permit = require('../middleware/permissions');
 const sendNotifications = require('../middleware/fcm');
 const {sendAppNotifications} = require('./orders');
 const sendEmail = require('../middleware/sendemail');
+const getRec = require('../middleware/functions');
 const moment = require('moment');
+
 const {
   Bargain,
   validate
@@ -26,15 +28,16 @@ const router = express.Router();
 const _ = require('lodash');
 
 router.get('/', async (req, res) => {
-      if (req.query.pageid) {
-        recordtoskip = (req.query.pageid - 1) * 15;
-        rowslimit = 15;  
-    } else {
-        recordtoskip = 0;
-        rowslimit = 0;
-    }
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize);
+  const total = await await Bargain.find().countDocuments();   
   const bargain = await Bargain.find().sort({'lastupdated':-1}).skip(recordtoskip).limit(rowslimit);
-  res.send(bargain);
+  output = {
+    totalRecords : total,
+    pageId : recordtoskip,
+    pageSize : rowslimit,
+    _embedded : {bargains : bargain}
+  }
+  res.send(output);
 });
 
 
@@ -484,36 +487,37 @@ router.get('/:id', async (req, res) => {
 
 router.get('/buyer/:buyerid', async (req, res) => {
 
-      if (req.query.pageid) {
-        recordtoskip = (req.query.pageid - 1) * 15;
-        rowslimit = 15;  
-    } else {
-        recordtoskip = 0;
-        rowslimit = 0;
-    }
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize);
+  const total = await Bargain.find({'buyer._id': req.params.buyerid}).countDocuments();
 
   const bargain = await Bargain.find({'buyer._id': req.params.buyerid}).sort({'lastupdated':-1}).skip(recordtoskip).limit(rowslimit);
 
   if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
-  res.send(bargain);
+  output = {
+    totalRecords : total,
+    pageId : recordtoskip,
+    pageSize : rowslimit,
+    _embedded : {bargains : bargain}
+  }
+  res.send(output);
 });
 
 router.get('/seller/:sellerid', async (req, res) => {
 
-      if (req.query.pageid) {
-        recordtoskip = (req.query.pageid - 1) * 15;
-        rowslimit = 15;  
-    } else {
-        recordtoskip = 0;
-        rowslimit = 0;
-    }
-
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize);
+  const total = await Bargain.find({'seller._id': req.params.sellerid}).countDocuments(); 
   const bargain = await Bargain.find({'seller._id': req.params.sellerid}).sort({'lastupdated':-1}).skip(recordtoskip).limit(rowslimit);
 
   if (!bargain) return res.status(404).send('The bargain details with the given ID was not found.');
 
-  res.send(bargain);
+  output = {
+    totalRecords : total,
+    pageId : recordtoskip,
+    pageSize : rowslimit,
+    _embedded : {bargains : bargain}
+  }
+  res.send(output);
 });
 
 router.get('/buyer/:buyerid/item/:id', async (req, res) => {
