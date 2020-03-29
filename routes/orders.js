@@ -32,8 +32,15 @@ function dropIfDNE(Obj, arr) {
 router.get('/', [auth], async (req, res) => {
     // const order = await Order.find().sort({'placedTime':-1});            // Old order query pulling all records
     const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
+    const total = await Order.find().countDocuments();
     const order = await Order.find().sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);
-    res.send(order);
+    output = {
+        totalRecords : total,
+        pageId : recordtoskip,
+        pageSize : rowslimit,
+        _embedded : {orders : order}
+      }
+      res.send(output);
 });
 
 // Check below permit as in future seller may also place order
@@ -371,6 +378,7 @@ router.get('/orderno', [auth,permit('admin','agent','seller','buyer')], async (r
 });
 
 router.get('/user/:id', [auth], async (req, res) => {
+    var total;
     const customer = await User.findById(req.params.id);
     
     if (!customer) return res.status(400).send('Invalid buyer or seller');
@@ -380,13 +388,22 @@ router.get('/user/:id', [auth], async (req, res) => {
     // Due to role policy first check if buyer id is same as seller/agent if yes fetch the details else pull seller details
     const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
     if (customer.isSeller) {
+        total = await Order.find({'seller._id': customer._id}).countDocuments();
         order = await Order.find({'seller._id': customer._id}).sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);
     } else {
+        total = await Order.find({'buyer._id': customer._id}).countDocuments();
         order = await Order.find({'buyer._id': customer._id}).sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);;
     }    
     if (!order) return res.status(404).send('The item with the given ID was not found.');
     
-    res.send(order);
+    output = {
+        totalRecords : total,
+        pageId : recordtoskip,
+        pageSize : rowslimit,
+        _embedded : {orders : order}
+      }
+    res.send(output);
+      
 });
 
 
@@ -399,12 +416,18 @@ router.get('/agent/:id', [auth], async (req, res) => {
 
     const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
     // Due to role policy first check if buyer id is same as seller/agent if yes fetch the details else pull seller details
-    
+    const total = await Order.find({buyer: customer}).countDocuments();
     order = await Order.find({buyer: customer}).sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);;
 
     if (!order) return res.status(404).send('The item with the given ID was not found.');
     
-    res.send(order);
+    output = {
+        totalRecords : total,
+        pageId : recordtoskip,
+        pageSize : rowslimit,
+        _embedded : {orders : order}
+      }
+    res.send(output);
 });
 
 async function getTaxBreakup(userObj) {

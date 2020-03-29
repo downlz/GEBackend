@@ -94,9 +94,20 @@ router.get('/byItemname/:itemname', async (req, res) => {
  * Api to get current  user listings
  */
 router.get('/current', [auth], async (req, res) => {
-    const state = await Item.find({ $or : [{'seller._id': req.user._id},{'addedby._id': req.user._id}]
-    }).sort('name.name');
-    res.send(state);
+    const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
+    
+    const total = await Item.find({ $or : [{'seller._id': req.user._id},{'addedby._id': req.user._id}]
+                  }).countDocuments(); 
+    
+    const item = await Item.find({ $or : [{'seller._id': req.user._id},{'addedby._id': req.user._id}]
+    }).sort('name.name').skip(recordtoskip).limit(rowslimit);
+    output = {
+      totalRecords : total,
+      pageId : recordtoskip,
+      pageSize : rowslimit,
+      _embedded : {items : item}
+    }
+    res.send(output);
 });
 
 /**
@@ -316,9 +327,10 @@ router.get('/grade/:grade', [auth], async (req, res) => {
 });
 
 router.get('/search/:text', [auth], async (req, res) => {         // Improve Search technique
+
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
   searchtext=req.params.text;
   const item = await Item.find({
-
     $or :
           [{sampleNo: {
             $regex: new RegExp(searchtext),
@@ -344,7 +356,7 @@ router.get('/search/:text', [auth], async (req, res) => {         // Improve Sea
             $regex: new RegExp(searchtext),
             $options: 'i'
           }}]
-        });
+        }).sort('sampleNo') //.skip(recordtoskip).limit(rowslimit);
 
 // Junk Code for testing
   //   sampleNo : 
