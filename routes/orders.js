@@ -32,11 +32,12 @@ function dropIfDNE(Obj, arr) {
 router.get('/', [auth], async (req, res) => {
     // const order = await Order.find().sort({'placedTime':-1});            // Old order query pulling all records
     const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
+
     const total = await Order.find().countDocuments();
     const order = await Order.find().sort({'placedTime': -1}).skip(recordtoskip).limit(rowslimit);
     output = {
         totalRecords : total,
-        pageId : recordtoskip,
+        pageId : req.query.pageid,
         pageSize : rowslimit,
         _embedded : {orders : order}
       }
@@ -398,7 +399,7 @@ router.get('/user/:id', [auth], async (req, res) => {
     
     output = {
         totalRecords : total,
-        pageId : recordtoskip,
+        pageId : req.query.pageid,
         pageSize : rowslimit,
         _embedded : {orders : order}
       }
@@ -423,7 +424,7 @@ router.get('/agent/:id', [auth], async (req, res) => {
     
     output = {
         totalRecords : total,
-        pageId : recordtoskip,
+        pageId : req.query.pageid,
         pageSize : rowslimit,
         _embedded : {orders : order}
       }

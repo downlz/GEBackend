@@ -103,7 +103,7 @@ router.get('/current', [auth], async (req, res) => {
     }).sort('name.name').skip(recordtoskip).limit(rowslimit);
     output = {
       totalRecords : total,
-      pageId : recordtoskip,
+      pageId : req.query.pageid,
       pageSize : rowslimit,
       _embedded : {items : item}
     }
@@ -123,7 +123,7 @@ router.get('/all', [auth,permit('seller', 'admin', 'agent','buyer')], async (req
 
   output = {
     totalRecords : total,
-    pageId : recordtoskip,
+    pageId : req.query.pageid,
     pageSize : rowslimit,
     _embedded : {items : item}
   }

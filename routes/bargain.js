@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
   const bargain = await Bargain.find().sort({'lastupdated':-1}).skip(recordtoskip).limit(rowslimit);
   output = {
     totalRecords : total,
-    pageId : recordtoskip,
+    pageId : req.query.pageid,
     pageSize : rowslimit,
     _embedded : {bargains : bargain}
   }
@@ -496,7 +496,7 @@ router.get('/buyer/:buyerid', async (req, res) => {
 
   output = {
     totalRecords : total,
-    pageId : recordtoskip,
+    pageId : req.query.pageid,
     pageSize : rowslimit,
     _embedded : {bargains : bargain}
   }
@@ -513,7 +513,7 @@ router.get('/seller/:sellerid', async (req, res) => {
 
   output = {
     totalRecords : total,
-    pageId : recordtoskip,
+    pageId : req.query.pageid,
     pageSize : rowslimit,
     _embedded : {bargains : bargain}
   }
