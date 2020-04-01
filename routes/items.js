@@ -9,6 +9,7 @@ const {Unit} = require('../models/unit');
 const {Order} = require('../models/order');
 const {Manufacturer} = require('../models/manufacturer');
 const {Address, validateAddress} = require('../models/address');
+const getRec = require('../middleware/functions');
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
@@ -22,6 +23,7 @@ function dropIfDNE(Obj, arr) {
 }
 
 router.get('/', async (req, res) => {
+  // Lists only active items
   const itemnameId = req.query.name;
   const catId = req.query.cat;
   const cityId = req.query.origin;
@@ -29,15 +31,7 @@ router.get('/', async (req, res) => {
   const price = req.query.price;
   const mnfId = req.query.mnf;
 
-
-  if (req.query.pageid) {
-    recordtoskip = (req.query.pageid - 1) * 10;
-    rowslimit = 10;  
-  } else {
-    recordtoskip = 0;
-    rowslimit = 0;
-  }
-
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
 
   filter = {};
   if (itemnameId) {
@@ -73,13 +67,8 @@ router.get('/', async (req, res) => {
  * Api to get listings by category id
  */
 router.get('/byCategory/:category', async (req, res) => {
-  if (req.query.pageid) {
-    recordtoskip = (req.query.pageid - 1) * 10;
-    rowslimit = 10;  
-  } else {
-    recordtoskip = 0;
-    rowslimit = 0;
-  }
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
+
     const state = await Item.find({
         $and : [{'category._id': req.params.category},
         {'isLive': true}]
@@ -91,13 +80,7 @@ router.get('/byCategory/:category', async (req, res) => {
  * Api to get listings by itemname
  */
 router.get('/byItemname/:itemname', async (req, res) => {
-  if (req.query.pageid) {
-    recordtoskip = (req.query.pageid - 1) * 10;
-    rowslimit = 10;  
-  } else {
-    recordtoskip = 0;
-    rowslimit = 0;
-  }
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
 
   const state = await Item.find({
       $and : [{'name._id': req.params.itemname},
@@ -110,30 +93,53 @@ router.get('/byItemname/:itemname', async (req, res) => {
 /**
  * Api to get current  user listings
  */
-router.get('/current/', [auth], async (req, res) => {
-    const state = await Item.find({ $or : [{'seller._id': req.user._id},{'addedby._id': req.user._id}]
-    }).sort('name.name');
-    res.send(state);
+router.get('/current', [auth], async (req, res) => {
+    const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
+    
+    const total = await Item.find({ $or : [{'seller._id': req.user._id},{'addedby._id': req.user._id}]
+                  }).countDocuments(); 
+    
+    const item = await Item.find({ $or : [{'seller._id': req.user._id},{'addedby._id': req.user._id}]
+    }).sort('name.name').skip(recordtoskip).limit(rowslimit);
+    output = {
+      totalRecords : total,
+      pageId : req.query.pageid,
+      pageSize : rowslimit,
+      _embedded : {items : item}
+    }
+    res.send(output);
 });
 
 /**
  * Api to get all listings
  */
-router.get('/all/', [auth,permit('seller', 'admin', 'agent','buyer')], async (req, res) => {
-  const item = await Item.find({}).sort('sampleNo');
-  res.send(item);
+router.get('/all', [auth,permit('seller', 'admin', 'agent','buyer')], async (req, res) => {
+
+
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
+
+  const total = await Item.countDocuments(); // Removing await as this is super fast usually 
+  const item = await Item.find({}).sort('sampleNo').skip(recordtoskip).limit(rowslimit);
+
+  output = {
+    totalRecords : total,
+    pageId : req.query.pageid,
+    pageSize : rowslimit,
+    _embedded : {items : item}
+  }
+  res.send(output);
 });
 
 /**
  *  Api to get newly added items
  */
 
-router.get('/recent/', async (req, res) => {
+router.get('/recent', async (req, res) => {
   const recentitem = await Item.find({}).sort({'updatedon': -1}).limit(6);
   res.send(recentitem);
 });
 
-router.get('/ordered/', async (req, res) => {
+router.get('/ordered', async (req, res) => {
   const recentlyordered = await Order.find({},{item:1}).sort({'placedTime': -1}).limit(6);
   // const recentlyordered = await Order.distinct('item').sort({'placedTime': -1}).limit(4);
   // const recentlyordered = await Order.aggregate( [ { $project : { 'item': 0 } } ] ).sort({'placedTime': -1}).limit(4);
@@ -144,7 +150,7 @@ router.get('/ordered/', async (req, res) => {
 * Api to select nearby items
 */
 
-router.post('/nearme/',[auth], async (req, res) => {
+router.post('/nearme',[auth], async (req, res) => {
   // Ideally should be done based on user location 
   nearbyCities = [];
   const user = await User.findById(req.user._id).select('-password');
@@ -321,15 +327,15 @@ router.get('/grade/:grade', [auth], async (req, res) => {
 });
 
 router.get('/search/:text', [auth], async (req, res) => {         // Improve Search technique
-  searchtext=req.params.text;
-  // var searchtext=req.query.text;
-  const item = await Item.find({
 
+  const [recordtoskip,rowslimit] = getRec(req.query.pageid,req.query.pageSize)
+  searchtext=req.params.text;
+  const item = await Item.find({
     $or :
-        [{sampleNo: {
-      $regex: new RegExp(searchtext),
-      $options: 'i'
-    } },
+          [{sampleNo: {
+            $regex: new RegExp(searchtext),
+            $options: 'i'
+          }},
           {origin: {
             $regex: new RegExp(searchtext),
             $options: 'i'
@@ -350,7 +356,7 @@ router.get('/search/:text', [auth], async (req, res) => {         // Improve Sea
             $regex: new RegExp(searchtext),
             $options: 'i'
           }}]
-        });
+        }).sort('sampleNo') //.skip(recordtoskip).limit(rowslimit);
 
 // Junk Code for testing
   //   sampleNo : 
@@ -397,10 +403,13 @@ router.get('/search/:text', [auth], async (req, res) => {         // Improve Sea
 //   //           "$search": req.params.text
 //   //   }
 //   // });
-
+output = {
+  totalRecords : item.length,
+  _embedded : {items : item}
+}
   if (!item) return res.status(404).send('The item with the given sample was not found.');
 
-  res.send(item);
+  res.send(output);
 });
 
 module.exports = router;
